@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-08-28 14:50:43
-LastEditTime: 2023-12-06 16:20:48
+LastEditTime: 2023-12-12 10:29:07
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/ppsplit/quantification/fisher_information/dFIL_inverse.py
 Description: 一个一个样本计算，没有平均之说
@@ -23,13 +23,13 @@ class dFIL_inverse():
     
     def quantify(self, model, inputs, outputs = None, sigmas=0.01, with_outputs = True):
         if with_outputs:
-            return self.computing_eta_with_outputs(model, inputs, outputs, sigmas).detach().cpu().numpy()
+            return self._computing_eta_with_outputs(model, inputs, outputs, sigmas).detach().cpu().numpy()
         else:
-            return self.computing_eta_without_outputs(model, inputs,  sigmas).detach().cpu().numpy()
+            return self._computing_eta_without_outputs(model, inputs,  sigmas).detach().cpu().numpy()
         
 
     # model的smashed data需要在[0,1]之间，才能保证输出的eta也在[0,1]之间?证明？
-    def computing_eta_without_outputs(self, model, inputs,  sigmas): # sigma_square
+    def _computing_eta_without_outputs(self, model, inputs,  sigmas): # sigma_square
         inputs.requires_grad_(True) # 需要求导
         outputs = model(inputs)
         
@@ -51,7 +51,7 @@ class dFIL_inverse():
         return 1.0/dFIL
     
         # model的smashed data需要在[0,1]之间，才能保证输出的eta也在[0,1]之间?证明？
-    def computing_eta_with_outputs(self, model, inputs, outputs, sigmas): # sigma_square
+    def _computing_eta_with_outputs(self, model, inputs, outputs, sigmas): # sigma_square
         # 前向传播
         # outputs = outputs + sigma * torch.randn_like(outputs) # 加噪声 (0,1] uniform
     

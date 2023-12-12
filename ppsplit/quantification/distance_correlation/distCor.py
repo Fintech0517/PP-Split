@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-09-07 10:18:31
-LastEditTime: 2023-12-06 16:00:59
+LastEditTime: 2023-12-12 10:28:22
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/ppsplit/quantification/distance_correlation/distCor.py
 Description: 
@@ -22,7 +22,8 @@ class distCorMetric():
     def __init__(self) -> None:
         super().__init__()
 
-    def quantify(self,inputs,outputs):
+    def quantify(self,inputs,outputs): 
+        # 一个batch的 inputs和outputs,batchsize>=2
         # 返回的是一个numpy array
         assert (inputs.shape[0] == outputs.shape[0]), 'inputs.shape[0]!= outputs.shape[0]'
         batch_size = inputs.shape[0]
