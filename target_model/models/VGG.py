@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-08-27 20:58:31
-LastEditTime: 2023-12-12 20:15:30
+LastEditTime: 2023-12-12 21:06:17
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/models/VGG.py
 Description: 
@@ -22,7 +22,7 @@ import collections
 
 
 # --------- VGG model ---------
-split_layer_list = list(range(len(model_cfg['VGG5'])))
+# split_layer_list = list(range(len(model_cfg['VGG5'])))
 
 # Model configration
 model_cfg = {
@@ -172,7 +172,7 @@ class VGG(nn.Module):
 		return None
 
 class VGG5Decoder(nn.Module): # 这个cfg参数指的是model_cfg[vgg5]
-    def __init__(self,split_layer,network):
+    def __init__(self,split_layer,network='VGG5'):
         super().__init__()
         cfg = model_cfg[network]
         assert split_layer < len(cfg)
