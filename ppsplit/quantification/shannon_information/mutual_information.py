@@ -1,7 +1,7 @@
 '''
 Author: yjr && 949804347@qq.com
 Date: 2023-11-15 20:03:50
-LastEditTime: 2023-12-12 10:28:04
+LastEditTime: 2023-12-20 16:06:44
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/ppsplit/quantification/shannon_information/mutual_information.py
 Description: 在整个test数据集上，没有平均之说。
@@ -17,13 +17,13 @@ import numpy as np
 import pandas as pd
 
 # ite mutual information
-sys.path.insert(1,'/home/dengruijun/data/FinTech/VFL/quantification/ite-in-python') # 这个首先要手动下载一下ite的库
+sys.path.append('/home/dengruijun/data/software/ITE/ite-in-python') # 这个首先要手动下载一下ite的库
 import ite
 
 import os
 os.environ['NUMEXPR_MAX_THREADS'] = '48'
 
-class MuInfo():
+class MuInfoMetric():
     def __init__(self) -> None:
         pass
     

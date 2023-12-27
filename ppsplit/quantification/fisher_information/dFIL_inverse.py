@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-08-28 14:50:43
-LastEditTime: 2023-12-12 10:29:07
+LastEditTime: 2023-12-20 14:09:42
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/ppsplit/quantification/fisher_information/dFIL_inverse.py
 Description: 一个一个样本计算，没有平均之说
@@ -16,7 +16,7 @@ import time
 import os
 os.environ['NUMEXPR_MAX_THREADS'] = '48'
 
-class dFIL_inverse():
+class dFILInverseMetric():
     def __init__(self) -> None:
         pass
     
