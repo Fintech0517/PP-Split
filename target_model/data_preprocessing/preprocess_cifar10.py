@@ -1,9 +1,9 @@
 '''
 Author: Ruijun Deng
 Date: 2023-09-03 19:29:00
-LastEditTime: 2023-12-12 21:17:07
+LastEditTime: 2024-01-02 19:40:27
 LastEditors: Ruijun Deng
-FilePath: /PP-Split/data/dengruijun/FinTech/PP-Split/target_model/data_preprocessing/preprocess_cifar10.py
+FilePath: /PP-Split/target_model/data_preprocessing/preprocess_cifar10.py
 Description: 
 '''
 # 导包
@@ -88,20 +88,6 @@ def get_one_data(dataloader,batch_size = 1): # 得到一个dataloader中第一�
     return inverseloader
 
 
-# 构造数据集 CIFAR10适用
-class ListDataset(Dataset):
-    def __init__(self, data_list) -> None:
-        super().__init__()
-        self.x = [t[0] for t in data_list]
-        self.y = [t[1] for t in data_list]
-
-    def __getitem__(self, index):  # 张量压缩一个维度
-        x = torch.squeeze(self.x[index], 0)
-        y = torch.squeeze(self.y[index], 0)
-        return x, y
-
-    def __len__(self):
-        return len(self.x)
 
 # mnist和cifar的预处理？ （类似transform）
 def preprocess_cifar10(data):
@@ -149,6 +135,3 @@ def deprocess(data): # CIFAR10
     return Unnormalize(data)
     # return Unnormalize(data[0,:,:,:]).unsqueeze(0)
     # return clip(Unnormalize(data[0,:,:,:]).unsqueeze(0))
-
-
-

@@ -2,7 +2,7 @@
 Author: yjr 949804347@qq.com
 Date: 2023-09-09 20:35:31
 LastEditors: Ruijun Deng
-LastEditTime: 2023-12-20 16:08:10
+LastEditTime: 2024-01-02 19:40:24
 FilePath: /PP-Split/target_model/data_preprocessing/preprocess_bank.py
 Description: none
 '''
@@ -11,22 +11,6 @@ import numpy as np
 from sklearn.preprocessing import MinMaxScaler, LabelEncoder
 from torch.utils.data import Dataset
 dataPath = 'dataset/bank-additional-full.csv'
-
-# bank数据集
-class bank_dataset(Dataset):
-    def __init__(self, data):
-        # data = data
-        self.Xa, self.y = data
-
-    def __getitem__(self, item):
-        Xa = self.Xa[item]
-        y = self.y[item]
-
-        return np.float32(Xa), np.float32(y)
-
-    def __len__(self):
-        return len(self.Xa)
-    
 
 num_columns = ['age', 'duration', 'campaign', 'pdays', 'previous', 'emp.var.rate', 'cons.price.idx', 'cons.conf.idx', 'euribor3m', 'nr.employed']
 onehot_columns = ['job_admin.', 'job_blue-collar', 'job_entrepreneur', 'job_housemaid',
