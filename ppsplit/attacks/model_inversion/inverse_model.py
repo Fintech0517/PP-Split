@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-12-12 12:42:45
-LastEditTime: 2023-12-12 21:22:41
+LastEditTime: 2024-01-02 20:32:59
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/ppsplit/attacks/model_inversion/inverse_model.py
 Description: 
@@ -30,6 +30,8 @@ class InverseModelAttack():
         self.decoder_route = decoder_route if decoder_route else './decoder_net.pth'
         if not os.path.exists(self.inverse_dir):
             os.makedirs(self.inverse_dir)
+        if not os.path.exists(self.inverse_dir+'/images'):
+            os.makedirs(self.inverse_dir+'/images')
 
     def train_decoder(self,client_net,decoder_net,
                       train_loader,test_loader,
@@ -49,7 +51,8 @@ class InverseModelAttack():
 
         # loss function 统一采用MSELoss？
         if not optimizer:
-            optimizer = torch.optim.SGD(decoder_net.parameters(), 1e-3)
+            # optimizer = torch.optim.SGD(decoder_net.parameters(), 1e-3)
+            optimizer = torch.optim.Adam(decoder_net.parameters())
         criterion = nn.MSELoss()
         
 
@@ -177,8 +180,8 @@ class InverseModelAttack():
 
             # 保存图片
             if save_fake == True: # 储存原始图像+inv图像
-                torchvision.utils.save_image(deprocessImg_raw, self.inverse_dir + str(i) + '-ref.png')
-                torchvision.utils.save_image(deprocessImg_inversed, self.inverse_dir + str(i) + '-inv.png')
+                torchvision.utils.save_image(deprocessImg_raw, self.inverse_dir + '/images/' + str(i) + '-ref.png')
+                torchvision.utils.save_image(deprocessImg_inversed, self.inverse_dir + '/images/' + str(i) + '-inv.png')
             
         print(f"SSIM: {np.mean(sim_metrics.sim_metric_dict['ssim'])},\
               MSE:{np.mean(sim_metrics.sim_metric_dict['mse'])}")

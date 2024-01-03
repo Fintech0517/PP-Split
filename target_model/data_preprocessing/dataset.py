@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2024-01-02 19:39:41
-LastEditTime: 2024-01-02 19:40:44
+LastEditTime: 2024-01-02 19:42:11
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/data_preprocessing/dataset.py
 Description: 
@@ -11,6 +11,7 @@ import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader, Dataset
 import numpy as np
+import torch
 
 # 构造数据集 CIFAR10适用
 class ListDataset(Dataset):

@@ -1,7 +1,7 @@
 '''
 Author: yjr && 949804347@qq.com
 Date: 2023-11-18 14:13:20
-LastEditTime: 2023-12-20 14:31:35
+LastEditTime: 2024-01-03 16:00:40
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/data_preprocessing/preprocess_purchase.py
 Description: 
@@ -149,3 +149,80 @@ def accuracy(output, target, topk=(1,)):
         correct_k = correct[:k].contiguous().view(-1).float().sum(0)
         res.append(correct_k.mul_(100.0 / batch_size))
     return res
+
+def preprocess_purchase_shadow(data_path='/home/dengruijun/data/FinTech/DATASET/kaggle-dataset/Purchase100/', batch_size=100):
+    DATASET_PATH=data_path # dir目录
+    DATASET_NAME= 'dataset_purchase' # 原始数据压缩文件
+    DATASET_NUMPY = 'data.npz' # 简单处理后的numpy存储
+    print('datset route:', DATASET_PATH+'/data.npz')
+
+    if not os.path.isdir(DATASET_PATH):
+        os.makedirs(DATASET_PATH)
+    
+    DATASET_FILE = os.path.join(DATASET_PATH,DATASET_NAME)
+    
+    if not os.path.isfile(DATASET_FILE): # 如果数据没下载
+        # 下载官网数据集保存到tmp.tgz, 解压
+        print('Dowloading the dataset...')
+        # simplified and preprocessed version: 197324 rows
+        urllib.request.urlretrieve("https://www.comp.nus.edu.sg/~reza/files/dataset_purchase.tgz",os.path.join(DATASET_PATH,'tmp.tgz'))
+        print('Dataset Dowloaded')
+        tar = tarfile.open(os.path.join(DATASET_PATH,'tmp.tgz'))
+        tar.extractall(path=DATASET_PATH)
+
+        #读取数据集以numpy的形式存储到data.npz
+        print('reading dataset...')
+        data_set =np.genfromtxt(DATASET_FILE,delimiter=',') # 从txt构造np array
+        print('finish reading!')
+        X = data_set[:,1:].astype(np.float64) # 特征
+        Y = (data_set[:,0]).astype(np.int32)-1 # label
+        np.savez(os.path.join(DATASET_PATH, DATASET_NUMPY), X=X, Y=Y) # 保存数据
+    
+    data = np.load(os.path.join(DATASET_PATH, DATASET_NUMPY))
+    X = data['X']
+    Y = data['Y']
+    len_train =len(X)
+    r = np.load('./dataset_shuffle/random_r_purchase100.npy')
+
+    X=X[r]
+    Y=Y[r]
+        
+    train_classifier_ratio, train_attack_ratio = 0.1,0.3
+    train_data = X[:int(train_classifier_ratio*len_train)]
+    test_data = X[int((train_classifier_ratio+train_attack_ratio)*len_train):]
+    
+    train_label = Y[:int(train_classifier_ratio*len_train)]
+    test_label = Y[int((train_classifier_ratio+train_attack_ratio)*len_train):]
+    
+    np.random.seed(100)
+    train_len = train_data.shape[0]
+    r = np.arange(train_len)
+    np.random.shuffle(r)
+    shadow_indices = r[:train_len//2]
+    target_indices = r[train_len//2:]
+
+    shadow_train_data, shadow_train_label = train_data[shadow_indices], train_label[shadow_indices]
+    target_train_data, target_train_label = train_data[target_indices], train_label[target_indices]
+
+    test_len = 1*train_len
+    r = np.arange(test_len)
+    np.random.shuffle(r)
+    shadow_indices = r[:test_len//2]
+    target_indices = r[test_len//2:]
+    
+    shadow_test_data, shadow_test_label = test_data[shadow_indices], test_label[shadow_indices]
+    target_test_data, target_test_label = test_data[target_indices], test_label[target_indices]
+
+    shadow_train = tensor_data_create(shadow_train_data, shadow_train_label)
+    shadow_train_loader = torch.utils.data.DataLoader(shadow_train, batch_size=batch_size, shuffle=True, num_workers=1)
+
+    shadow_test = tensor_data_create(shadow_test_data, shadow_test_label)
+    shadow_test_loader = torch.utils.data.DataLoader(shadow_test, batch_size=batch_size, shuffle=True, num_workers=1)
+
+    target_train = tensor_data_create(target_train_data, target_train_label)
+    target_train_loader = torch.utils.data.DataLoader(target_train, batch_size=batch_size, shuffle=True, num_workers=1)
+
+    target_test = tensor_data_create(target_test_data, target_test_label)
+    target_test_loader = torch.utils.data.DataLoader(target_test, batch_size=batch_size, shuffle=True, num_workers=1)
+    print('Data loading finished')
+    return shadow_train_loader, shadow_test_loader, target_train_loader, target_test_loader

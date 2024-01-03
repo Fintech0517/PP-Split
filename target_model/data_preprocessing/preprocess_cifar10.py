@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-09-03 19:29:00
-LastEditTime: 2024-01-02 19:40:27
+LastEditTime: 2024-01-02 20:09:23
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/data_preprocessing/preprocess_cifar10.py
 Description: 
@@ -32,12 +32,12 @@ def get_cifar10_normalize(batch_size = 1):
     trainset = torchvision.datasets.CIFAR10(root='/home/dengruijun/data/FinTech/DATASET/image-dataset/cifar10/', train=True,
                                             download=False, transform=transform)
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size,
-                                            shuffle=False, num_workers=1)
+                                            shuffle=False, num_workers=4)
 
     testset = torchvision.datasets.CIFAR10(root='/home/dengruijun/data/FinTech/DATASET/image-dataset/cifar10/', train=False,
                                         download=False, transform=transform)
     testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size,
-                                            shuffle=False, num_workers=1)
+                                            shuffle=False, num_workers=4)
     
     return trainloader,testloader
 
