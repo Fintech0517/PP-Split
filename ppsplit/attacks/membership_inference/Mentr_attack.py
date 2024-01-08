@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2024-01-03 15:19:20
-LastEditTime: 2024-01-03 15:48:37
+LastEditTime: 2024-01-03 16:21:04
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/ppsplit/attacks/membership_inference/Mentr_attack.py
 Description: Usenix sec'21-Systematic Evaluation of Privacy Risks of Machine Learning Models
@@ -12,37 +12,12 @@ import math
 
 class MentrAttack(object):
     # 基于shadow model 的blackbox
-    def __init__(self, shadow_train_performance, shadow_test_performance, 
-                 target_train_performance, target_test_performance, num_classes):
+    def __init__(self, num_classes):
         '''
         each input contains both model predictions (shape: num_data*num_classes) and ground-truth labels. 
         '''
+
         self.num_classes = num_classes
-        
-        self.s_tr_outputs, self.s_tr_labels = shadow_train_performance
-        self.s_te_outputs, self.s_te_labels = shadow_test_performance
-        self.t_tr_outputs, self.t_tr_labels = target_train_performance
-        self.t_te_outputs, self.t_te_labels = target_test_performance
-        
-        self.s_tr_corr = (np.argmax(self.s_tr_outputs, axis=1)==self.s_tr_labels).astype(int)
-        self.s_te_corr = (np.argmax(self.s_te_outputs, axis=1)==self.s_te_labels).astype(int)
-        self.t_tr_corr = (np.argmax(self.t_tr_outputs, axis=1)==self.t_tr_labels).astype(int)
-        self.t_te_corr = (np.argmax(self.t_te_outputs, axis=1)==self.t_te_labels).astype(int)
-        
-        self.s_tr_conf = np.array([self.s_tr_outputs[i, self.s_tr_labels[i]] for i in range(len(self.s_tr_labels))])
-        self.s_te_conf = np.array([self.s_te_outputs[i, self.s_te_labels[i]] for i in range(len(self.s_te_labels))])
-        self.t_tr_conf = np.array([self.t_tr_outputs[i, self.t_tr_labels[i]] for i in range(len(self.t_tr_labels))])
-        self.t_te_conf = np.array([self.t_te_outputs[i, self.t_te_labels[i]] for i in range(len(self.t_te_labels))])
-        
-        self.s_tr_entr = self._entr_comp(self.s_tr_outputs)
-        self.s_te_entr = self._entr_comp(self.s_te_outputs)
-        self.t_tr_entr = self._entr_comp(self.t_tr_outputs)
-        self.t_te_entr = self._entr_comp(self.t_te_outputs)
-        
-        self.s_tr_m_entr = self._m_entr_comp(self.s_tr_outputs, self.s_tr_labels)
-        self.s_te_m_entr = self._m_entr_comp(self.s_te_outputs, self.s_te_labels)
-        self.t_tr_m_entr = self._m_entr_comp(self.t_tr_outputs, self.t_tr_labels)
-        self.t_te_m_entr = self._m_entr_comp(self.t_te_outputs, self.t_te_labels)
     
     def _softmax_by_row(self, logits, T = 1.0):
         mx = np.max(logits, axis=-1, keepdims=True) # 找到最大的
@@ -70,7 +45,34 @@ class MentrAttack(object):
         
         target_train_performance = _model_predictions(target_model, target_train_loader)
         target_test_performance = _model_predictions(target_model, target_test_loader)
-        return shadow_train_performance,shadow_test_performance,target_train_performance,target_test_performance
+
+
+        # 设置各类的必要数据
+        self.s_tr_outputs, self.s_tr_labels = shadow_train_performance
+        self.s_te_outputs, self.s_te_labels = shadow_test_performance
+        self.t_tr_outputs, self.t_tr_labels = target_train_performance
+        self.t_te_outputs, self.t_te_labels = target_test_performance
+        
+        self.s_tr_corr = (np.argmax(self.s_tr_outputs, axis=1)==self.s_tr_labels).astype(int)
+        self.s_te_corr = (np.argmax(self.s_te_outputs, axis=1)==self.s_te_labels).astype(int)
+        self.t_tr_corr = (np.argmax(self.t_tr_outputs, axis=1)==self.t_tr_labels).astype(int)
+        self.t_te_corr = (np.argmax(self.t_te_outputs, axis=1)==self.t_te_labels).astype(int)
+        
+        self.s_tr_conf = np.array([self.s_tr_outputs[i, self.s_tr_labels[i]] for i in range(len(self.s_tr_labels))])
+        self.s_te_conf = np.array([self.s_te_outputs[i, self.s_te_labels[i]] for i in range(len(self.s_te_labels))])
+        self.t_tr_conf = np.array([self.t_tr_outputs[i, self.t_tr_labels[i]] for i in range(len(self.t_tr_labels))])
+        self.t_te_conf = np.array([self.t_te_outputs[i, self.t_te_labels[i]] for i in range(len(self.t_te_labels))])
+        
+        self.s_tr_entr = self._entr_comp(self.s_tr_outputs)
+        self.s_te_entr = self._entr_comp(self.s_te_outputs)
+        self.t_tr_entr = self._entr_comp(self.t_tr_outputs)
+        self.t_te_entr = self._entr_comp(self.t_te_outputs)
+        
+        self.s_tr_m_entr = self._m_entr_comp(self.s_tr_outputs, self.s_tr_labels)
+        self.s_te_m_entr = self._m_entr_comp(self.s_te_outputs, self.s_te_labels)
+        self.t_tr_m_entr = self._m_entr_comp(self.t_tr_outputs, self.t_tr_labels)
+        self.t_te_m_entr = self._m_entr_comp(self.t_te_outputs, self.t_te_labels)
+        # return shadow_train_performance,shadow_test_performance,target_train_performance,target_test_performance
 
     def _log_value(self, probs, small_value=1e-30):
         return -np.log(np.maximum(probs, small_value))
