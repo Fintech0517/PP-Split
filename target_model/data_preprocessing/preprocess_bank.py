@@ -2,7 +2,7 @@
 Author: yjr 949804347@qq.com
 Date: 2023-09-09 20:35:31
 LastEditors: Ruijun Deng
-LastEditTime: 2024-01-02 19:40:24
+LastEditTime: 2024-01-08 16:50:53
 FilePath: /PP-Split/target_model/data_preprocessing/preprocess_bank.py
 Description: none
 '''
@@ -10,7 +10,10 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler, LabelEncoder
 from torch.utils.data import Dataset
-dataPath = 'dataset/bank-additional-full.csv'
+from .dataset import bank_dataset
+import torch
+
+dataPath = '/home/dengruijun/data/FinTech/DATASET/kaggle-dataset/bank/bank-additional-full.csv'
 
 num_columns = ['age', 'duration', 'campaign', 'pdays', 'previous', 'emp.var.rate', 'cons.price.idx', 'cons.conf.idx', 'euribor3m', 'nr.employed']
 onehot_columns = ['job_admin.', 'job_blue-collar', 'job_entrepreneur', 'job_housemaid',
@@ -45,7 +48,7 @@ def to_onehot(df, col_features):
 # 'contact': [33, 34], 'month': [35, 36, 37, 38, 39, 40, 41, 42, 43, 44], \
 # 'day_of_week': [45, 46, 47, 48, 49], 'poutcome': [50, 51, 52]}
 
-def preprocess_bank(dataPath):
+def preprocess_bank_dataset(dataPath):
     print("===============processing data===============")
 
     df = pd.read_csv(dataPath, delimiter=';',quotechar='"') # 读取文件生成df
@@ -92,6 +95,18 @@ def preprocess_bank(dataPath):
     print("===============processing data end===============")
 
     return [X_train, y_train], [X_test, y_test]
+
+def preprocess_bank(batch_size = 1):
+    train_data, test_data = preprocess_bank_dataset(dataPath)
+    train_dataset = bank_dataset(train_data)
+    test_dataset = bank_dataset(test_data)
+
+    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True,
+                                              num_workers=8, drop_last=False)
+    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False,
+                                             num_workers=8, drop_last=False)
+
+    return train_loader,test_loader
 
 
 if __name__ == "__main__":

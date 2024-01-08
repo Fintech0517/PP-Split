@@ -2,7 +2,7 @@
 Author: yjr 949804347@qq.com
 Date: 2023-09-09 20:35:31
 LastEditors: Ruijun Deng
-LastEditTime: 2023-12-20 14:31:20
+LastEditTime: 2024-01-08 17:29:06
 FilePath: /PP-Split/target_model/data_preprocessing/preprocess_credit.py
 Description: none
 '''
@@ -11,9 +11,10 @@ import sys
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler, LabelEncoder
+from .dataset import bank_dataset
+import torch
 
-dataPath = 'dataset/bank-additional-full.csv'
-
+dataPath = '/home/dengruijun/data/FinTech/DATASET/kaggle-dataset/home_credit/dataset/application_train.csv'
 
 def to_onehot(df, col_features):
     # 对类别型特征进行one-hot编码,并返回离散特征的索引
@@ -24,7 +25,7 @@ def to_onehot(df, col_features):
     return onehot_df, discrete_index
 
 
-def preprocess_credit(dataPath):
+def preprocess_credit_dataset(dataPath):
     print("===============processing data===============")
 
     df = pd.read_csv(dataPath)
@@ -91,6 +92,18 @@ def preprocess_credit(dataPath):
     print("===============processing data end===============")
 
     return [X_train, y_train], [X_test, y_test]
+
+def preprocess_credit(batch_size = 1):
+    train_data,test_data = preprocess_credit_dataset(dataPath)
+    train_dataset = bank_dataset(train_data)
+    test_dataset = bank_dataset(test_data)
+
+    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True,
+                                                num_workers=8, drop_last=False)
+    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False,
+                                               num_workers=8, drop_last=False)
+    return train_loader, test_loader 
+
 
 
 if __name__ == "__main__":

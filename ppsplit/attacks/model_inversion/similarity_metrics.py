@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-12-12 16:00:55
-LastEditTime: 2023-12-12 19:08:02
+LastEditTime: 2024-01-08 17:02:40
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/ppsplit/attacks/model_inversion/similarity_metrics.py
 Description: 
@@ -22,7 +22,7 @@ class SimilarityMetrics():
         self.mse_loss = nn.MSELoss()
 
         if type == 0: # tabular
-            self.sim_metric_dict = {'cos':[],'ecu':[],'mse':[]}
+            self.sim_metric_dict = {'cos':[],'euc':[],'mse':[]}
         elif type == 1: # image
             self.sim_metric_dict = {'ssim':[],'mse':[]}
 
