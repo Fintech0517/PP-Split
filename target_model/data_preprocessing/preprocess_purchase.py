@@ -1,7 +1,7 @@
 '''
 Author: yjr && 949804347@qq.com
 Date: 2023-11-18 14:13:20
-LastEditTime: 2024-01-03 16:09:26
+LastEditTime: 2024-01-11 21:46:53
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/data_preprocessing/preprocess_purchase.py
 Description: 
@@ -217,12 +217,12 @@ def preprocess_purchase_shadow(data_path='/home/dengruijun/data/FinTech/DATASET/
     shadow_train_loader = torch.utils.data.DataLoader(shadow_train, batch_size=batch_size, shuffle=True, num_workers=1)
 
     shadow_test = tensor_data_create(shadow_test_data, shadow_test_label)
-    shadow_test_loader = torch.utils.data.DataLoader(shadow_test, batch_size=batch_size, shuffle=True, num_workers=1)
+    shadow_test_loader = torch.utils.data.DataLoader(shadow_test, batch_size=batch_size, shuffle=False, num_workers=1)
 
     target_train = tensor_data_create(target_train_data, target_train_label)
     target_train_loader = torch.utils.data.DataLoader(target_train, batch_size=batch_size, shuffle=True, num_workers=1)
 
     target_test = tensor_data_create(target_test_data, target_test_label)
-    target_test_loader = torch.utils.data.DataLoader(target_test, batch_size=batch_size, shuffle=True, num_workers=1)
+    target_test_loader = torch.utils.data.DataLoader(target_test, batch_size=batch_size, shuffle=False, num_workers=1)
     print('Data loading finished')
     return shadow_train_loader, shadow_test_loader, target_train_loader, target_test_loader

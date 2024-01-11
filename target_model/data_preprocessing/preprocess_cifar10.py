@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-09-03 19:29:00
-LastEditTime: 2024-01-02 20:09:23
+LastEditTime: 2024-01-11 21:36:54
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/data_preprocessing/preprocess_cifar10.py
 Description: 
@@ -14,6 +14,8 @@ import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader, Dataset
 import numpy as np
+
+from .dataset import ListDataset
 
 def get_cifar10_normalize(batch_size = 1):
     #  数据集 CIFAR
@@ -72,6 +74,7 @@ def get_cifar10_preprocess(batch_size = 1):
                                         shuffle = False, num_workers = 1)
     return trainloader,testloader
 
+# 取dataloader的前batch_size个数据，成为一个数据集loader,只有一组数据，bs=batch_size
 def get_one_data(dataloader,batch_size = 1): # 得到一个dataloader中第一个数据构造的dataloader
     # trainloader, testloader = get_cifar10_normalize(batch_size=batch_size)
     testIter = iter(dataloader)
