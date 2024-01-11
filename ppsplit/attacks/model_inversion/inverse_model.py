@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-12-12 12:42:45
-LastEditTime: 2024-01-08 16:43:34
+LastEditTime: 2024-01-11 21:11:41
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/ppsplit/attacks/model_inversion/inverse_model.py
 Description: 
@@ -109,6 +109,8 @@ class InverseModelAttack():
         # 网络搬到设备上
         client_net.to(self.device)
         decoder_net.to(self.device)
+        client_net.eval() 
+        decoder_net.eval()
         
         # 记录数据:
         sim_metrics = SimilarityMetrics(type = self.data_type)

@@ -1,7 +1,7 @@
 '''
 Author: yjr && 949804347@qq.com
 Date: 2023-09-26 20:45:13
-LastEditTime: 2024-01-08 19:52:10
+LastEditTime: 2024-01-08 19:56:43
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/models/CreditNet.py
 Description:
@@ -107,6 +107,7 @@ class CreditNet1(nn.Module):
             elif component[0]=='BN':
                 self.add_module(f'batch_norm{bn_idx}',torch.nn.BatchNorm1d(component[1]))
                 bn_idx+=1
+        self.apply(self.initialize_weights)
 
     def forward(self,x):
         in_ = x
@@ -114,6 +115,11 @@ class CreditNet1(nn.Module):
             in_ = layer(in_)
         return in_
     
+    def initialize_weights(self, module):
+        if isinstance(module, nn.Linear):
+            init.xavier_uniform_(module.weight)
+            if module.bias is not None:
+                nn.init.constant_(module.bias, 0)
 
 # blackbox 网络  从layer2 重建的网络
 class CreditNetDecoder(nn.Module):  # cifar10 relu22 decoder网络 （目前结构就完全是和edge net的相反的层）
