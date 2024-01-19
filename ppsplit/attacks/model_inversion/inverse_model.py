@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-12-12 12:42:45
-LastEditTime: 2024-01-11 21:11:41
+LastEditTime: 2024-01-14 11:46:54
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/ppsplit/attacks/model_inversion/inverse_model.py
 Description: 
@@ -19,6 +19,7 @@ torch.multiprocessing.set_sharing_strategy('file_system')
 
 from .similarity_metrics import SimilarityMetrics
 import torchvision
+import time
 
 class InverseModelAttack():
     def __init__(self,gpu=True,decoder_route=None,data_type=0,inverse_dir=None) -> None:
@@ -116,23 +117,28 @@ class InverseModelAttack():
         sim_metrics = SimilarityMetrics(type = self.data_type)
 
         X_fake_list = []
+        time_list = []
         for i, (trn_X, trn_y) in enumerate(tqdm.tqdm(test_loader)):  # 对testloader遍历
             originData = trn_X.to(self.device)
             smashed_data = client_net(originData)  # edge 推理
+            
+            start = time.time()
             inverted_data = decoder_net(smashed_data)  # inverse
-            X_fake_list.append(inverted_data.cpu().detach().squeeze().numpy())
-
-
+        
             cos = sim_metrics.cosine_similarity(inverted_data, originData).item()
+            time_list.append(time.time()-start)
             sim_metrics.sim_metric_dict['cos'].append(cos)
             euc = sim_metrics.euclidean_distance(inverted_data, originData).item()
             sim_metrics.sim_metric_dict['euc'].append(euc)
             mse = sim_metrics.mse_loss(inverted_data, originData).item()
             sim_metrics.sim_metric_dict['mse'].append(mse)
+            
+            X_fake_list.append(inverted_data.cpu().detach().squeeze().numpy())
 
         print(f"cosine: {np.mean(sim_metrics.sim_metric_dict['cos'])}, \
               Euclidean: {np.mean(sim_metrics.sim_metric_dict['euc'])},\
               MSE:{np.mean(sim_metrics.sim_metric_dict['mse'])}")
+        print("average time: {}".format(sum(time_list)/len(time_list)))
 
         # 存储数据
         # self.inverse_dir = f'../results/1-8/inverted/{split_layer}/' # 每层一个文件夹
@@ -165,20 +171,22 @@ class InverseModelAttack():
         sim_metrics = SimilarityMetrics(type = self.data_type)
 
         X_fake_list = []
+        time_list = []
         for i, (trn_X, trn_y) in enumerate(tqdm.tqdm(test_loader)):  # 对testloader遍历
             raw_input = trn_X.to(self.device)
             smashed_data = client_net(raw_input)  # edge 推理
+            start = time.time()
             inverted_input = decoder_net(smashed_data)  # inverse
             deprocessImg_raw = deprocess(raw_input.clone()) # x_n
             deprocessImg_inversed = deprocess(inverted_input.clone()) # s_n
 
-            
-            X_fake_list.append(inverted_input.cpu().detach().squeeze().numpy())
-
             ssim = sim_metrics.ssim_metric(deprocessImg_raw, deprocessImg_inversed).item()
+            time_list.append(time.time()-start)
+
             sim_metrics.sim_metric_dict['ssim'].append(ssim)
             mse = sim_metrics.mse_loss(inverted_input, raw_input).item()
             sim_metrics.sim_metric_dict['mse'].append(mse)
+            X_fake_list.append(inverted_input.cpu().detach().squeeze().numpy())
 
             # 保存图片
             if save_fake == True: # 储存原始图像+inv图像
@@ -187,7 +195,7 @@ class InverseModelAttack():
             
         print(f"SSIM: {np.mean(sim_metrics.sim_metric_dict['ssim'])},\
               MSE:{np.mean(sim_metrics.sim_metric_dict['mse'])}")
-
+        print("average time: {}".format(sum(time_list)/len(time_list)))
         # 储存similairty相关文件
         pd.DataFrame({'ssim': sim_metrics.sim_metric_dict['ssim'],
                         'mse':sim_metrics.sim_metric_dict['mse']}).to_csv(self.inverse_dir + f'inv-sim.csv', index = False)

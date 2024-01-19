@@ -2,7 +2,7 @@
 Author: yjr 949804347@qq.com
 Date: 2023-09-09 20:35:31
 LastEditors: Ruijun Deng
-LastEditTime: 2024-01-08 16:50:53
+LastEditTime: 2024-01-13 17:35:33
 FilePath: /PP-Split/target_model/data_preprocessing/preprocess_bank.py
 Description: none
 '''
@@ -104,7 +104,7 @@ def preprocess_bank(batch_size = 1):
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True,
                                               num_workers=8, drop_last=False)
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False,
-                                             num_workers=8, drop_last=False)
+                                             num_workers=8, drop_last=True)
 
     return train_loader,test_loader
 

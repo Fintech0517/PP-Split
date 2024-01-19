@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-09-07 10:18:31
-LastEditTime: 2023-12-12 10:28:22
+LastEditTime: 2024-01-13 22:12:19
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/ppsplit/quantification/distance_correlation/distCor.py
 Description: 
@@ -14,8 +14,6 @@ Description:
 import torch
 import numpy as np
 import pandas as pd
-
-
 
 
 class distCorMetric():

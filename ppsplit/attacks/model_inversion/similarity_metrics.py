@@ -32,8 +32,8 @@ class SimilarityMetrics():
         # Y=np.moveaxis(inv_img, 0, -1),  
         # data_range = inv_img.max() - inv_img.min(), # 为什么是inv_img的呢
         # multichannel=True)
-        ref_img = deprocessImg_raw.detach().cpu().numpy().squeeze()
-        inv_img = deprocessImg_inversed.detach().cpu().numpy().squeeze()
+        ref_img = deprocessImg_raw.clone().detach().cpu().numpy().squeeze()
+        inv_img = deprocessImg_inversed.clone().detach().cpu().numpy().squeeze()
         ssim = metrics.structural_similarity(np.moveaxis(inv_img,0,-1), np.moveaxis(ref_img,0,-1), 
                                                 data_range=inv_img.max() - inv_img.min(), channel_axis=-1)
         return ssim
