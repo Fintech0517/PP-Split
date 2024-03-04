@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-12-12 12:42:45
-LastEditTime: 2024-01-14 11:46:54
+LastEditTime: 2024-01-26 19:53:18
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/ppsplit/attacks/model_inversion/inverse_model.py
 Description: 
@@ -31,8 +31,6 @@ class InverseModelAttack():
         self.decoder_route = decoder_route if decoder_route else './decoder_net.pth'
         if not os.path.exists(self.inverse_dir):
             os.makedirs(self.inverse_dir)
-        if not os.path.exists(self.inverse_dir+'/images'):
-            os.makedirs(self.inverse_dir+'/images')
 
     def train_decoder(self,client_net,decoder_net,
                       train_loader,test_loader,
@@ -118,15 +116,19 @@ class InverseModelAttack():
 
         X_fake_list = []
         time_list = []
+        infer_time_list = []
         for i, (trn_X, trn_y) in enumerate(tqdm.tqdm(test_loader)):  # 对testloader遍历
             originData = trn_X.to(self.device)
+            start_infer = time.time()
             smashed_data = client_net(originData)  # edge 推理
             
             start = time.time()
             inverted_data = decoder_net(smashed_data)  # inverse
-        
+            
             cos = sim_metrics.cosine_similarity(inverted_data, originData).item()
             time_list.append(time.time()-start)
+            infer_time_list.append(start-start_infer)
+
             sim_metrics.sim_metric_dict['cos'].append(cos)
             euc = sim_metrics.euclidean_distance(inverted_data, originData).item()
             sim_metrics.sim_metric_dict['euc'].append(euc)
@@ -138,7 +140,8 @@ class InverseModelAttack():
         print(f"cosine: {np.mean(sim_metrics.sim_metric_dict['cos'])}, \
               Euclidean: {np.mean(sim_metrics.sim_metric_dict['euc'])},\
               MSE:{np.mean(sim_metrics.sim_metric_dict['mse'])}")
-        print("average time: {}".format(sum(time_list)/len(time_list)))
+        print("average time: {}".format(sum(time_list)/len(time_list)),
+              "avg infer time:{}".format(sum(infer_time_list)/len(infer_time_list)))
 
         # 存储数据
         # self.inverse_dir = f'../results/1-8/inverted/{split_layer}/' # 每层一个文件夹
@@ -163,6 +166,9 @@ class InverseModelAttack():
         print("decoder_net: ")
         print(decoder_net)
 
+        if not os.path.exists(self.inverse_dir+'/images') and save_fake==True: # 创建存储inverted images的文件夹
+            os.makedirs(self.inverse_dir+'/images')
+            
         # 网络搬到设备上
         client_net.to(self.device)
         decoder_net.to(self.device)
@@ -172,8 +178,11 @@ class InverseModelAttack():
 
         X_fake_list = []
         time_list = []
+        infer_time_list = []
+
         for i, (trn_X, trn_y) in enumerate(tqdm.tqdm(test_loader)):  # 对testloader遍历
             raw_input = trn_X.to(self.device)
+            start_infer = time.time()
             smashed_data = client_net(raw_input)  # edge 推理
             start = time.time()
             inverted_input = decoder_net(smashed_data)  # inverse
@@ -182,7 +191,7 @@ class InverseModelAttack():
 
             ssim = sim_metrics.ssim_metric(deprocessImg_raw, deprocessImg_inversed).item()
             time_list.append(time.time()-start)
-
+            infer_time_list.append(start-start_infer)
             sim_metrics.sim_metric_dict['ssim'].append(ssim)
             mse = sim_metrics.mse_loss(inverted_input, raw_input).item()
             sim_metrics.sim_metric_dict['mse'].append(mse)
@@ -195,7 +204,9 @@ class InverseModelAttack():
             
         print(f"SSIM: {np.mean(sim_metrics.sim_metric_dict['ssim'])},\
               MSE:{np.mean(sim_metrics.sim_metric_dict['mse'])}")
-        print("average time: {}".format(sum(time_list)/len(time_list)))
+        print("average time: {}".format(sum(time_list)/len(time_list)),
+              "avg infer time:{}".format(sum(infer_time_list)/len(infer_time_list)))
+        
         # 储存similairty相关文件
         pd.DataFrame({'ssim': sim_metrics.sim_metric_dict['ssim'],
                         'mse':sim_metrics.sim_metric_dict['mse']}).to_csv(self.inverse_dir + f'inv-sim.csv', index = False)

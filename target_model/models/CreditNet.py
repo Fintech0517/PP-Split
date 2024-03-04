@@ -1,7 +1,7 @@
 '''
 Author: yjr && 949804347@qq.com
 Date: 2023-09-26 20:45:13
-LastEditTime: 2024-01-08 19:56:43
+LastEditTime: 2024-01-25 13:49:48
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/models/CreditNet.py
 Description:
@@ -152,9 +152,13 @@ class CreditNetDecoder1(nn.Module):
         assert layer < len(credit_cfg)
         for i, component in enumerate(credit_inv_cfg):
             if component[0]=='D':
-                out_,in_ = component[1],component[2]
-                self.add_module(f"delinear{linear_idx}",torch.nn.Linear(in_,out_))
-                self.add_module(f"ReLU{linear_idx}",torch.nn.ReLU())
+                if i==len(credit_inv_cfg)-1:
+                    out_,in_ = component[1],component[2]
+                    self.add_module(f"delinear{linear_idx}",torch.nn.Linear(in_,out_)) 
+                else:                  
+                    out_,in_ = component[1],component[2]
+                    self.add_module(f"delinear{linear_idx}",torch.nn.Linear(in_,out_))
+                    self.add_module(f"ReLU{linear_idx}",torch.nn.ReLU())
                 linear_idx+=1
 
     def forward(self, x):

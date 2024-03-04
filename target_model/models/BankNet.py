@@ -2,7 +2,7 @@
 Author: yjr && 949804347@qq.com
 Date: 2023-09-09 20:31:05
 LastEditors: Ruijun Deng
-LastEditTime: 2023-12-20 14:36:00
+LastEditTime: 2024-01-25 13:58:38
 FilePath: /PP-Split/target_model/models/BankNet.py
 Description: 
 '''
@@ -123,9 +123,17 @@ class BankNetDecoder1(nn.Module):
         assert layer < len(bank_cfg)
         for i, component in enumerate(bank_inv_cfg):
             if component[0]=='D':
-                out_,in_ = component[1],component[2]
-                self.add_module(f"delinear{linear_idx}",torch.nn.Linear(in_,out_))
-                self.add_module(f"ReLU{linear_idx}",torch.nn.ReLU())
+            #     out_,in_ = component[1],component[2]
+            #     self.add_module(f"delinear{linear_idx}",torch.nn.Linear(in_,out_))
+            #     self.add_module(f"ReLU{linear_idx}",torch.nn.ReLU())
+            #     linear_idx+=1
+                if i==len(bank_inv_cfg)-1:
+                    out_,in_ = component[1],component[2]
+                    self.add_module(f"delinear{linear_idx}",torch.nn.Linear(in_,out_)) 
+                else:                  
+                    out_,in_ = component[1],component[2]
+                    self.add_module(f"delinear{linear_idx}",torch.nn.Linear(in_,out_))
+                    self.add_module(f"ReLU{linear_idx}",torch.nn.ReLU())
                 linear_idx+=1
 
     def forward(self, x):
