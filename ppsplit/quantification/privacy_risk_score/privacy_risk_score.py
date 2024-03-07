@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2024-01-08 15:43:58
-LastEditTime: 2024-01-08 15:43:58
+LastEditTime: 2024-03-07 13:37:53
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/ppsplit/quantification/privacy_risk_score/privacy_risk_score.py
 Description: 
@@ -14,30 +14,38 @@ def distrs_compute(tr_values, te_values, tr_labels, te_labels, num_bins=5, log_b
     ### function to compute and plot the normalized histogram for both training and test values class by class.
     ### we recommand using the log scale to plot the distribution to get better-behaved distributions.
     
-    num_classes = len(set(tr_labels))
-    sqr_num = np.ceil(np.sqrt(num_classes))
-    tr_distrs, te_distrs, all_bins = [], [], []
+    num_classes = len(set(tr_labels)) # 类别数目
+    print(f'数据共有{num_classes}个类别' )
+    sqr_num = int(np.ceil(np.sqrt(num_classes))) # 类数目的开根
+    tr_distrs, te_distrs, all_bins = [], [], [] # 待返回的三个列表
     
-    plt.figure(figsize = (15,15))
+    # 开始画图了
+    plt.figure(figsize = (30,30))
     plt.rc('font', family='serif', size=10)
     plt.rc('axes', linewidth=2)
+    # plt.rc('figure.subplot', hspace=0.5)  # 设置垂直间距为0.5
+    # plt.rc('figure.subplot', wspace=0.5)  # 设置垂直间距为0.5
     
-    for i in range(num_classes):
-        tr_list, te_list = tr_values[tr_labels==i], te_values[te_labels==i]
+    
+    for i in range(num_classes): # 对每个类别
+        tr_list, te_list = tr_values[tr_labels==i], te_values[te_labels==i] # 提取该类别的训练数据和测试数据
         if log_bins:
             # when using log scale, avoid very small number close to 0
             small_delta = 1e-10
-            tr_list[tr_list<=small_delta] = small_delta
-            te_list[te_list<=small_delta] = small_delta
+            tr_list[tr_list<=small_delta] = small_delta # 进行clip
+            te_list[te_list<=small_delta] = small_delta # 进行clip
         n1, n2 = np.sum(tr_labels==i), np.sum(te_labels==i)
         all_list = np.concatenate((tr_list, te_list))
         max_v, min_v = np.amax(all_list), np.amin(all_list)
         
         plt.subplot(sqr_num, sqr_num, i+1)
+        plt.subplots_adjust(hspace=0.5)  # 调整垂直间距
+        plt.subplots_adjust(wspace=0.5)  # 调整垂直间距
+
         if log_bins:
-            bins = np.logspace(np.log10(min_v), np.log10(max_v),num_bins+1)
-            weights = np.ones_like(tr_list)/float(len(tr_list))
-            h1, _,_ = plt.hist(tr_list,bins=bins,facecolor='b',weights=weights,alpha = 0.5)
+            bins = np.logspace(np.log10(min_v), np.log10(max_v),num_bins+1) # 横轴 logbins
+            weights = np.ones_like(tr_list)/float(len(tr_list)) # 归一化？ x会乘这个weight的到一个x‘ 也不算是归一化，能说是个取平均
+            h1, _,_ = plt.hist(tr_list,bins=bins,facecolor='b',weights=weights,alpha = 0.5) # 画出训练数据集每个类的x的分布
             plt.gca().set_xscale("log")
             weights = np.ones_like(te_list)/float(len(te_list))
             h2, _, _ = plt.hist(te_list,bins=bins,facecolor='r',weights=weights,alpha = 0.5)
@@ -86,7 +94,7 @@ def risk_score_compute(tr_distrs, te_distrs, all_bins, data_values, data_labels)
                         return tr_distr[t_ind]/(tr_distr[t_ind]+te_distr[t_ind])
                     
     risk_score = []   
-    for i in range(len(data_values)):
+    for i in range(len(data_values)): # 对每个数据 算risk score
         c_value, c_label = data_values[i], data_labels[i]
         c_tr_distr, c_te_distr, c_bins = tr_distrs[c_label], te_distrs[c_label], all_bins[c_label]
         c_index = find_index(c_bins, c_value)
@@ -101,9 +109,9 @@ def calculate_risk_score(tr_values, te_values, tr_labels, te_labels, data_values
     ########### data_values, data_labels are from target classifier's training data
     ########### potential choice for the value -- entropy, or modified entropy, or prediction loss (i.e., -np.log(confidence))
     
-    tr_distrs, te_distrs, all_bins = distrs_compute(tr_values, te_values, tr_labels, te_labels, 
+    tr_distrs, te_distrs, all_bins = distrs_compute(tr_values, te_values, tr_labels, te_labels,  # 这些全是从shadow model的输出算的
                                                     num_bins=num_bins, log_bins=log_bins)
-    risk_score = risk_score_compute(tr_distrs, te_distrs, all_bins, data_values, data_labels)
+    risk_score = risk_score_compute(tr_distrs, te_distrs, all_bins, data_values, data_labels) # 得到shadow的histogram后，来算target的？
     return risk_score
 
 

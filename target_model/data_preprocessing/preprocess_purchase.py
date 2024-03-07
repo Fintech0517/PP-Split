@@ -1,7 +1,7 @@
 '''
 Author: yjr && 949804347@qq.com
 Date: 2023-11-18 14:13:20
-LastEditTime: 2024-01-11 21:46:53
+LastEditTime: 2024-03-05 19:07:38
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/data_preprocessing/preprocess_purchase.py
 Description: 
@@ -182,7 +182,7 @@ def preprocess_purchase_shadow(data_path='/home/dengruijun/data/FinTech/DATASET/
     X = data['X']
     Y = data['Y']
     len_train =len(X)
-    r = np.load('./dataset_shuffle/random_r_purchase100.npy')
+    r = np.load(DATASET_PATH+'/random_r_purchase100.npy')
 
     X=X[r]
     Y=Y[r]

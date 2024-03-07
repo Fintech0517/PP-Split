@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2024-01-03 15:19:20
-LastEditTime: 2024-01-03 16:21:04
+LastEditTime: 2024-03-07 10:45:16
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/ppsplit/attacks/membership_inference/Mentr_attack.py
 Description: Usenix sec'21-Systematic Evaluation of Privacy Risks of Machine Learning Models
@@ -9,15 +9,17 @@ Description: Usenix sec'21-Systematic Evaluation of Privacy Risks of Machine Lea
 '''
 import numpy as np
 import math
+import torch
 
 class MentrAttack(object):
     # 基于shadow model 的blackbox
-    def __init__(self, num_classes):
+    def __init__(self, num_classes,gpu=True):
         '''
         each input contains both model predictions (shape: num_data*num_classes) and ground-truth labels. 
         '''
 
         self.num_classes = num_classes
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() and gpu else "cpu")
     
     def _softmax_by_row(self, logits, T = 1.0):
         mx = np.max(logits, axis=-1, keepdims=True) # 找到最大的
@@ -30,11 +32,12 @@ class MentrAttack(object):
         # 进行模型推理，输出 outputs，和true labels的数组                          
         def _model_predictions(model, dataloader):
             return_outputs, return_labels = [], []
-
+            model.to(self.device)
             for (inputs, labels) in dataloader:
+                inputs = inputs.to(self.device)
                 return_labels.append(labels.numpy())
-                outputs = model.forward(inputs.cuda()) 
-                return_outputs.append( softmax_by_row(outputs.data.cpu().numpy()) ) # 归一化后再softmax
+                outputs = model.forward(inputs) 
+                return_outputs.append( self._softmax_by_row(outputs.data.cpu().detach().numpy()) ) # 归一化后再softmax
             return_outputs = np.concatenate(return_outputs) # 拼接数组
             return_labels = np.concatenate(return_labels) # 拼接数组
             return (return_outputs, return_labels)
