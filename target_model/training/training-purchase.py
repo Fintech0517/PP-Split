@@ -167,7 +167,7 @@ if __name__ == '__main__':
     # 训练好的模型存储的dir
     model_dir = "results/purchase/"
     model_name = "purchase-0ep.pth"
-    data_dir = '/home/dengruijun/data/FinTech/DATASET/kaggle-dataset/Purchase100/'
+    data_dir = '/data/dengruijun/FinTech/DATASET/kaggle-dataset/Purchase100/'
 
     # 公用定义
     best_acc = 0.0

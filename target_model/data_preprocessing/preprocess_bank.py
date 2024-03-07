@@ -13,7 +13,7 @@ from torch.utils.data import Dataset
 from .dataset import bank_dataset
 import torch
 
-dataPath = '/home/dengruijun/data/FinTech/DATASET/kaggle-dataset/bank/bank-additional-full.csv'
+dataPath = '/data/dengruijun/FinTech/DATASET/kaggle-dataset/bank/bank-additional-full.csv'
 
 num_columns = ['age', 'duration', 'campaign', 'pdays', 'previous', 'emp.var.rate', 'cons.price.idx', 'cons.conf.idx', 'euribor3m', 'nr.employed']
 onehot_columns = ['job_admin.', 'job_blue-collar', 'job_entrepreneur', 'job_housemaid',
@@ -110,7 +110,7 @@ def preprocess_bank(batch_size = 1):
 
 
 if __name__ == "__main__":
-    dataPath = '/home/dengruijun/data/FinTech/DATASET/kaggle-dataset/bank/bank-additional-full.csv'
+    dataPath = '/data/dengruijun/FinTech/DATASET/kaggle-dataset/bank/bank-additional-full.csv'
 
     # df = pd.read_csv(dataPath, delimiter=';')
 

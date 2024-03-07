@@ -109,7 +109,7 @@ if __name__ == '__main__':
         save_img_dir = f'../results/1-7/dFIL/'
         model_path = '../results/1-7/credit-20ep.pth'
 
-        dataPath = '/home/dengruijun/data/FinTech/DATASET/kaggle-dataset/home_credit/dataset/application_train.csv'
+        dataPath = '/data/dengruijun/FinTech/DATASET/kaggle-dataset/home_credit/dataset/application_train.csv'
         train_data, test_data = preprocess_credit(dataPath)
         test_dataset = bank_dataset(test_data)
         testloader = torch.utils.data.DataLoader(test_dataset, batch_size=1, shuffle=False,
@@ -119,7 +119,7 @@ if __name__ == '__main__':
         split_layer_list = [0,3,6,9]
     elif args.dataset=='bank':
         model_path = '../results/1-8/bank-20ep.pth'
-        dataPath = '/home/dengruijun/data/FinTech/DATASET/kaggle-dataset/bank/bank-additional-full.csv'
+        dataPath = '/data/dengruijun/FinTech/DATASET/kaggle-dataset/bank/bank-additional-full.csv'
         save_img_dir = f'../results/1-8/dFIL/'
 
         train_data, test_data = preprocess_bank(dataPath)
@@ -132,7 +132,7 @@ if __name__ == '__main__':
     elif args.dataset=='purchase':
         save_img_dir = f'../results/1-9/dFIL/'
         model_path = '../results/1-9/epoch_train0.pth'
-        dataPath = '/home/dengruijun/data/FinTech/DATASET/kaggle-dataset/Purchase100/'
+        dataPath = '/data/dengruijun/FinTech/DATASET/kaggle-dataset/Purchase100/'
 
         trainloader, testloader = preprocess_purchase(data_path=dataPath, batch_size=1)
         one_data_loader = get_one_data(testloader,batch_size = 1) #拿到第一个测试数据

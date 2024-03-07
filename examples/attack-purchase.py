@@ -12,7 +12,7 @@ Description:
 # %%
 # 导包
 import sys
-sys.path.append('/home/dengruijun/data/FinTech/PP-Split/')
+sys.path.append('/home/yangchenxi/data/PP-Split/')
 from ppsplit.attacks.model_inversion.inverse_model import InverseModelAttack
 from ppsplit.utils.utils import create_dir
 import torch
@@ -32,7 +32,7 @@ test_num = 6 # 测试编号（对应结果文件夹名称）
 split_layer = 8 # 模型切割点 （split point）在该层之前的层（含），作为client的模型，之后的层作为server的模型
 
 # 重要路径设置
-unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/Purchase100/Purchase_bestmodel_param.pth'
+unit_net_route = '/home/yangchenxi/data/PP-Split/results/trained_models/Purchase100/Purchase_bestmodel_param.pth'
 results_dir = f'../results/Purchase/{test_num}/'
 inverse_dir = results_dir + 'layer'+str(split_layer)+'/'
 decoder_net_route = results_dir + f'Decoder-layer{split_layer}.pth' # 攻击的decoder net存储位置

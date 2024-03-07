@@ -14,7 +14,7 @@ from sklearn.preprocessing import MinMaxScaler, LabelEncoder
 from .dataset import bank_dataset
 import torch
 
-dataPath = '/home/dengruijun/data/FinTech/DATASET/kaggle-dataset/home_credit/dataset/application_train.csv'
+dataPath = '/data/dengruijun/FinTech/DATASET/kaggle-dataset/home_credit/dataset/application_train.csv'
 
 def to_onehot(df, col_features):
     # 对类别型特征进行one-hot编码,并返回离散特征的索引
@@ -107,7 +107,7 @@ def preprocess_credit(batch_size = 1):
 
 
 if __name__ == "__main__":
-    dataPath = '/home/dengruijun/data/FinTech/DATASET/kaggle-dataset/home_credit/dataset/application_train.csv'
+    dataPath = '/data/dengruijun/FinTech/DATASET/kaggle-dataset/home_credit/dataset/application_train.csv'
 
     # df = pd.read_csv(dataPath, delimiter=';')
 

@@ -31,12 +31,12 @@ def get_cifar10_normalize(batch_size = 1):
 
     # 数据集加载：
     # 测试数据集
-    trainset = torchvision.datasets.CIFAR10(root='/home/dengruijun/data/FinTech/DATASET/image-dataset/cifar10/', train=True,
+    trainset = torchvision.datasets.CIFAR10(root='/data/dengruijun/FinTech/DATASET/image-dataset/cifar10/', train=True,
                                             download=False, transform=transform)
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size,
                                             shuffle=False, num_workers=4)
 
-    testset = torchvision.datasets.CIFAR10(root='/home/dengruijun/data/FinTech/DATASET/image-dataset/cifar10/', train=False,
+    testset = torchvision.datasets.CIFAR10(root='/data/dengruijun/FinTech/DATASET/image-dataset/cifar10/', train=False,
                                         download=False, transform=transform)
     testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size,
                                             shuffle=False, num_workers=4)
@@ -62,9 +62,9 @@ def get_cifar10_preprocess(batch_size = 1):
         Normalize
         ])
     }
-    trainset = torchvision.datasets.CIFAR10(root='/home/dengruijun/data/FinTech/DATASET/image-dataset/cifar10/', train = True,
+    trainset = torchvision.datasets.CIFAR10(root='/data/dengruijun/FinTech/DATASET/image-dataset/cifar10/', train = True,
                                     download=False, transform = tsf['train'])
-    testset = torchvision.datasets.CIFAR10(root='/home/dengruijun/data/FinTech/DATASET/image-dataset/cifar10/', train = False,
+    testset = torchvision.datasets.CIFAR10(root='/data/dengruijun/FinTech/DATASET/image-dataset/cifar10/', train = False,
                                     download=False, transform = tsf['test'])
 
 

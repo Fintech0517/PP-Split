@@ -118,7 +118,7 @@ def calculate_risk_score(tr_values, te_values, tr_labels, te_labels, data_values
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run membership inference attacks')
     parser.add_argument('--dataset', type=str, default='purchase', help='purchase or texas')
-    parser.add_argument('--model-dir', type=str, default='/home/dengruijun/data/FinTech/VFL/MIAs/membership_inference_evaluation/adv_reg/training_code/models/purchase_undefended/model_best.pth.tar', help='directory of target model')
+    parser.add_argument('--model-dir', type=str, default='/home/data/FinTech/VFL/MIAs/membership_inference_evaluation/adv_reg/training_code/models/purchase_undefended/model_best.pth.tar', help='directory of target model')
     parser.add_argument('--batch-size', type=int, default=100, help='batch size of data loader')
     args = parser.parse_args()
     

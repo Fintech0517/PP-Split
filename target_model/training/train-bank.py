@@ -1,5 +1,6 @@
-from utils.preprocess_bank import *
-from models.net import *
+# from utils.preprocess_bank import *
+from data_preprocessing.preprocess_bank import *
+# from models.net import *
 from models.BankNet import *
 from utils.utils import evalTest_bank, setLearningRate
 
@@ -18,7 +19,8 @@ import numpy as np
 # os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'  # 可能是由于是MacOS系统的原因
 
 from torch.utils.data import Dataset
-from utils.datasets import bank_dataset
+# from utils.datasets import bank_dataset
+from data_preprocessing.dataset import bank_dataset
 from torch.utils.tensorboard import SummaryWriter
 from utils.utils import accuracy_bank
 
@@ -28,7 +30,7 @@ def train(DATASET='CIFAR10', network='VGG5', NEpochs=200,
           BatchSize=32, learningRate=1e-3, NDecreaseLR=20, eps=1e-3,
            model_dir="", model_name="", gpu=True):
 
-    dataPath = '/home/dengruijun/data/FinTech/DATASET/kaggle-dataset/bank/bank-additional-full.csv'
+    dataPath = '/data/dengruijun/FinTech/DATASET/kaggle-dataset/bank/bank-additional-full.csv'
 
     train_data, test_data = preprocess_bank(dataPath)
 

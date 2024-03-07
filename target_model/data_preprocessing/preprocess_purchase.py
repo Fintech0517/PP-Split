@@ -28,7 +28,7 @@ def tensor_data_create(features, labels):
     return dataset
 
 # purchase数据集与处理，和那个前面的purchase_defended/undefended里面的功能一样
-def preprocess_purchase(data_path='/home/dengruijun/data/FinTech/DATASET/kaggle-dataset/Purchase100/',batch_size=1):
+def preprocess_purchase(data_path='/data/dengruijun/FinTech/DATASET/kaggle-dataset/Purchase100/',batch_size=1):
     print('purchase100 dataset processing...')
     # 文件夹路径
     # DATASET_PATH='./datasets/purchase'
@@ -150,7 +150,7 @@ def accuracy(output, target, topk=(1,)):
         res.append(correct_k.mul_(100.0 / batch_size))
     return res
 
-def preprocess_purchase_shadow(data_path='/home/dengruijun/data/FinTech/DATASET/kaggle-dataset/Purchase100/', batch_size=100):
+def preprocess_purchase_shadow(data_path='/data/dengruijun/FinTech/DATASET/kaggle-dataset/Purchase100/', batch_size=100):
     DATASET_PATH=data_path # dir目录
     DATASET_NAME= 'dataset_purchase' # 原始数据压缩文件
     DATASET_NUMPY = 'data.npz' # 简单处理后的numpy存储

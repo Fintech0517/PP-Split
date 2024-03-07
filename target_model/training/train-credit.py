@@ -31,7 +31,7 @@ def train(DATASET='CIFAR10', network='VGG5', NEpochs=200,
           BatchSize=32, learningRate=1e-3, NDecreaseLR=20, eps=1e-3,
           model_dir="", model_name="", gpu=True):
 
-    dataPath = '/home/dengruijun/data/FinTech/DATASET/kaggle-dataset/home_credit/dataset/application_train.csv'
+    dataPath = '/data/dengruijun/FinTech/DATASET/kaggle-dataset/home_credit/dataset/application_train.csv'
 
     train_data, test_data = preprocess_credit(dataPath)
 

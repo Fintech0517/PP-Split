@@ -17,7 +17,7 @@ import numpy as np
 import pandas as pd
 
 # ite mutual information
-sys.path.append('/home/dengruijun/data/software/ITE/ite-in-python') # 这个首先要手动下载一下ite的库
+sys.path.append('/data/dengruijun/software/ITE/ite-in-python') # 这个首先要手动下载一下ite的库
 import ite
 
 import os
@@ -72,7 +72,7 @@ if __name__=="__main__":
         # batch_size = 8
 
         model_path = '../results/1-7/credit-20ep.pth'
-        dataPath = '/home/dengruijun/data/FinTech/DATASET/kaggle-dataset/home_credit/dataset/application_train.csv'
+        dataPath = '/data/dengruijun/FinTech/DATASET/kaggle-dataset/home_credit/dataset/application_train.csv'
         train_data, test_data = preprocess_credit(dataPath)
         test_dataset = bank_dataset(test_data)
         testloader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False,
@@ -87,7 +87,7 @@ if __name__=="__main__":
         # batch_size=8
 
         model_path = '../results/1-8/bank-20ep.pth'
-        dataPath = '/home/dengruijun/data/FinTech/DATASET/kaggle-dataset/bank/bank-additional-full.csv'
+        dataPath = '/data/dengruijun/FinTech/DATASET/kaggle-dataset/bank/bank-additional-full.csv'
         
         train_data, test_data = preprocess_bank(dataPath)
         test_dataset = bank_dataset(test_data)
@@ -102,7 +102,7 @@ if __name__=="__main__":
         # batchsize = 39465 # test len
         batch_size = 8 # test len
         model_path = '../results/1-9/epoch_train0.pth'
-        dataPath = '/home/dengruijun/data/FinTech/DATASET/kaggle-dataset/Purchase100/'
+        dataPath = '/data/dengruijun/FinTech/DATASET/kaggle-dataset/Purchase100/'
 
         trainloader, testloader = preprocess_purchase(data_path=dataPath, batch_size=batch_size)
         # one_data_loader = get_one_data(testloader,batch_size = 1) #拿到第一个测试数据

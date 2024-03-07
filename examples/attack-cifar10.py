@@ -4,7 +4,7 @@
 # %%
 # 导包
 import sys
-sys.path.append('/home/dengruijun/data/FinTech/PP-Split/')
+sys.path.append('/home/yangchenxi/data/PP-Split/')
 from ppsplit.attacks.model_inversion.inverse_model import InverseModelAttack
 from ppsplit.utils.utils import create_dir
 import torch
@@ -25,7 +25,8 @@ test_num = 9 # 测试编号（对应结果文件夹名称）
 split_layer = 6 # 模型切割点 （split point）在该层之前的层（含），作为client的模型，之后的层作为server的模型
 
 # 重要路径设置
-unit_net_route = '/home/dengruijun/data/project/Inverse_efficacy/results/VGG5/BN+Tanh/2-20240101/VGG5-params-19ep.pth'
+# unit_net_route = '/data/dengruijun//data/dengruijun/FinTech/DATASET/AISecurity/Inverse_efficacy/results/VGG5/BN+Tanh/2-20240101/VGG5-params-19ep.pth'
+unit_net_route = '/data/dengruijun//data/dengruijun/FinTech/DATASET/AISecurity/Inverse_efficacy/results/VGG5/BN+Tanh/2-20240101/VGG5-params-19ep.pth'
 results_dir = f'../results/VGG5/{test_num}/'
 inverse_dir = results_dir + 'layer'+str(split_layer)+'/'
 decoder_net_route = results_dir + f'Decoder-layer{split_layer}.pth' # 攻击的decoder net存储位置
