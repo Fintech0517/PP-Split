@@ -1,7 +1,7 @@
 '''
 Author: yjr && 949804347@qq.com
 Date: 2023-11-18 14:13:20
-LastEditTime: 2024-03-05 19:07:38
+LastEditTime: 2024-03-09 16:50:27
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/data_preprocessing/preprocess_purchase.py
 Description: 
@@ -77,6 +77,9 @@ def preprocess_purchase(data_path='/home/dengruijun/data/FinTech/DATASET/kaggle-
     train_ratio = 0.8
     train_data = X[:int(train_ratio*len_train)]
     test_data = X[int((train_ratio)*len_train):]
+
+    import pandas as pd
+    pd.DataFrame(test_data).to_csv('raw-X.csv', index = False)
     
     train_label = Y[:int(train_ratio*len_train)]
     test_label = Y[int((train_ratio)*len_train):]

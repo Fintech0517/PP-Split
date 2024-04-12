@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-12-12 12:42:45
-LastEditTime: 2024-01-26 19:53:18
+LastEditTime: 2024-03-07 14:36:36
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/ppsplit/attacks/model_inversion/inverse_model.py
 Description: 

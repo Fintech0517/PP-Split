@@ -2,7 +2,7 @@
 Author: yjr 949804347@qq.com
 Date: 2023-09-09 20:35:31
 LastEditors: Ruijun Deng
-LastEditTime: 2024-01-13 17:35:40
+LastEditTime: 2024-03-09 16:45:15
 FilePath: /PP-Split/target_model/data_preprocessing/preprocess_credit.py
 Description: none
 '''
@@ -81,6 +81,9 @@ def preprocess_credit_dataset(dataPath):
 
     X_train, X_test = X[:n_train], X[n_train:]
     y_train, y_test = y[:n_train], y[n_train:]
+
+
+    pd.DataFrame(X_test).to_csv('raw-X.csv', index = False)
 
     print("X_train.shape:", X_train.shape)
     print("X_test.shape:", X_test.shape)
