@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-12-12 16:00:55
-LastEditTime: 2024-04-12 20:41:41
+LastEditTime: 2024-04-12 20:52:01
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/ppsplit/utils/similarity_metrics.py
 Description: 
@@ -13,7 +13,7 @@ from skimage import metrics # 测量SSIM
 import numpy as np
 import pandas as pd
 import os
-from 
+from .utils import test_auc, test_acc, test_pr_roc, test_f1
 
 class SimilarityMetrics():
     def __init__(self,gpu=True, type=0) -> None:
@@ -164,16 +164,16 @@ class SimilarityMetrics():
         print("fakeNet ML efficacy: ", "accuracy =", fake_acc, "f1 =", fake_f1, "auc =", fake_auc, "precision =", fake_precision, "recall =", fake_recall)
         print("rawNet ML efficacy: ", "accuracy =", raw_acc, "f1 =", raw_f1, "auc =", raw_auc, "precision =", raw_precision, "recall =", raw_recall)
 
-        # 绘制pr曲线
-        plt.figure()
-        plt.plot(fake_recall_list,fake_precision_list)
-        plt.plot(raw_recall_list,raw_precision_list)
-        plt.legend(["fake","raw"])
-        plt.savefig("./p_r_curve.jpg")
+        # # 绘制pr曲线
+        # plt.figure()
+        # plt.plot(fake_recall_list,fake_precision_list)
+        # plt.plot(raw_recall_list,raw_precision_list)
+        # plt.legend(["fake","raw"])
+        # plt.savefig("./p_r_curve.jpg")
 
-        # 绘制roc曲线
-        plt.figure()
-        plt.plot(fake_fpr_list,fake_tpr_list)
-        plt.plot(raw_fpr_list,raw_tpr_list)
-        plt.legend(["fake","raw"])
-        plt.savefig("./roc_curve.jpg")
+        # # 绘制roc曲线
+        # plt.figure()
+        # plt.plot(fake_fpr_list,fake_tpr_list)
+        # plt.plot(raw_fpr_list,raw_tpr_list)
+        # plt.legend(["fake","raw"])
+        # plt.savefig("./roc_curve.jpg")
