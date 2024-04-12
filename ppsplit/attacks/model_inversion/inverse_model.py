@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-12-12 12:42:45
-LastEditTime: 2024-03-07 14:36:36
+LastEditTime: 2024-04-12 20:41:38
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/ppsplit/attacks/model_inversion/inverse_model.py
 Description: 
@@ -17,7 +17,7 @@ import pandas as pd
 from torch.utils.data import Dataset
 torch.multiprocessing.set_sharing_strategy('file_system')
 
-from .similarity_metrics import SimilarityMetrics
+from ...utils.similarity_metrics import SimilarityMetrics
 import torchvision
 import time
 
@@ -87,6 +87,7 @@ class InverseModelAttack():
                 deprocess=None,
                 save_fake=True):
         if self.data_type==1 and deprocess==None: # 图像数据集没给deprocess方法
+            print("图像数据没给deprocess 函数")
             exit(0)
         
         if self.data_type==0: # 表格数据
@@ -176,7 +177,7 @@ class InverseModelAttack():
         # 记录数据:
         sim_metrics = SimilarityMetrics(type = self.data_type)
 
-        X_fake_list = []
+        # X_fake_list = []
         time_list = []
         infer_time_list = []
 
@@ -195,8 +196,9 @@ class InverseModelAttack():
             sim_metrics.sim_metric_dict['ssim'].append(ssim)
             mse = sim_metrics.mse_loss(inverted_input, raw_input).item()
             sim_metrics.sim_metric_dict['mse'].append(mse)
-            X_fake_list.append(inverted_input.cpu().detach().squeeze().numpy())
+            # X_fake_list.append(inverted_input.cpu().detach().squeeze().numpy())
 
+            
             # 保存图片
             if save_fake == True: # 储存原始图像+inv图像
                 torchvision.utils.save_image(deprocessImg_raw, self.inverse_dir + '/images/' + str(i) + '-ref.png')
