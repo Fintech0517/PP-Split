@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-12-12 12:42:45
-LastEditTime: 2024-04-12 20:41:38
+LastEditTime: 2024-04-13 21:53:00
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/ppsplit/attacks/model_inversion/inverse_model.py
 Description: 
@@ -126,30 +126,35 @@ class InverseModelAttack():
             start = time.time()
             inverted_data = decoder_net(smashed_data)  # inverse
             
-            cos = sim_metrics.cosine_similarity(inverted_data, originData).item()
+            cos = sim_metrics.cosine_similarity(originData,inverted_data).item()
             time_list.append(time.time()-start)
             infer_time_list.append(start-start_infer)
 
             sim_metrics.sim_metric_dict['cos'].append(cos)
-            euc = sim_metrics.euclidean_distance(inverted_data, originData).item()
+            euc = sim_metrics.euclidean_distance(originData,inverted_data).item()
             sim_metrics.sim_metric_dict['euc'].append(euc)
-            mse = sim_metrics.mse_loss(inverted_data, originData).item()
+            mse = sim_metrics.mse_loss(originData,inverted_data).item()
             sim_metrics.sim_metric_dict['mse'].append(mse)
-            
+            accuracy = sim_metrics.accuracy(originData,inverted_data).item()
+            sim_metrics.sim_metric_dict['acc'].append(accuracy)
+
             X_fake_list.append(inverted_data.cpu().detach().squeeze().numpy())
 
-        print(f"cosine: {np.mean(sim_metrics.sim_metric_dict['cos'])}, \
-              Euclidean: {np.mean(sim_metrics.sim_metric_dict['euc'])},\
-              MSE:{np.mean(sim_metrics.sim_metric_dict['mse'])}")
+        # print(f"cosine: {np.mean(sim_metrics.sim_metric_dict['cos'])}, \
+        #       Euclidean: {np.mean(sim_metrics.sim_metric_dict['euc'])},\
+        #       MSE:{np.mean(sim_metrics.sim_metric_dict['mse'])}")
+        sim_metrics.report_similarity()
         print("average time: {}".format(sum(time_list)/len(time_list)),
               "avg infer time:{}".format(sum(infer_time_list)/len(infer_time_list)))
 
         # 存储数据
         # self.inverse_dir = f'../results/1-8/inverted/{split_layer}/' # 每层一个文件夹
         # 储存similairty相关文件
-        pd.DataFrame({'cos': sim_metrics.sim_metric_dict['cos'],
-                        'euc': sim_metrics.sim_metric_dict['euc'],
-                        'mse':sim_metrics.sim_metric_dict['mse']}).to_csv(self.inverse_dir + f'inv-sim.csv', index = False)
+        # pd.DataFrame({'cos': sim_metrics.sim_metric_dict['cos'],
+        #                 'euc': sim_metrics.sim_metric_dict['euc'],
+        #                 'mse':sim_metrics.sim_metric_dict['mse']}).to_csv(self.inverse_dir + f'inv-sim.csv', index = False)
+
+        sim_metrics.store_similarity(inverse_route=self.inverse_dir + f'inv-sim.csv')
 
         # 存储inverse data
         if save_fake:
@@ -194,23 +199,24 @@ class InverseModelAttack():
             time_list.append(time.time()-start)
             infer_time_list.append(start-start_infer)
             sim_metrics.sim_metric_dict['ssim'].append(ssim)
-            mse = sim_metrics.mse_loss(inverted_input, raw_input).item()
+            mse = sim_metrics.mse_loss(raw_input, inverted_input).item()
             sim_metrics.sim_metric_dict['mse'].append(mse)
-            # X_fake_list.append(inverted_input.cpu().detach().squeeze().numpy())
+            euc = sim_metrics.euclidean_distance(raw_input, inverted_input).mean().item()
+            sim_metrics.sim_metric_dict['euc'].append(euc)
 
-            
             # 保存图片
             if save_fake == True: # 储存原始图像+inv图像
                 torchvision.utils.save_image(deprocessImg_raw, self.inverse_dir + '/images/' + str(i) + '-ref.png')
                 torchvision.utils.save_image(deprocessImg_inversed, self.inverse_dir + '/images/' + str(i) + '-inv.png')
             
-        print(f"SSIM: {np.mean(sim_metrics.sim_metric_dict['ssim'])},\
-              MSE:{np.mean(sim_metrics.sim_metric_dict['mse'])}")
+        # print(f"SSIM: {np.mean(sim_metrics.sim_metric_dict['ssim'])},\
+        #       MSE:{np.mean(sim_metrics.sim_metric_dict['mse'])}")
+        sim_metrics.report_similarity()
         print("average time: {}".format(sum(time_list)/len(time_list)),
               "avg infer time:{}".format(sum(infer_time_list)/len(infer_time_list)))
         
         # 储存similairty相关文件
-        pd.DataFrame({'ssim': sim_metrics.sim_metric_dict['ssim'],
-                        'mse':sim_metrics.sim_metric_dict['mse']}).to_csv(self.inverse_dir + f'inv-sim.csv', index = False)
-
+        # pd.DataFrame({'ssim': sim_metrics.sim_metric_dict['ssim'],
+        #                 'mse':sim_metrics.sim_metric_dict['mse']}).to_csv(self.inverse_dir + f'inv-sim.csv', index = False)
+        sim_metrics.store_similarity(inverse_route=self.inverse_dir + f'inv-sim.csv')
 

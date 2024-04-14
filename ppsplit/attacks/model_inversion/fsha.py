@@ -17,27 +17,35 @@ from tqdm import tqdm
 
 from.inverse_model import InverseModelAttack
 
-#####################
-# Training:
-# python inverse_FSHA.py --training
-#
-# Testing:
-# python inverse_FSHA.py --testing
-#
-#
-#
-#####################
+class discriminatorNet(nn.Module):
+    # 包含decoder和攻击者的编码器tilde_f
+    def __init__(self,input_dim = 16):
+        super().__init__()
 
-# def train_step(x_private, x_public, label_private, label_public, ):
-# 直接写道大函数里算了
+        self.nnlayers = nn.Sequential(
+            nn.Linear(input_dim, 16),
+            nn.LeakyReLU(),
+            nn.Linear(16,8),
+            nn.LeakyReLU(),
+            nn.Linear(8, 1)
+        )
 
+    def forward(self, x):
+        return self.nnlayers(x)
 
 class FSHA_Attack(InverseModelAttack):
-    def __init__(self,data_type = 0, gpu=True,shadow_route=None, discriminator_route = None,decoder_route=None,inverse_dir=None) -> None:
+    def __init__(self,data_type = 0, gpu=True,
+                 client_route = None,
+                 shadow_route=None,
+                   discriminator_route = None,
+                   decoder_route=None,
+                 inverse_dir=None) -> None:
         self.data_type = data_type # 0 是表格数据集，1是图像数据集
         self.device = torch.device("cuda:0" if torch.cuda.is_available() and gpu else "cpu")
 
         self.inverse_dir = inverse_dir if inverse_dir else './inverted/'
+        
+        self.client_route = client_route if client_route else './client_net.pth'
         self.decoder_route = decoder_route if decoder_route else './decoder_net.pth'
         self.shadow_route = shadow_route if shadow_route else './shadow_net.pth'
         self.discriminator_route = discriminator_route if discriminator_route else './discriminator_net.pth'
@@ -54,7 +62,7 @@ class FSHA_Attack(InverseModelAttack):
                       propertyInfer = False):
 
         # 打印相关信息
-        print("----train decoder----")
+        print("----train fsha----")
         print("client_net: ")
         print(client_net)
         print('shadow_net: ')
@@ -94,6 +102,8 @@ class FSHA_Attack(InverseModelAttack):
             print("Epoch {}".format(epoch))
 
             for i,(private_data,public_data) in enumerate(tqdm(zip(private_loader,public_loader))):
+                # print(len(public_data))
+                # print(type(private_data))
                 x_public, label_public = public_data
                 x_private, label_private = private_data
 
@@ -110,7 +120,7 @@ class FSHA_Attack(InverseModelAttack):
                 # 这个是他原始的网络训练（最初功能的训练）
                 # 用z代表中间层
                 z_private = client_net(x_private)
-
+                # print(z_private.shape)
                 adv_private_logits = discriminator_net(z_private)
 
                 # 鉴别器真实数据是记作0
@@ -121,8 +131,8 @@ class FSHA_Attack(InverseModelAttack):
 
                 # ------2.fsha攻击者网络------
                 # 自动编码器训练
-                z_public = shadow_net.getLayerOutput(x_public) # tilde_f 输出
-                infer_x_public = decoder_net.fromLayerForward(z_public)  # 从切割层往后推理？
+                z_public = shadow_net(x_public) # tilde_f 输出
+                infer_x_public = decoder_net(z_public)  # 从切割层往后推理？
 
                 if propertyInfer:
                     # 这里只取第一列数据
@@ -163,5 +173,5 @@ class FSHA_Attack(InverseModelAttack):
         print("model saved")
 
         # 返回训练好的decoder
-        return decoder_net 
+        return client_net, shadow_net, decoder_net
 
