@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-08-27 20:58:31
-LastEditTime: 2023-12-12 21:06:17
+LastEditTime: 2024-04-14 17:52:19
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/models/VGG.py
 Description: 
@@ -96,13 +96,15 @@ elif model_name == 'VGG9':
 
 # Build the VGG model according to location and split_layer
 class VGG(nn.Module):
-	def __init__(self, location, vgg_name, split_layer, cfg):
+	def __init__(self, location, vgg_name, split_layer, cfg, noise_scale=0.1):
 		super(VGG, self).__init__()
 		assert split_layer < len(cfg[vgg_name])
 		self.split_layer = split_layer
 		self.location = location
 		self.features, self.denses = self._make_layers(cfg[vgg_name])
 		self._initialize_weights()
+
+		self._noise = torch.distributions.Laplace(0.0, noise_scale)
 
 	def forward(self, x):
 		if len(self.features) > 0:

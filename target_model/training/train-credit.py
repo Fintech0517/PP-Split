@@ -1,9 +1,4 @@
-import sys
-sys.path.append('../')
-from utils.preprocess_credit import *
-from models.net import *
-from models.CreditNet import *
-from utils.utils import evalTest_credit, setLearningRate
+
 
 import torch.backends.cudnn as cudnn
 import torch.optim as optim
@@ -22,9 +17,21 @@ import numpy as np
 
 from torch.utils.data import Dataset
 
-from utils.datasets import bank_dataset
+import sys
+sys.path.append('/home/dengruijun/data/FinTech/PP-Split/')
+from target_model.models.CreditNet import CreditNet1,CreditNetDecoder1,credit_cfg
+from target_model.data_preprocessing.dataset import bank_dataset
+from target_model.data_preprocessing.preprocess_credit import preprocess_credit
+from utils import evalTest,evalTest_tab_acc
+from ppsplit.utils.similarity_metrics import SimilarityMetrics
+
+# from utils.preprocess_credit import *
+# from models.net import *
+# from models.CreditNet import *
+# from utils.utils import evalTest_credit, setLearningRate
+# from utils.datasets import bank_dataset
 # from torch.utils.tensorboard import SummaryWriter
-from utils.utils import accuracy_bank
+# from utils.utils import accuracy_bank
 
 
 def train(DATASET='CIFAR10', network='VGG5', NEpochs=200, 
@@ -33,25 +40,25 @@ def train(DATASET='CIFAR10', network='VGG5', NEpochs=200,
 
     dataPath = '/home/dengruijun/data/FinTech/DATASET/kaggle-dataset/home_credit/dataset/application_train.csv'
 
-    train_data, test_data = preprocess_credit(dataPath)
+    trainloader, testloader = preprocess_credit(BatchSize)
 
-    X_train, y_train = train_data
+    # X_train, y_train = train_data
     # X_test, y_test = test_data
 
-    # dataloader
-    train_dataset = bank_dataset(train_data)
-    test_dataset = bank_dataset(test_data)
+    # # dataloader
+    # train_dataset = bank_dataset(train_data)
+    # test_dataset = bank_dataset(test_data)
 
-    train_dataset = torch.utils.data.DataLoader(train_dataset, batch_size=BatchSize, shuffle=True,
-                                              num_workers=8, drop_last=False)
-    test_dataset = torch.utils.data.DataLoader(test_dataset, batch_size=BatchSize, shuffle=False,
-                                             num_workers=8, drop_last=False)
+    # train_dataset = torch.utils.data.DataLoader(train_dataset, batch_size=BatchSize, shuffle=True,
+    #                                           num_workers=8, drop_last=False)
+    # test_dataset = torch.utils.data.DataLoader(test_dataset, batch_size=BatchSize, shuffle=False,
+    #                                          num_workers=8, drop_last=False)
 
-    net = CreditNet(input_dim=250, output_dim=1)
+    net = CreditNet1(input_dim=250, output_dim=1)
     # 打印数据集和网络信息
     # print("edge net: \n", net)
 
-    criterion = nn.BCEWithLogitsLoss(reduction='sum')
+    criterion = nn.BCEWithLogitsLoss()
 
     # GPU配置
     if gpu:
@@ -64,16 +71,18 @@ def train(DATASET='CIFAR10', network='VGG5', NEpochs=200,
                            lr=learningRate, eps=eps, amsgrad=True)
 
     # batch配置
-    NBatch = len(X_train) / BatchSize
-
+    # NBatch = len(X_train) / BatchSize
+    NBatch = len(trainloader)
+    
     cudnn.benchmark = True
+    sim = SimilarityMetrics(gpu=gpu)
 
     # trainIter = iter(trainloader)
     # 迭代训练
     for epoch in range(NEpochs):
         lossTrain = 0.0
         accTrain = 0.0
-        for i, (batchX, batchY) in enumerate(tqdm.tqdm(train_dataset)):
+        for i, (batchX, batchY) in enumerate(tqdm.tqdm(trainloader)):
 
             if gpu:
                 batchX = batchX.cuda()
@@ -88,27 +97,29 @@ def train(DATASET='CIFAR10', network='VGG5', NEpochs=200,
             optimizer.step()
 
             # 防止loss nan所以 / 10000
-            lossTrain += loss.cpu().detach().numpy() / NBatch \
+            lossTrain += loss.cpu().detach().numpy()
             # print(lossTrain)
             pred = torch.sigmoid(prob)
             pred = pred.cpu().detach().numpy()
             groundTruth = batchY.cpu().detach().numpy()
 
 
-            acc = accuracy_bank(y_targets=groundTruth, y_prob_preds=pred)
+            acc = sim.accuracy(y_targets=groundTruth, y_prob_preds=pred)
 
-            accTrain += acc / NBatch
+            accTrain += acc
 
         if (epoch + 1) % NDecreaseLR == 0:
             # learningRate = learningRate / 2.0
             learningRate = learningRate * 0.1
-            setLearningRate(optimizer, learningRate)
+            for param_group in optimizer.param_groups:
+                param_group['lr'] = learningRate
+            # setLearningRate(optimizer, learningRate)
 
-        print("Epoch: ", epoch, "Loss: ", lossTrain,
-              "Train accuracy: ", accTrain)
+        print("Epoch: ", epoch, "Loss: ", lossTrain/NBatch,
+              "Train accuracy: ", accTrain/NBatch)
         
 
-        acc_test, auc_score = evalTest_credit(test_dataset, net, gpu=gpu)  # 测试一下模型精度
+        acc_test, auc_score = evalTest_tab_acc(testloader, net, gpu=gpu)  # 测试一下模型精度
         print("Test accuracy: ", acc_test)
         print("Test auc: ",auc_score)
 
@@ -118,13 +129,13 @@ def train(DATASET='CIFAR10', network='VGG5', NEpochs=200,
     torch.save(net, model_dir + model_name)
     print("Model saved")
 
-    # 读取（load）模型
-    newNet = torch.load(model_dir + model_name)
-    newNet.eval()
-    acc_test, auc_score = evalTest_credit(test_dataset, net, gpu=gpu)  # 测试模型精度
+    # # 读取（load）模型
+    # newNet = torch.load(model_dir + model_name)
+    # newNet.eval()
+    # acc_test, auc_score = evalTest_credit(test_dataset, net, gpu=gpu)  # 测试模型精度
 
-    print("Test accuracy: ", acc_test)
-    print("Test auc: ", auc_score)
+    # print("Test accuracy: ", acc_test)
+    # print("Test auc: ", auc_score)
 
 
 if __name__ == '__main__':
@@ -149,7 +160,7 @@ if __name__ == '__main__':
 
     # 训练好的模型存储的dir
     # model_dir = "../results/credit/"
-    model_dir = "../trained_models/credit/"
+    model_dir = "../../results/trained_models/credit/20240414/"
     model_name = f"credit-{args.epochs}ep.pth"
 
     # 待inverse的模型训练
@@ -160,7 +171,6 @@ if __name__ == '__main__':
             model_dir=model_dir,
             model_name=model_name,
             gpu=args.gpu)
-
 
 
 
