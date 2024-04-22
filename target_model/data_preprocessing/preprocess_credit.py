@@ -2,7 +2,7 @@
 Author: yjr 949804347@qq.com
 Date: 2023-09-09 20:35:31
 LastEditors: Ruijun Deng
-LastEditTime: 2024-03-09 16:45:15
+LastEditTime: 2024-04-15 20:21:05
 FilePath: /PP-Split/target_model/data_preprocessing/preprocess_credit.py
 Description: none
 '''
@@ -15,6 +15,21 @@ from .dataset import bank_dataset
 import torch
 
 dataPath = '/home/dengruijun/data/FinTech/DATASET/kaggle-dataset/home_credit/dataset/application_train.csv'
+
+tabinfo_credit = {
+    'onehot': {'NAME_CONTRACT_TYPE': [0, 1], 'CODE_GENDER': [2, 3, 4], 'FLAG_OWN_CAR': [5, 6], 'FLAG_OWN_REALTY': [7, 8],
+            'NAME_TYPE_SUITE': [9, 10, 11, 12, 13, 14, 15, 16], 'NAME_INCOME_TYPE': [17, 18, 19, 20, 21, 22, 23, 24],
+            'NAME_EDUCATION_TYPE': [25, 26, 27, 28, 29], 'NAME_FAMILY_STATUS': [30, 31, 32, 33, 34, 35],
+            'NAME_HOUSING_TYPE': [36, 37, 38, 39, 40, 41],
+            'OCCUPATION_TYPE': [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60],
+            'WEEKDAY_APPR_PROCESS_START': [61, 62, 63, 64, 65, 66, 67],
+            'ORGANIZATION_TYPE': [68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90,
+                                91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110,
+                                111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125],
+            'FONDKAPREMONT_MODE': [126, 127, 128, 129, 130], 'HOUSETYPE_MODE': [131, 132, 133, 134],
+            'WALLSMATERIAL_MODE': [135, 136, 137, 138, 139, 140, 141, 142], 'EMERGENCYSTATE_MODE': [143, 144, 145]},
+    'numList': [i for i in range(146, 250)]
+}
 
 def to_onehot(df, col_features):
     # 对类别型特征进行one-hot编码,并返回离散特征的索引

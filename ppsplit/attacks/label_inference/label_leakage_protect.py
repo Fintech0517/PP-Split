@@ -1,3 +1,4 @@
+# 一个是加上了防御的
 import numpy as np
 import pandas as pd
 import torch
@@ -13,7 +14,7 @@ from torch.utils.tensorboard import SummaryWriter
 from ppsplit.fedml_core.trainer.splitLearning import SplitNN, SplitNNClient, ISO_SplitNN, MAX_NORM_SplitNN, Marvell_SplitNN
 # from splitLearning import SplitNN, SplitNNClient, ISO_SplitNN, MAX_NORM_SplitNN, Marvell_SplitNN
 # from attack import norm_attack, direction_attack
-from ppsplit.attacks.label_inference.attack import norm_attack, direction_attack
+from ppsplit.attacks.label_inference.attack import NormDirect_Attack
 
 class NumpyDataset(Dataset):
     """This class allows you to convert numpy.array to torch.Dataset
@@ -57,16 +58,16 @@ class NumpyDataset(Dataset):
         return len(self.x)
 
 
-config = {"batch_size": 128}
-
-# 输入貌似只有28个维度 线性层输入后有16个隐藏层
-hidden_dim = 16
+args = {
+    'batch_size': 256,
+    'hidden_dim': 16, # 输入貌似只有28个维度 线性层输入后有16个隐藏层
+}
 
 
 class FirstNet(nn.Module):
     def __init__(self, train_features):
         super(FirstNet, self).__init__()
-        self.L1 = nn.Linear(train_features.shape[-1], hidden_dim)
+        self.L1 = nn.Linear(train_features.shape[-1], args['hidden_dim'])
 
     def forward(self, x):
         x = self.L1(x)
@@ -77,7 +78,7 @@ class FirstNet(nn.Module):
 class SecondNet(nn.Module):
     def __init__(self):
         super(SecondNet, self).__init__()
-        self.L2 = nn.Linear(hidden_dim, 1)
+        self.L2 = nn.Linear(args['hidden_dim'], 1)
 
     def forward(self, x):
         x = self.L2(x)
@@ -85,8 +86,6 @@ class SecondNet(nn.Module):
         return x
 
 
-def torch_auc(label, pred):
-    return roc_auc_score(label.detach().numpy(), pred.detach().numpy())
 
 
 def main_protect(data_path="mini_creditcard.csv", protect_method=None, t=None):
@@ -170,13 +169,13 @@ def main_protect(data_path="mini_creditcard.csv", protect_method=None, t=None):
         train_features, train_labels.astype(np.float64).reshape(-1, 1)
     )
     train_loader = torch.utils.data.DataLoader(
-        train_dataset, batch_size=config["batch_size"], shuffle=True
+        train_dataset, batch_size=args['batch_size'], shuffle=True
     )
     test_dataset = NumpyDataset(
         test_features, test_labels.astype(np.float64).reshape(-1, 1)
     )
     test_loader = torch.utils.data.DataLoader(
-        test_dataset, batch_size=config["batch_size"], shuffle=True
+        test_dataset, batch_size=args['batch_size'], shuffle=True
     )
 
     # -------------------------------------------------
@@ -275,38 +274,39 @@ def main_protect(data_path="mini_creditcard.csv", protect_method=None, t=None):
                 opt.step()
 
         print(
-            f"epoch={epoch}, loss: {epoch_loss}, auc: {torch_auc(torch.cat(epoch_labels), torch.cat(epoch_outputs))}"
+            f"epoch={epoch}, loss: {epoch_loss}, auc: {roc_auc_score(torch.cat(epoch_labels), torch.cat(epoch_outputs))}"
         )
 
+    attack = NormDirect_Attack
     # 攻击1：模攻击
     if protect_method == "Marvell":
-        train_leak_auc = norm_attack(
+        train_leak_auc = attack.norm_attack(
             splitnn, train_loader, attack_criterion=nn.BCELoss(), device=device, marvell=True)
         print("norm_attack: train_leak_auc is ", train_leak_auc)
-        test_leak_auc = norm_attack(
+        test_leak_auc = attack.norm_attack(
             splitnn, test_loader, attack_criterion=nn.BCELoss(), device=device, marvell=True)
         print("norm_attack: test_leak_auc is ", test_leak_auc)
     else:
-        train_leak_auc = norm_attack(
+        train_leak_auc = attack.norm_attack(
             splitnn, train_loader, attack_criterion=nn.BCELoss(), device=device)
         print("norm_attack: train_leak_auc is ", train_leak_auc)
-        test_leak_auc = norm_attack(
+        test_leak_auc = attack.norm_attack(
             splitnn, test_loader, attack_criterion=nn.BCELoss(), device=device)
         print("norm_attack: test_leak_auc is ", test_leak_auc)
 
     # 攻击2：余弦攻击
     if protect_method == "Marvell":
-        train_leak_auc = direction_attack(
+        train_leak_auc = attack.direction_attack(
             splitnn, train_loader, attack_criterion=nn.BCELoss(), device=device, marvell=True)
         print("direction_attack: train_leak_auc is ", train_leak_auc)
-        test_leak_auc = direction_attack(
+        test_leak_auc = attack.direction_attack(
             splitnn, test_loader, attack_criterion=nn.BCELoss(), device=device, marvell=True)
         print("direction_attack: test_leak_auc is ", test_leak_auc)
     else:
-        train_leak_auc = direction_attack(
+        train_leak_auc = attack.direction_attack(
             splitnn, train_loader, attack_criterion=nn.BCELoss(), device=device)
         print("direction_attack: train_leak_auc is ", train_leak_auc)
-        test_leak_auc = direction_attack(
+        test_leak_auc = attack.direction_attack(
             splitnn, test_loader, attack_criterion=nn.BCELoss(), device=device)
         print("direction_attack: test_leak_auc is ", test_leak_auc)
 

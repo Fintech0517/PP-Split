@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2024-03-07 16:22:11
-LastEditTime: 2024-03-13 16:35:27
+LastEditTime: 2024-04-16 16:45:03
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/ppsplit/HFL/DLG.py
 Description: DLG论文
@@ -20,10 +20,11 @@ from torchvision import models, datasets, transforms
 # print(torch.__version__, torchvision.__version__)
 
 class DLGAttack():
-    def __init__(self,gpu=True) -> None:
+    def __init__(self,gpu=True,num_class=100) -> None:
         self.device = torch.device("cuda:0" if torch.cuda.is_available() and gpu else "cpu")
         self.tt = transforms.ToTensor()
         self.tp = transforms.ToPILImage()
+        self.numclass=num_class
 
     def _label_to_onehot(self, target, num_classes=100):
         target = torch.unsqueeze(target, 1)
@@ -44,7 +45,7 @@ class DLGAttack():
 
         gt_data = gt_data.view(1, *gt_data.size()) # 拉平
         gt_label = gt_label.view(1, ) # 拉平
-        gt_onehot_label = self._label_to_onehot(gt_label) # onehot 为啥要用 onehot 为了优化 # 84位为0，其他为1
+        gt_onehot_label = self._label_to_onehot(gt_label,self.numclass) # onehot 为啥要用 onehot 为了优化 # 84位为0，其他为1
 
         # plt.imshow(tp(gt_data[0].cpu())) # 展示图片
 
@@ -88,6 +89,8 @@ class DLGAttack():
                 history.append(self.tp(dummy_data[0].cpu()))
         return [dummy_data, dummy_label], history
 
+    # 评估重构结果
+    
     def show_optimization_process(self,history):
         # 画图，画出优化后的图
         plt.figure(figsize=(12, 8))

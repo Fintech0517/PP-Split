@@ -1,7 +1,7 @@
 '''
 Author: yjr && 949804347@qq.com
 Date: 2023-11-19 15:05:05
-LastEditTime: 2023-12-20 14:36:32
+LastEditTime: 2024-04-14 21:33:10
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/models/PurchaseNet.py
 Description: 
@@ -58,7 +58,7 @@ class PurchaseClassifierClient(nn.Module):
     
 
 class PurchaseClassifier1(nn.Module):
-    def __init__(self, input_dim=63, output_dim=1, layer=8) -> None:
+    def __init__(self, input_dim=63, output_dim=1, layer=8, noise_scale=0) -> None:
         super().__init__()
         # self.layers = nn.Sequential()
         linear_idx, lr_idx = 1,1
@@ -73,11 +73,15 @@ class PurchaseClassifier1(nn.Module):
             elif component[0]=='Tanh':
                 self.add_module(f"Tanh{lr_idx}",torch.nn.Tanh())
                 lr_idx+=1
+        self.noise_scale = noise_scale
 
     def forward(self,x):
         in_ = x
         for layer in self.children():
             in_ = layer(in_)
+        if self.noise_scale!=0: # 需要加laplace noise   
+            self._noise = torch.distributions.Laplace(0.0, self.noise_scale)
+            return in_+self._noise.sample(in_.size()).to(in_.device)
         return in_
     
 

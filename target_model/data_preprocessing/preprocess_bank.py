@@ -2,7 +2,7 @@
 Author: yjr 949804347@qq.com
 Date: 2023-09-09 20:35:31
 LastEditors: Ruijun Deng
-LastEditTime: 2024-01-13 17:35:33
+LastEditTime: 2024-04-15 20:20:42
 FilePath: /PP-Split/target_model/data_preprocessing/preprocess_bank.py
 Description: none
 '''
@@ -32,6 +32,14 @@ onehot_columns = ['job_admin.', 'job_blue-collar', 'job_entrepreneur', 'job_hous
        'day_of_week_tue', 'day_of_week_wed', 'poutcome_failure',
        'poutcome_nonexistent', 'poutcome_success']
 
+tabinfo_bank = {
+    'onehot': { # 前面是类别列
+        'job': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], 'marital': [12, 13, 14, 15],
+            'education': [16, 17, 18, 19, 20, 21, 22, 23], 'default': [24, 25, 26], 'housing': [27, 28, 29],
+            'loan': [30, 31, 32], 'contact': [33, 34], 'month': [35, 36, 37, 38, 39, 40, 41, 42, 43, 44],
+            'day_of_week': [45, 46, 47, 48, 49], 'poutcome': [50, 51, 52]},
+    'numList': [i for i in range(53, 63)] # 后面是数值列
+}
 
 def to_onehot(df, col_features):
     # 对类别型特征进行one-hot编码,并返回离散特征的索引

@@ -38,10 +38,10 @@ class BasicBlock(nn.Module):
             )
 
     def forward(self, x):
-        out = F.Sigmoid(self.bn1(self.conv1(x)))
+        out = F.sigmoid(self.bn1(self.conv1(x)))
         out = self.bn2(self.conv2(out))
         out += self.shortcut(x)
-        out = F.Sigmoid(out)
+        out = F.sigmoid(out)
         return out
 
 
@@ -65,11 +65,11 @@ class Bottleneck(nn.Module):
             )
 
     def forward(self, x):
-        out = F.Sigmoid(self.bn1(self.conv1(x)))
-        out = F.Sigmoid(self.bn2(self.conv2(out)))
+        out = F.sigmoid(self.bn1(self.conv1(x)))
+        out = F.sigmoid(self.bn2(self.conv2(out)))
         out = self.bn3(self.conv3(out))
         out += self.shortcut(x)
-        out = F.Sigmoid(out)
+        out = F.sigmoid(out)
         return out
 
 
@@ -95,7 +95,7 @@ class ResNet(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
-        out = F.Sigmoid(self.bn1(self.conv1(x)))
+        out = F.sigmoid(self.bn1(self.conv1(x)))
         out = self.layer1(out)
         out = self.layer2(out)
         out = self.layer3(out)

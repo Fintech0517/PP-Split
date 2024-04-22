@@ -1,9 +1,9 @@
 '''
 Author: Ruijun Deng
 Date: 2023-12-12 16:00:55
-LastEditTime: 2024-04-13 21:05:11
+LastEditTime: 2024-04-16 16:50:43
 LastEditors: Ruijun Deng
-FilePath: /PP-Split/data/dengruijun/FinTech/PP-Split/ppsplit/utils/similarity_metrics.py
+FilePath: /PP-Split/ppsplit/utils/similarity_metrics.py
 Description: 
 '''
 
@@ -26,6 +26,7 @@ class SimilarityMetrics():
         self.mse_loss = nn.MSELoss()
         self.ssim = self.ssim_metric
         self.accuracy = self._accuracy
+        self.rebuild_acc = self._tabRebuildAcc
 
         self.sim_metric_dict = {'cos':[],'euc':[],'mse':[],'acc':[],'ssim':[]}
         # if type == 0: # tabular
@@ -52,6 +53,7 @@ class SimilarityMetrics():
         pred_neg_count = 0
         correct_count = 0
         for y_prob, y_t in zip(y_prob_preds, y_targets):
+            print('y_prob.size: ',y_prob.size())
             if y_prob <= threshold: # 小于threshold
                 pred_neg_count += 1
                 y_hat_lbl = 0
@@ -84,11 +86,12 @@ class SimilarityMetrics():
                 dic[key] = value
         pd.DataFrame(dic).to_csv(inverse_route,index=False)
 
-    def collect_sim_tab(self,raw,inverted):
+    def collect_sim_tab(self,raw,inverted,tab):
         cos = self.cosine_similarity(raw, inverted).item()
         euc = self.euclidean_distance(raw, inverted).mean().item()
         mse = self.mse_loss(raw, inverted).item()
-        accuracy = self.accuracy(raw, inverted).item()
+        # accuracy = self.accuracy(raw, inverted).item()
+        accuracy,_,_ = self.rebuild_acc(raw, inverted,tab)
         
         self.sim_metric_dict['cos'].append(cos)
         self.sim_metric_dict['euc'].append(euc)
@@ -96,13 +99,53 @@ class SimilarityMetrics():
         self.sim_metric_dict['acc'].append(accuracy)
 
     def collect_sim_img(self,raw,inverted,deprocess):
-        ssim = self.ssim_metric(deprocess(raw.clone()), deprocess(inverted.clone())).item()
+        if deprocess == None:
+            ssim = self.ssim_metric(raw.clone(), inverted.clone()).item()
+        else:
+            ssim = self.ssim_metric(deprocess(raw.clone()), deprocess(inverted.clone())).item()
         mse = self.mse_loss(raw, inverted).item()
         euc = self.euclidean_distance(raw, inverted).mean().item()
 
         self.sim_metric_dict['ssim'].append(ssim)
         self.sim_metric_dict['mse'].append(mse)
         self.sim_metric_dict['euc'].append(euc)
+
+    def _tabRebuildAcc(self,originData, rebuildData, tab, sigma=0.2): # 数值性不超过0.2就算正确。
+        originData = originData.detach().clone()
+        rebuildData = rebuildData.detach().clone()
+
+        # 1. 计算onehot列的准确率
+        onehot_index = tab['onehot']
+
+        onehotsuccessnum = 0
+        numsuccessnum = 0
+
+        num_acc, onehot_acc = 0.0,0.0
+
+        if len(tab['onehot']):
+            for item in onehot_index: # 遍历keys 是看对应的idex是否一致
+                origin = torch.argmax(originData[:, onehot_index[item]], dim=1) # 提取几列，找到 argmax的
+                rebuild = torch.argmax(rebuildData[:, onehot_index[item]], dim=1) # 提取几列
+
+                onehotsuccessnum += torch.eq(origin, rebuild).sum().item()
+
+            onehot_acc = onehotsuccessnum/(len(onehot_index) * rebuildData.shape[0])
+
+        # 2. 计算num列的准确率
+        if len(tab['numList']):
+            for i in tab['numList']:
+                origin = originData[:, i]
+                rebuild = rebuildData[:, i]
+                diff = torch.abs(origin - rebuild)
+                # print("diff:", diff)
+                # if diff < sigma:
+                numsuccessnum += (diff < sigma).sum().item()
+
+            # print("numsuccessnum:", numsuccessnum)
+            num_acc = numsuccessnum/(len(tab['numList']) * rebuildData.shape[0])
+
+        return (numsuccessnum+onehotsuccessnum)/((len(tab['numList']) + len(onehot_index)) *\
+                                                  rebuildData.shape[0]), onehot_acc, num_acc
 
     def _ML_Efficacy(self,
                      raw_net_route,inverted_net_route,

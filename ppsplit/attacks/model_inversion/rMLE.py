@@ -22,7 +22,7 @@ from ...utils.similarity_metrics import SimilarityMetrics
 class rMLE_Attack():
     def __init__(self,gpu=True,inverse_dir=None,data_type = 0) -> None:
         self.data_type = data_type # 0 是表格数据集，1是图像数据集
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() and gpu else "cpu")
+        self.device = torch.device("cuda:1" if torch.cuda.is_available() and gpu else "cpu")
         self.inverse_dir = inverse_dir if inverse_dir else './inverted/'
         if not os.path.exists(self.inverse_dir+'/images/'):
             os.makedirs(self.inverse_dir+'/images/')

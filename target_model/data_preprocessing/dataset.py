@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2024-01-02 19:39:41
-LastEditTime: 2024-01-02 19:42:11
+LastEditTime: 2024-04-22 10:41:51
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/data_preprocessing/dataset.py
 Description: 
@@ -63,5 +63,45 @@ class bank_dataset(Dataset):
         return len(self.Xa)
     
 
+class NumpyDataset(Dataset):
+    """This class allows you to convert numpy.array to torch.Dataset
+    Args:
+        x (np.array):
+        y (np.array):
+        transform (torch.transform):
+    Attriutes
+        x (np.array):
+        y (np.array):
+        transform (torch.transform):
+    """
+
+    def __init__(self, x, y=None, transform=None, return_idx=False):
+        self.x = x
+        self.y = y
+        self.transform = transform
+        self.return_idx = return_idx
+
+    def __getitem__(self, index):
+        x = self.x[index]
+        if self.y is not None:
+            y = self.y[index]
+
+        if self.transform is not None:
+            x = self.transform(x)
+
+        if not self.return_idx:
+            if self.y is not None:
+                return x, y
+            else:
+                return x
+        else:
+            if self.y is not None:
+                return index, x, y
+            else:
+                return index, x
+
+    def __len__(self):
+        """get the number of rows of self.x"""
+        return len(self.x)
 
 

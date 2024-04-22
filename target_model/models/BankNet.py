@@ -2,7 +2,7 @@
 Author: yjr && 949804347@qq.com
 Date: 2023-09-09 20:31:05
 LastEditors: Ruijun Deng
-LastEditTime: 2024-01-25 13:58:38
+LastEditTime: 2024-04-14 21:37:19
 FilePath: /PP-Split/target_model/models/BankNet.py
 Description: 
 '''
@@ -66,7 +66,7 @@ class BankNet(nn.Module):
                 return x
 
 class BankNet1(nn.Module):
-    def __init__(self, input_dim=63, output_dim=1, layer=6) -> None:
+    def __init__(self, input_dim=63, output_dim=1, layer=6,noise_scale=0) -> None:
         super().__init__()
         # self.layers = nn.Sequential()
         linear_idx, lr_idx = 1,1
@@ -85,11 +85,15 @@ class BankNet1(nn.Module):
         # 删除最后一个激活层
         # if layer == 2:
             # delattr (self,"ReLU2")
+        self.noise_scale = noise_scale
 
     def forward(self,x):
         in_ = x
         for layer in self.children():
             in_ = layer(in_)
+        if self.noise_scale!=0: # 需要加laplace noise
+            self._noise = torch.distributions.Laplace(0.0, self.noise_scale)
+            return in_+self._noise.sample(in_.size()).to(in_.device)
         return in_
     
 

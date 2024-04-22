@@ -1,7 +1,7 @@
 '''
 Author: yjr && 949804347@qq.com
 Date: 2023-11-18 14:13:20
-LastEditTime: 2024-03-09 16:50:27
+LastEditTime: 2024-04-16 12:09:43
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/data_preprocessing/preprocess_purchase.py
 Description: 
@@ -17,9 +17,13 @@ import urllib
 import pickle
 import tarfile
 
+# 全部是num，没有类别值
+tabinfo_purchase = {
+    'onehot': {},
+    'numList': [i for i in range(600)]
+}
+
 # 从路径获取avazu数据集loader
-
-
 # numpy转为tensor数据集
 def tensor_data_create(features, labels):
     tensor_x = torch.stack([torch.FloatTensor(i) for i in features]) # transform to torch tensors

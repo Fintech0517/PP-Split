@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-12-12 12:42:45
-LastEditTime: 2024-04-13 21:53:00
+LastEditTime: 2024-04-16 12:25:54
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/ppsplit/attacks/model_inversion/inverse_model.py
 Description: 
@@ -24,7 +24,7 @@ import time
 class InverseModelAttack():
     def __init__(self,gpu=True,decoder_route=None,data_type=0,inverse_dir=None) -> None:
         self.data_type=data_type # 0 是表格数据集，1是图像数据集
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() and gpu else "cpu")
+        self.device = torch.device("cuda:1" if torch.cuda.is_available() and gpu else "cpu")
         # 储存或加载攻击模型的路径
 
         self.inverse_dir = inverse_dir if inverse_dir else './inverted/'
@@ -85,19 +85,21 @@ class InverseModelAttack():
     def inverse(self,client_net,decoder_net,
                 train_loader,test_loader,
                 deprocess=None,
-                save_fake=True):
+                save_fake=True,
+                tab=None):
         if self.data_type==1 and deprocess==None: # 图像数据集没给deprocess方法
             print("图像数据没给deprocess 函数")
             exit(0)
         
         if self.data_type==0: # 表格数据
-            return self._inverse_tab(client_net,decoder_net,train_loader,test_loader,save_fake)
+            return self._inverse_tab(client_net,decoder_net,train_loader,test_loader,save_fake,tab)
         else: # 图像数据
             return self._inverse_image(client_net,decoder_net,train_loader,test_loader,deprocess,save_fake)
         
     def _inverse_tab(self,client_net,decoder_net,
                 train_loader,test_loader,
-                save_fake=True):
+                save_fake=True,
+                tab=None):
         
         # 打印相关信息
         print("----train decoder----")
@@ -135,7 +137,9 @@ class InverseModelAttack():
             sim_metrics.sim_metric_dict['euc'].append(euc)
             mse = sim_metrics.mse_loss(originData,inverted_data).item()
             sim_metrics.sim_metric_dict['mse'].append(mse)
-            accuracy = sim_metrics.accuracy(originData,inverted_data).item()
+            # accuracy,_,_ = sim_metrics.rebuild_acc(originData,inverted_data,tab).item()
+            accuracy,onehotacc,numacc = sim_metrics.rebuild_acc(originData,inverted_data,tab)
+            # print("onehotacc,numacc: ",onehotacc,numacc)
             sim_metrics.sim_metric_dict['acc'].append(accuracy)
 
             X_fake_list.append(inverted_data.cpu().detach().squeeze().numpy())

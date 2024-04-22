@@ -181,7 +181,7 @@ class ISO_SplitNN(torch.nn.Module):
             self.clients[i].download(grad_from_next_client)
             if i != 0:
                 # 由于只用2个参与者所以噪声直接加在这里
-                grad_from_next_client = self.clients[i].distribute() + self.t * torch.randn(grads_outputs.shape)
+                grad_from_next_client = self.clients[i].distribute() + self.t * torch.randn(grads_outputs.shape, device=self.clients[i].distribute().device)
         return grad_from_next_client
 
     def train(self):
@@ -236,13 +236,13 @@ class MAX_NORM_SplitNN(torch.nn.Module):
                 g_norm = g.pow(2).sum(dim=1).sqrt()
                 # print(g_norm.shape)
                 max_norm = torch.max(g_norm)
-                stds = torch.maximum(max_norm ** 2 / (g_norm ** 2 + 1e-32) - 1.0, torch.zeros(size=g_norm.shape)).sqrt()
-                standard_gaussian_noise = torch.normal(mean=0.0, std=1.0, size=stds.shape)
+                stds = torch.maximum(max_norm ** 2 / (g_norm ** 2 + 1e-32) - 1.0, torch.zeros(size=g_norm.shape,device=g_norm.device)).sqrt()
+                standard_gaussian_noise = torch.normal(mean=0.0, std=1.0, size=stds.shape,device=g_norm.device)
                 gaussian_noise = standard_gaussian_noise * stds
                 # print(gaussian_noise.shape)
                 # print((torch.ones(size=stds.shape) + gaussian_noise).shape)
                 # print((torch.ones(size=stds.shape) + gaussian_noise).t().shape)
-                grad_from_next_client = g * (torch.ones(size=stds.shape) + gaussian_noise).reshape([-1, 1])
+                grad_from_next_client = g * (torch.ones(size=stds.shape,device=g_norm.device) + gaussian_noise).reshape([-1, 1])
         return grad_from_next_client
 
     def train(self):
@@ -353,7 +353,7 @@ def marvell_g(g, labels):
     # print(neg_g_mean)
 
     # 算出16个差异的模
-    g_diff_norm = float(torch.norm(g_diff).numpy())
+    g_diff_norm = float(torch.norm(g_diff.cpu().detach()).numpy())
     # print(g_diff_norm)
     if g_diff_norm ** 2 > 1:
         print('pos_g_mean', pos_g_mean.shape)
@@ -417,21 +417,21 @@ def marvell_g(g, labels):
     y_float = y.float()
 
     # positive examples add noise in g1 - g0
-    perturbed_g += torch.reshape(torch.multiply(torch.randn(y.shape),
+    perturbed_g += torch.reshape(torch.multiply(torch.randn(y.shape,device=y_float.device),
                                                 y_float), shape=(-1, 1)) * g_diff * (
                                math.sqrt(lam11 - lam21) / g_diff_norm)
 
     # add spherical noise to positive examples
     if lam21 > 0.0:
-        perturbed_g += torch.randn(g.shape) * torch.reshape(y_float, shape=(-1, 1)) * math.sqrt(lam21)
+        perturbed_g += torch.randn(g.shape, device=y_float.device) * torch.reshape(y_float, shape=(-1, 1)) * math.sqrt(lam21)
 
     # negative examples add noise in g1 - g0
-    perturbed_g += torch.reshape(torch.multiply(torch.randn(y.shape),
+    perturbed_g += torch.reshape(torch.multiply(torch.randn(y.shape, device=y_float.device),
                                           1 - y_float), shape=(-1, 1)) * g_diff * (
                            math.sqrt(lam10 - lam20) / g_diff_norm)
 
     # add spherical noise to negative examples
     if lam20 > 0.0:
-        perturbed_g += torch.randn(g.shape) * torch.reshape(1 - y_float, shape=(-1, 1)) * math.sqrt(lam20)
+        perturbed_g += torch.randn(g.shape, device=y_float.device) * torch.reshape(1 - y_float, shape=(-1, 1)) * math.sqrt(lam20)
 
     return torch.reshape(perturbed_g, shape=g_original_shape)

@@ -1,7 +1,7 @@
 '''
 Author: yjr && 949804347@qq.com
 Date: 2023-09-26 20:45:13
-LastEditTime: 2024-01-25 13:49:48
+LastEditTime: 2024-04-14 21:36:27
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/models/CreditNet.py
 Description:
@@ -89,7 +89,7 @@ class CreditNet(nn.Module):
                 return x
 
 class CreditNet1(nn.Module):
-    def __init__(self, input_dim=63, output_dim=1, layer=9) -> None:
+    def __init__(self, input_dim=63, output_dim=1, layer=9, noise_scale=0) -> None:
         super().__init__()
         # self.layers = nn.Sequential()
         linear_idx, lr_idx, bn_idx = 1,1,1
@@ -108,11 +108,15 @@ class CreditNet1(nn.Module):
                 self.add_module(f'batch_norm{bn_idx}',torch.nn.BatchNorm1d(component[1]))
                 bn_idx+=1
         self.apply(self.initialize_weights)
+        self.noise_scale = noise_scale
 
     def forward(self,x):
         in_ = x
         for layer in self.children():
             in_ = layer(in_)
+        if self.noise_scale!=0: # 需要加laplace noise
+            self._noise = torch.distributions.Laplace(0.0, self.noise_scale)
+            return in_+self._noise.sample(in_.size()).to(in_.device)
         return in_
     
     def initialize_weights(self, module):

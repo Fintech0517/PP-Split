@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-08-27 20:58:31
-LastEditTime: 2024-04-14 17:52:19
+LastEditTime: 2024-04-16 17:45:49
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/models/VGG.py
 Description: 
@@ -33,7 +33,7 @@ model_cfg = {
 	('C', 32, 64, 3, 64*16*16, 64*16*16*3*3*32), #2
     ('M', 64, 64, 2, 64*8*8, 0), # 3
 	('C', 64, 64, 3, 64*8*8, 64*8*8*3*3*64), # 4
-	('D', 8*8*64, 128, 1, 64, 128*8*8*64), # 5
+	('D', 8*8*64, 128, 1, 64, 128*8*8*64), # 5 
 	('D', 128, 10, 1, 10, 128*10)],# 6
 	'VGG9':[#[1,4,7,9,10,11,12,13]
 		('C',3,64,3,65535,1769472), 
@@ -96,15 +96,15 @@ elif model_name == 'VGG9':
 
 # Build the VGG model according to location and split_layer
 class VGG(nn.Module):
-	def __init__(self, location, vgg_name, split_layer, cfg, noise_scale=0.1):
+	def __init__(self, location, vgg_name, split_layer, cfg, noise_scale=0):
 		super(VGG, self).__init__()
 		assert split_layer < len(cfg[vgg_name])
 		self.split_layer = split_layer
 		self.location = location
 		self.features, self.denses = self._make_layers(cfg[vgg_name])
 		self._initialize_weights()
-
-		self._noise = torch.distributions.Laplace(0.0, noise_scale)
+		
+		self.noise_scale = noise_scale
 
 	def forward(self, x):
 		if len(self.features) > 0:
@@ -115,6 +115,9 @@ class VGG(nn.Module):
 			out = out.view(out.size(0), -1)
 			out = self.denses(out)
 
+		if self.noise_scale!=0: # 需要加laplace noise
+			self._noise = torch.distributions.Laplace(0.0, self.noise_scale)
+			return out+self._noise.sample(out.size()).to(out.device)
 		return out
 
 	def _make_layers(self, cfg):
