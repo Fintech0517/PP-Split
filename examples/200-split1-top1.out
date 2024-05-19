@@ -1,0 +1,33 @@
+nohup: ignoring input
+cuda:1
+features.0.weight
+features.0.bias
+features.1.weight
+features.1.bias
+features.1.running_mean
+features.1.running_var
+features.1.num_batches_tracked
+=> loading paired dataset from ../results/20240428-Rep-quantify//VGG5/quantification/200pairs/
+[False, True]
+0
+
+  0%|          | 0/400 [00:00<?, ?it/s]
+  0%|          | 1/400 [00:02<15:38,  2.35s/it]
+100%|██████████| 400/400 [00:02<00:00, 164.68it/s]
+diff_data.shape:  torch.Size([200, 1])
+in recenter: 
+torch.Size([200, 1])
+torch.Size([1, 1])
+in recenter: 
+torch.Size([400, 1])
+torch.Size([1, 1])
+direction shape of first layer:  (1, 1)
+signs of first layer:  [1.]
+
+  0%|          | 0/400 [00:00<?, ?it/s]
+100%|██████████| 400/400 [00:00<00:00, 5187.09it/s]
+in recenter: 
+torch.Size([400, 1])
+torch.Size([1, 1])
+[tensor(-0.9999), tensor(-1.0000)]
+quantified accuracy(privacy lekage): 0.5 
