@@ -20,7 +20,7 @@ import torch.backends.cudnn as cudnn
 import sys
 sys.path.append('/home/dengruijun/data/FinTech/PP-Split/')
 from target_model.models.VGG import VGG,model_cfg
-from target_model.data_preprocessing.preprocess_cifar10 import get_cifar10_normalize,get_one_data,deprocess
+from target_model.data_preprocessing.preprocess_cifar10 import get_cifar10_normalize,get_one_data,deprocess,get_cifar10_normalize_two_train
 from utils import evalTest 
 
 
@@ -37,7 +37,8 @@ def train(network = 'VGG5', NEpochs = 200,
         os.makedirs(model_dir)
 
     # 数据集和模型
-    trainloader,testloader = get_cifar10_normalize(batch_size=BatchSize)
+    # trainloader,testloader = get_cifar10_normalize(batch_size=BatchSize)
+    trainloader,trainloader2,testloader = get_cifar10_normalize_two_train(batch_size=BatchSize)
     net = VGG('Unit',network,len(model_cfg[network])-1,model_cfg)
 
     # 数据集装入loader中
@@ -126,7 +127,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # 训练好的模型存储的dir
-    model_dir = "../../results/trained_models/VGG5/20240414/"
+    model_dir = "../../results/trained_models/VGG5/20240429-RepE/"
     # model_name = "VGG5-20ep.pth"
 
     # 待inverse的模型训练

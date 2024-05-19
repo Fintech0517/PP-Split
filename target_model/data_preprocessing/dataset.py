@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2024-01-02 19:39:41
-LastEditTime: 2024-04-22 10:41:51
+LastEditTime: 2024-05-02 22:20:39
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/data_preprocessing/dataset.py
 Description: 
@@ -9,9 +9,77 @@ Description:
 # 导包
 import torchvision
 import torchvision.transforms as transforms
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader, Dataset,ConcatDataset,Subset,TensorDataset
 import numpy as np
 import torch
+import random
+
+
+
+# 要多少对训练数据啊？（先拿所有吧）
+# def pair_smashed_data(trainset1,trainset2,num_pairs,batch_size=1):
+#     datasetC = ConcatDataset([trainset1,trainset2])
+#     if num_pairs:
+#         datasetC = Subset(datasetC,range(num_pairs))
+#     dataloader = DataLoader(datasetC,batch_size=batch_size,shuffle=False,num_workers=4)
+#     return dataloader
+
+
+def pair_smashed_data(trainloader1,trainloader2,num_pairs,batch_size=1):
+    # 构造数据集，每个pair是[看过的，没看过的]
+    data = [[seen[0],unseen[0]] for seen,unseen in zip(trainloader1,trainloader2)]
+    train_data = data[:num_pairs]
+    test_data = data[num_pairs:2*num_pairs]
+
+    train_labels = []
+    # 此时开始shuffle每个pair的位置并且获取labels
+    for d in train_data:
+        true_feature = d[0]
+        random.shuffle(d)
+        train_labels.append([s.equal(true_feature) for s in d])
+    
+    test_labels = []
+    for d in test_data:
+        true_feature = d[0]
+        random.shuffle(d)
+        test_labels.append([s.equal(true_feature) for s in d])
+
+    # 转为可用的dataset
+    trainset = [item for sublist in train_data for item in sublist]
+    testset = [item for sublist in test_data for item in sublist]
+
+    trainset = TensorDataset(*trainset)
+    testset = TensorDataset(*testset)
+
+    train_loader = DataLoader(*trainset,shuffle=False,batch_size=batch_size)
+    test_loader = DataLoader(*testset,shuffle=False,batch_size=batch_size)
+    # datasetC = ConcatDataset([train_loader1.dataset,train_loader2.dataset])
+    # if num_pairs:
+    #     datasetC = Subset(datasetC,range(num_pairs))
+    # dataloader = DataLoader(datasetC,batch_size=batch_size,shuffle=False,num_workers=4)
+    return train_loader,train_labels,test_loader,test_labels
+
+
+# def diff_pair_data(trainset1,trainset2):
+#     tensor_A = torch.stack([trainset1[i][0] for i in range(num_pairs)])
+#     tensor_B = torch.stack([trainset2[i][0] for i in range(num_pairs)])
+#     # 计算每个元素的差值
+#     diff = tensor_A - tensor_B
+
+#     # 创建数据集 
+#     dataset_D = TensorDataset(diff)
+
+#     array_D = np.array(dataset_D[i][0].numpy() for i in range(num_pairs))
+
+#     return array_D
+
+def diff_pair_data(smashed_data):
+    # smashed_data = np.array(smashed_data)
+    # smashed_data = torch.stack(smashed_data).squeeze()
+    relative_hidden_states = smashed_data[::2] - smashed_data[1::2]
+
+    return relative_hidden_states
+
 
 # 构造数据集 CIFAR10适用
 class ListDataset(Dataset):

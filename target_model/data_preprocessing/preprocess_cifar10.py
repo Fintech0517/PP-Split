@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-09-03 19:29:00
-LastEditTime: 2024-01-11 21:36:54
+LastEditTime: 2024-05-07 16:59:39
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/data_preprocessing/preprocess_cifar10.py
 Description: 
@@ -14,8 +14,45 @@ import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader, Dataset
 import numpy as np
+from torch.utils.data import Subset, random_split
 
 from .dataset import ListDataset
+
+# 构建 train1，train2，test三组数据集
+def get_cifar10_normalize_two_train(batch_size = 1, split_ratio=0.5):
+    mu = torch.tensor([0.5,0.5,0.5],dtype=torch.float32)
+    sigma = torch.tensor([0.5,0.5,0.5],dtype=torch.float32)
+
+    transform=transforms.Compose(
+        [
+            transforms.ToTensor(),
+            transforms.Normalize(mu,sigma)
+        ]
+    )
+
+    trainset = torchvision.datasets.CIFAR10(root='/home/dengruijun/data/FinTech/DATASET/image-dataset/cifar10/',train=True,
+                                            download=False, transform=transform)
+    testset = torchvision.datasets.CIFAR10(root='/home/dengruijun/data/FinTech/DATASET/image-dataset/cifar10/',train=False,
+                                           download=False, transform=transform)
+    # 使得两个trainset长度相等                                       
+    half_length = len(trainset) // 2                                     
+    trainset_seen = Subset(trainset, range(half_length))
+    trainset_unseen = Subset(trainset, range(half_length, len(trainset)))
+    
+    if len(trainset_seen) != len(trainset_unseen):
+        if len(trainset_seen) > len(trainset_unseen):
+            trainset_seen = Subset(trainset_seen, range(len(trainset_unseen)))
+        else:
+            trainset_unseen = Subset(trainset_unseen, range(len(trainset_seen)))
+
+    trainloader1 = torch.utils.data.DataLoader(trainset_seen,batch_size=batch_size,shuffle=False, num_workers=4)
+    trainloader2 = torch.utils.data.DataLoader(trainset_unseen,batch_size=batch_size,shuffle=False, num_workers=4)
+    testloader = torch.utils.data.DataLoader(testset,batch_size=batch_size,shuffle=False, num_workers=4)
+    
+    return trainloader1,trainloader2,testloader
+    # return trainloader1,trainloader2
+
+
 
 def get_cifar10_normalize(batch_size = 1):
     #  数据集 CIFAR
@@ -89,8 +126,6 @@ def get_one_data(dataloader,batch_size = 1): # 得到一个dataloader中第一�
     dataset = ListDataset(inverse_data_list)
     inverseloader = DataLoader(dataset, batch_size = batch_size, shuffle = False, num_workers = 1)
     return inverseloader
-
-
 
 # mnist和cifar的预处理？ （类似transform）
 def preprocess_cifar10(data):
