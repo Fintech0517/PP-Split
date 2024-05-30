@@ -113,8 +113,8 @@ def train(DATASET='CIFAR10', network='VGG5', NEpochs=200,
 
         print("Epoch: ", epoch, "Loss: ", lossTrain/NBatch,
               "Train accuracy: ", accTrain/NBatch)
-
-        acc_test, auc_score = evalTest_tab_acc(testloader, net, gpu=gpu)  # 测试一下模型精度
+        # TODO:这个要改的acc
+        # acc_test, auc_score = evalTest_tab_acc(testloader, net, gpu=gpu)  # 测试一下模型精度
         print("Test accuracy: ", acc_test)
         print("Test auc: ",auc_score)
 

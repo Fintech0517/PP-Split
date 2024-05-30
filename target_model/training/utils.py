@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2024-04-14 15:58:18
-LastEditTime: 2024-04-14 16:58:06
+LastEditTime: 2024-05-30 11:01:43
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/training/utils.py
 Description: 
@@ -26,30 +26,37 @@ sys.path.append('/home/dengruijun/data/FinTech/PP-Split/')
 # from ...ppsplit.utils.similarity_metrics import SimilarityMetrics
 from ppsplit.utils.similarity_metrics import SimilarityMetrics
 
-def acc(pred_logits, true_label):
-    pred = np.argmax(pred_logits.cpu().detach().numpy(), axis = 1)
-    groundTruth = true_label.cpu().detach().numpy()
-    return np.mean(pred == groundTruth)
 
-# 评估edge模型测试精度
+# 评估edge模型测试精度，多分类任务，还是单纯针对多分类吧，用softmax
+# argmax
+# cifar10可用
 def evalTest(testloader, net, gpu = True):
+    def acc(pred_logits, true_label):
+        # 针对单个batch的 logits 用 argmax进行与 int 类型的true label的对比
+        pred = np.argmax(pred_logits.cpu().detach().numpy(), axis = 1)
+        groundTruth = true_label.cpu().detach().numpy()
+        return np.mean(pred == groundTruth)
+
     testIter = iter(testloader)
     acc_test = 0.0
     NBatch = 0
+    softmax = nn.Softmax(dim=1)  # 分类层 这里sigmoid都是写在外面的吗
     for i, data in enumerate(tqdm.tqdm(testIter, 0)):
         NBatch += 1
         batchX, batchY = data
         if gpu:
             batchX = batchX.cuda()
             batchY = batchY.cuda()
-        logits = net.forward(batchX)
-
-        acc_test+=acc(logits, batchY)
+        logits = net.forward(batchX) 
+        prob = softmax(logits)
+        # 没有用 softmax？,用了argmax（hardmax）？
+        acc_test+=acc(prob, batchY) # 计算batch 的accuracy
 
     acc_test = acc_test / NBatch
     return acc_test
 
-def evalTest_tab_acc(testloader, net, gpu = True):
+# 表格数据自定义的重建acc讨论，调用别的acc计算函数
+# def evalTest_tab_acc(testloader, net, gpu = True):
     testIter = iter(testloader)
     acc_test = 0.0
     NBatch = 0
@@ -64,25 +71,26 @@ def evalTest_tab_acc(testloader, net, gpu = True):
         if gpu:
             batchX = batchX.cuda()
             batchY = batchY.cuda()
-        logits = net.forward(batchX)
-
-        pred = torch.sigmoid(logits)
-        pred = pred.cpu().detach().numpy()
         groundTruth = batchY.cpu().detach().numpy()
 
+        # 前向推理
+        logits = net.forward(batchX)
+        pred = torch.sigmoid(logits)
+        pred = pred.cpu().detach().numpy()
+
+        # 表格数据自定义的acc分类讨论
         all_preds.extend(pred)
         all_groundTruth.extend(groundTruth)
 
         acc = sim.accuracy(y_targets=groundTruth, y_prob_preds=pred)
-
         acc_test += acc
 
-    acc_test = acc_test / NBatch
-    auc_score = roc_auc_score(all_groundTruth, all_preds)
+    acc_test = acc_test / NBatch # acc计算
+    auc_score = roc_auc_score(all_groundTruth, all_preds) # auc计算
 
     return acc_test, auc_score
 
-# sec'21的accuracy函数
+# sec'21的accuracy函数，用于判断purchase分类的
 def accuracy_purchase(output, target, topk=(1,)): 
     """Computes the precision@k for the specified values of k"""
     maxk = max(topk)
@@ -102,7 +110,8 @@ def accuracy_purchase(output, target, topk=(1,)):
         res.append(correct_k.mul_(100.0 / batch_size))
     return res
 
-def gradient_gaussian_noise_masking(g, ratio):
+# # 梯度加上高斯噪声
+# def gradient_gaussian_noise_masking(g, ratio):
     g_norm = torch.norm(g, p=2, dim=1)
     max_norm = torch.max(g_norm)
     gaussian_std = ratio * max_norm/torch.sqrt(torch.tensor(g.shape[1], dtype=torch.float))
