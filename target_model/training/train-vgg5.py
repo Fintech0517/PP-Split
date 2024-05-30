@@ -70,6 +70,7 @@ def train(network = 'VGG5', NEpochs = 200,
             # prob = nn.Softmax(logits)
             prob = softmax(logits)
             # prob = logits
+            # print("batchY: ",batchY)
             loss = criterion(logits, batchY)
             loss.backward()
             optimizer.step()
@@ -96,8 +97,8 @@ def train(network = 'VGG5', NEpochs = 200,
 
         evalTest(testloader, net, gpu = gpu)  # 测试一下模型精度
 
-        model_name = f'VGG5-params-{epoch}ep.pth'
-        torch.save(net.state_dict(), model_dir + model_name)
+        # model_name = f'VGG5-params-{epoch}ep.pth'
+        # torch.save(net.state_dict(), model_dir + model_name)
         print(f"Model saved for epoch {epoch}")
 
     # 读取（load）模型

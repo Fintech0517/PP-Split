@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2024-01-03 15:19:20
-LastEditTime: 2024-03-07 10:45:16
+LastEditTime: 2024-05-22 22:49:44
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/ppsplit/attacks/membership_inference/Mentr_attack.py
 Description: Usenix sec'21-Systematic Evaluation of Privacy Risks of Machine Learning Models
@@ -21,7 +21,7 @@ class MentrAttack(object):
         self.num_classes = num_classes
         self.device = torch.device("cuda:0" if torch.cuda.is_available() and gpu else "cpu")
     
-    def _softmax_by_row(self, logits, T = 1.0):
+    def _softmax_by_row(self, logits, T = 1.0): # 用于处理smashed data
         mx = np.max(logits, axis=-1, keepdims=True) # 找到最大的
         exp = np.exp((logits - mx)/T)
         denominator = np.sum(exp, axis=-1, keepdims=True)
@@ -56,10 +56,14 @@ class MentrAttack(object):
         self.t_tr_outputs, self.t_tr_labels = target_train_performance
         self.t_te_outputs, self.t_te_labels = target_test_performance
         
-        self.s_tr_corr = (np.argmax(self.s_tr_outputs, axis=1)==self.s_tr_labels).astype(int)
-        self.s_te_corr = (np.argmax(self.s_te_outputs, axis=1)==self.s_te_labels).astype(int)
-        self.t_tr_corr = (np.argmax(self.t_tr_outputs, axis=1)==self.t_tr_labels).astype(int)
-        self.t_te_corr = (np.argmax(self.t_te_outputs, axis=1)==self.t_te_labels).astype(int)
+        print(self.t_tr_outputs.shape)
+        print(self.t_te_outputs.shape)
+        print(self.s_tr_outputs.shape)
+        print(self.s_te_outputs.shape)
+        # self.s_tr_corr = (np.argmax(self.s_tr_outputs, axis=1)==self.s_tr_labels).astype(int)
+        # self.s_te_corr = (np.argmax(self.s_te_outputs, axis=1)==self.s_te_labels).astype(int)
+        # self.t_tr_corr = (np.argmax(self.t_tr_outputs, axis=1)==self.t_tr_labels).astype(int)
+        # self.t_te_corr = (np.argmax(self.t_te_outputs, axis=1)==self.t_te_labels).astype(int)
         
         self.s_tr_conf = np.array([self.s_tr_outputs[i, self.s_tr_labels[i]] for i in range(len(self.s_tr_labels))])
         self.s_te_conf = np.array([self.s_te_outputs[i, self.s_te_labels[i]] for i in range(len(self.s_te_labels))])
@@ -116,11 +120,12 @@ class MentrAttack(object):
         # perform membership inference attack by thresholding feature values: the feature can be prediction confidence,
         # (negative) prediction entropy, and (negative) modified entropy
         t_tr_mem, t_te_non_mem = 0, 0
-        for num in range(self.num_classes):
+        for num in range(self.num_classes): # 对于每一个class
             thre = self._thre_setting(s_tr_values[self.s_tr_labels==num], s_te_values[self.s_te_labels==num])
-            t_tr_mem += np.sum(t_tr_values[self.t_tr_labels==num]>=thre)
-            t_te_non_mem += np.sum(t_te_values[self.t_te_labels==num]<thre)
+            t_tr_mem += np.sum(t_tr_values[self.t_tr_labels==num]>=thre) # 分类正确的 train 数目
+            t_te_non_mem += np.sum(t_te_values[self.t_te_labels==num]<thre) # 分类正确的 test 数目
         mem_inf_acc = 0.5*(t_tr_mem/(len(self.t_tr_labels)+0.0) + t_te_non_mem/(len(self.t_te_labels)+0.0))
+        # mem_inf_acc = 0.5*(t_tr_mem/(len(self.t_tr_outputs)+0.0) + t_te_non_mem/(len(self.t_te_outputs)+0.0))
         print('For membership inference attack via {n}, the attack acc is {acc:.3f}'.format(n=v_name,acc=mem_inf_acc))
         return
     

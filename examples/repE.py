@@ -63,9 +63,9 @@ if args['dataset']=='CIFAR10':
     # 超参数
     testset_len = 10000 # 10000个数据一次 整个测试集合的长度
     # split_layer_list = list(range(len(model_cfg['VGG5'])))
-    split_layer = 3 # 定成2吧？
+    split_layer = 6 # 定成2吧？
     test_num = 1 # 试验序号
-    #  nohup python -u repE.py >> 200-split3-top1.out 2>&1  &
+    #  nohup python -u repE.py >> 200-split6-first10.out 2>&1  &
     # 关键路径
     # 此时是为了repE
     # unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/VGG5/BN+Tanh/VGG5-params-20ep.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
@@ -181,6 +181,10 @@ def clipDataTopX(dataToClip, top=3):
     new_data = torch.gather(dataToClip,1,sorted_indices)
     return new_data
 
+def clipDataFirstX(dataToClip, top=3):
+    new_data = dataToClip[:,:top]
+    return new_data
+
 
 # 1. designing stimulus and test
 dataset_route = f"../results/{args['result_dir']}/VGG5/quantification/{args['num_pairs']}pairs/"
@@ -231,7 +235,8 @@ for j, data in enumerate(tqdm.tqdm(train_loader)): # 对trainloader遍历
 
 train_smashed_data_list=torch.stack(train_smashed_data_list).squeeze()
 train_smashed_data_list=train_smashed_data_list.reshape(train_smashed_data_list.shape[0],-1)
-train_smashed_data_list = clipDataTopX(train_smashed_data_list,top=1)
+# train_smashed_data_list = clipDataTopX(train_smashed_data_list,top=1)
+train_smashed_data_list = clipDataFirstX(train_smashed_data_list,top=10)
 
 # 相对距离
 diff_data = diff_pair_data(train_smashed_data_list) # np.array
@@ -257,7 +262,8 @@ for j, data in enumerate(tqdm.tqdm(test_loader)): # 对trainloader遍历
 
 test_smashed_data_list=torch.stack(test_smashed_data_list).squeeze()
 test_smashed_data_list=test_smashed_data_list.reshape(test_smashed_data_list.shape[0],-1)
-test_smashed_data_list = clipDataTopX(test_smashed_data_list,top=1)
+# test_smashed_data_list = clipDataTopX(test_smashed_data_list,top=1)·
+test_smashed_data_list = clipDataFirstX(test_smashed_data_list,top=10)
 
 acc = reader.quantify_acc(hidden_states=test_smashed_data_list,test_labels=test_labels)
 print(f"quantified accuracy(privacy lekage): {acc} ")

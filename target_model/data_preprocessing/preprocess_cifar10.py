@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-09-03 19:29:00
-LastEditTime: 2024-05-07 16:59:39
+LastEditTime: 2024-05-21 22:23:23
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/data_preprocessing/preprocess_cifar10.py
 Description: 
@@ -16,7 +16,7 @@ from torch.utils.data import DataLoader, Dataset
 import numpy as np
 from torch.utils.data import Subset, random_split
 
-from .dataset import ListDataset
+from .dataset import ListDataset, split_trainset
 
 # 构建 train1，train2，test三组数据集
 def get_cifar10_normalize_two_train(batch_size = 1, split_ratio=0.5):
@@ -34,25 +34,13 @@ def get_cifar10_normalize_two_train(batch_size = 1, split_ratio=0.5):
                                             download=False, transform=transform)
     testset = torchvision.datasets.CIFAR10(root='/home/dengruijun/data/FinTech/DATASET/image-dataset/cifar10/',train=False,
                                            download=False, transform=transform)
-    # 使得两个trainset长度相等                                       
-    half_length = len(trainset) // 2                                     
-    trainset_seen = Subset(trainset, range(half_length))
-    trainset_unseen = Subset(trainset, range(half_length, len(trainset)))
-    
-    if len(trainset_seen) != len(trainset_unseen):
-        if len(trainset_seen) > len(trainset_unseen):
-            trainset_seen = Subset(trainset_seen, range(len(trainset_unseen)))
-        else:
-            trainset_unseen = Subset(trainset_unseen, range(len(trainset_seen)))
 
-    trainloader1 = torch.utils.data.DataLoader(trainset_seen,batch_size=batch_size,shuffle=False, num_workers=4)
-    trainloader2 = torch.utils.data.DataLoader(trainset_unseen,batch_size=batch_size,shuffle=False, num_workers=4)
+    trainloader1,trainloader2 = split_trainset(trainset=trainset,batch_size=batch_size)
     testloader = torch.utils.data.DataLoader(testset,batch_size=batch_size,shuffle=False, num_workers=4)
     
     return trainloader1,trainloader2,testloader
     # return trainloader1,trainloader2
-
-
+    
 
 def get_cifar10_normalize(batch_size = 1):
     #  数据集 CIFAR
@@ -129,7 +117,6 @@ def get_one_data(dataloader,batch_size = 1): # 得到一个dataloader中第一�
 
 # mnist和cifar的预处理？ （类似transform）
 def preprocess_cifar10(data):
-
     size = data.shape
     NChannels = size[-1]
     assert NChannels == 1 or NChannels == 3

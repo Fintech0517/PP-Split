@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2024-01-02 19:39:41
-LastEditTime: 2024-05-02 22:20:39
+LastEditTime: 2024-05-23 17:37:33
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/data_preprocessing/dataset.py
 Description: 
@@ -24,7 +24,24 @@ import random
 #     dataloader = DataLoader(datasetC,batch_size=batch_size,shuffle=False,num_workers=4)
 #     return dataloader
 
+def split_trainset(trainset,batch_size):
+        # 使得两个trainset长度相等                                       
+    half_length = len(trainset) // 2                                     
+    trainset_seen = Subset(trainset, range(half_length))
+    trainset_unseen = Subset(trainset, range(half_length, len(trainset)))
+    
+    if len(trainset_seen) != len(trainset_unseen):
+        if len(trainset_seen) > len(trainset_unseen):
+            trainset_seen = Subset(trainset_seen, range(len(trainset_unseen)))
+        else:
+            trainset_unseen = Subset(trainset_unseen, range(len(trainset_seen)))
 
+    trainloader1 = torch.utils.data.DataLoader(trainset_seen,batch_size=batch_size,shuffle=False, num_workers=4)
+    trainloader2 = torch.utils.data.DataLoader(trainset_unseen,batch_size=batch_size,shuffle=False, num_workers=4)
+
+    return trainloader1,trainloader2
+
+# 从seen data 和 unseen data中组成pair，切割成train test 的数据集
 def pair_smashed_data(trainloader1,trainloader2,num_pairs,batch_size=1):
     # 构造数据集，每个pair是[看过的，没看过的]
     data = [[seen[0],unseen[0]] for seen,unseen in zip(trainloader1,trainloader2)]
