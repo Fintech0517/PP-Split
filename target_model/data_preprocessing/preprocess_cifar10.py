@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-09-03 19:29:00
-LastEditTime: 2024-05-21 22:23:23
+LastEditTime: 2024-05-31 19:45:41
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/data_preprocessing/preprocess_cifar10.py
 Description: 
@@ -40,8 +40,8 @@ def get_cifar10_normalize_two_train(batch_size = 1, split_ratio=0.5):
     
     return trainloader1,trainloader2,testloader
     # return trainloader1,trainloader2
-    
 
+# 用0.5来normalize的
 def get_cifar10_normalize(batch_size = 1):
     #  数据集 CIFAR
     # 图像归一化
@@ -68,7 +68,7 @@ def get_cifar10_normalize(batch_size = 1):
     
     return trainloader,testloader
 
-
+# 其他的normalize 方法
 def get_cifar10_preprocess(batch_size = 1):
     #  数据集 CIFAR
     mu = torch.tensor([0.4914, 0.4822, 0.4465], dtype=torch.float32)
@@ -99,23 +99,7 @@ def get_cifar10_preprocess(batch_size = 1):
                                         shuffle = False, num_workers = 1)
     return trainloader,testloader
 
-# 取dataloader的前batch_size个数据，成为一个数据集loader,只有一组数据，bs=batch_size
-def get_one_data(dataloader,batch_size = 1): # 得到一个dataloader中第一个数据构造的dataloader
-    # trainloader, testloader = get_cifar10_normalize(batch_size=batch_size)
-    testIter = iter(dataloader)
-
-    # first = testIter.next()
-    # inverse_data_list = [(first[0],first[1])]
-    inverse_data_list = []
-    for i in range(batch_size):
-        first = testIter.next()
-        inverse_data_list.append((first[0],first[1]))
-
-    dataset = ListDataset(inverse_data_list)
-    inverseloader = DataLoader(dataset, batch_size = batch_size, shuffle = False, num_workers = 1)
-    return inverseloader
-
-# mnist和cifar的预处理？ （类似transform）
+# mnist和cifar的预处理？ （类似transform）很早的版本
 def preprocess_cifar10(data):
     size = data.shape
     NChannels = size[-1]

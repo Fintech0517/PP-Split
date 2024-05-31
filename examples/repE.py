@@ -23,6 +23,7 @@ from target_model.models.VGG import VGG,VGG5Decoder,model_cfg
 from target_model.models.BankNet import BankNet1,bank_cfg
 from target_model.models.CreditNet import CreditNet1,credit_cfg
 from target_model.models.PurchaseNet import PurchaseClassifier1,purchase_cfg
+
 # 数据预处理方法
 from target_model.data_preprocessing.preprocess_cifar10 import get_cifar10_normalize,get_one_data,deprocess
 from target_model.data_preprocessing.preprocess_bank import bank_dataset,preprocess_bank
@@ -33,16 +34,6 @@ from target_model.data_preprocessing.preprocess_purchase import preprocess_purch
 from ppsplit.utils.utils import create_dir
 
 # 基本参数：
-# 硬件
-# device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
-
-# 参数
-# parser = argparse.ArgumentParser()
-# parser.add_argument('--dataset', type = str, default = 'CIFAR10')
-# parser.add_argument('--device', type = str, default = 'cuda:1')
-# parser.add_argument('--batch_size',type=int, default=1) # muinfo最小为8，# distcor最小为2
-# args = parser.parse_args()
-
 args = {
         'device':torch.device("cuda:1" if torch.cuda.is_available() else "cpu"),
         # 'device':torch.device("cpu"),
@@ -67,15 +58,13 @@ if args['dataset']=='CIFAR10':
     test_num = 1 # 试验序号
     #  nohup python -u repE.py >> 200-split6-first10.out 2>&1  &
     # 关键路径
-    # 此时是为了repE
     # unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/VGG5/BN+Tanh/VGG5-params-20ep.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
     unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/VGG5/20240429-RepE/VGG5-params-19ep.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
     results_dir  = f"../results/{args['result_dir']}/VGG5/quantification/{test_num}/"
-    decoder_route = f"../results/{args['result_dir']}/VGG5/{test_num}/Decoder-layer{split_layer}.pth"
 
     # 数据集加载
-    trainloader,testloader = get_cifar10_normalize(batch_size = 5)
-    one_data_loader = get_one_data(testloader,batch_size = args['batch_size']) #拿到第一个测试数据
+    # trainloader,testloader = get_cifar10_normalize(batch_size = 5)
+    # one_data_loader = get_one_data(testloader,batch_size = args['batch_size']) #拿到第一个测试数据
 
     # 切割成client model
     # vgg5_unit.load_state_dict(torch.load(unit_net_route,map_location=torch.device('cpu'))) # 完整的模型
@@ -160,6 +149,7 @@ elif args['dataset']=='purchase':
 else:
     exit(-1)
 
+
 # 创建文件夹
 create_dir(results_dir)
 
@@ -167,7 +157,8 @@ create_dir(results_dir)
 client_net = client_net.to(args['device'])
 client_net.eval()
 
-# 导包
+
+# 导包，为了数据预处理？
 from target_model.data_preprocessing.dataset import pair_smashed_data,diff_pair_data
 from target_model.data_preprocessing.preprocess_cifar10 import get_cifar10_normalize_two_train
 import random
@@ -175,11 +166,13 @@ import time
 import pickle
 from torch.utils.data import DataLoader
 
-# #Picking the top X probabilities 
+
+#  Picking the top X probabilities 
 def clipDataTopX(dataToClip, top=3):
     sorted_indices = torch.argsort(dataToClip,dim=1,descending=True)[:,:top]
     new_data = torch.gather(dataToClip,1,sorted_indices)
     return new_data
+
 
 def clipDataFirstX(dataToClip, top=3):
     new_data = dataToClip[:,:top]
@@ -200,8 +193,7 @@ if os.path.isfile(dataset_route+'train_feature.pkl'): # 直接加载预处理好
         test_labels=pickle.load(file=f)     
     train_loader= DataLoader(train_feature,shuffle=False,batch_size=1)
     test_loader = DataLoader(test_feature,shuffle=False,batch_size=1)       
-# if False:
-#     pass
+
 else: # 进行预处理并存储
     seen_loader,unseen_loader,_ = get_cifar10_normalize_two_train(batch_size=1)
 
@@ -252,6 +244,7 @@ signs = reader.get_sign(hidden_states=train_smashed_data_list,train_labels=train
 print('direction shape of first layer: ', reader.direction.shape)
 print('signs of first layer: ', reader.direction_signs)
 
+
 # 4. 测试
 test_smashed_data_list = []
 for j, data in enumerate(tqdm.tqdm(test_loader)): # 对trainloader遍历
@@ -265,8 +258,8 @@ test_smashed_data_list=test_smashed_data_list.reshape(test_smashed_data_list.sha
 # test_smashed_data_list = clipDataTopX(test_smashed_data_list,top=1)·
 test_smashed_data_list = clipDataFirstX(test_smashed_data_list,top=10)
 
+
 acc = reader.quantify_acc(hidden_states=test_smashed_data_list,test_labels=test_labels)
 print(f"quantified accuracy(privacy lekage): {acc} ")
-
 
 # nohup python -u repE.py >> 500-split2.out 2>&1  &

@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2024-01-02 19:39:41
-LastEditTime: 2024-05-23 17:37:33
+LastEditTime: 2024-05-31 19:44:55
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/data_preprocessing/dataset.py
 Description: 
@@ -129,8 +129,6 @@ def get_one_data(dataloader,batch_size = 1): # 得到一个dataloader中第一�
     dataset = ListDataset(inverse_data_list)
     inverseloader = DataLoader(dataset, batch_size = batch_size, shuffle = False, num_workers = 1)
     return inverseloader
-
-
 
 # bank数据集
 class bank_dataset(Dataset):
