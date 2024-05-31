@@ -14,7 +14,7 @@ from ppsplit.quantification.distance_correlation.distCor import distCorMetric
 from ppsplit.quantification.fisher_information.dFIL_inverse import dFILInverseMetric
 from ppsplit.quantification.shannon_information.mutual_information import MuInfoMetric
 from ppsplit.quantification.shannon_information.ULoss import ULossMetric
-from ppsplit.quantification.rep_reading.rep_reader import PCA_Reader
+from ppsplit.quantification.rep_reading.rep_reader import PCA_Reader,clipDataFirstX,repE
 
 # 导入各个baseline模型及其数据集预处理方法
 # 模型
@@ -159,24 +159,13 @@ client_net.eval()
 
 
 # 导包，为了数据预处理？
-from target_model.data_preprocessing.dataset import pair_smashed_data,diff_pair_data
+from target_model.data_preprocessing.dataset import pair_data,diff_pair_data
 from target_model.data_preprocessing.preprocess_cifar10 import get_cifar10_normalize_two_train
 import random
 import time
 import pickle
 from torch.utils.data import DataLoader
 
-
-#  Picking the top X probabilities 
-def clipDataTopX(dataToClip, top=3):
-    sorted_indices = torch.argsort(dataToClip,dim=1,descending=True)[:,:top]
-    new_data = torch.gather(dataToClip,1,sorted_indices)
-    return new_data
-
-
-def clipDataFirstX(dataToClip, top=3):
-    new_data = dataToClip[:,:top]
-    return new_data
 
 
 # 1. designing stimulus and test
@@ -197,7 +186,7 @@ if os.path.isfile(dataset_route+'train_feature.pkl'): # 直接加载预处理好
 else: # 进行预处理并存储
     seen_loader,unseen_loader,_ = get_cifar10_normalize_two_train(batch_size=1)
 
-    train_loader,train_labels,test_loader,test_labels = pair_smashed_data(seen_loader,
+    train_loader,train_labels,test_loader,test_labels = pair_data(seen_loader,
                                                                         unseen_loader,
                                                                         num_pairs=args['num_pairs'])
     create_dir(dataset_route)
@@ -213,53 +202,57 @@ else: # 进行预处理并存储
 print(train_labels[0])
 print(test_labels[0].index(1))
 
+repE_agent = repE()
 
 # 2. collecting neural activity
 # 收集所有smashed data
-train_smashed_data_list = []
-for j, data in enumerate(tqdm.tqdm(train_loader)): # 对trainloader遍历
-    # print("data: ", len(data))
-    features=data.to(args['device'])
+train_smashed_data_list,diff_data = repE_agent.collect_neural_activity(train_loader,client_net)
+# train_smashed_data_list = []
+# for j, data in enumerate(tqdm.tqdm(train_loader)): # 对trainloader遍历
+#     # print("data: ", len(data))
+#     features=data.to(args['device'])
     
-    with torch.no_grad():
-        pred = client_net(features)
-        train_smashed_data_list.append(pred)
+#     with torch.no_grad():
+#         pred = client_net(features)
+#         train_smashed_data_list.append(pred)
 
-train_smashed_data_list=torch.stack(train_smashed_data_list).squeeze()
-train_smashed_data_list=train_smashed_data_list.reshape(train_smashed_data_list.shape[0],-1)
-# train_smashed_data_list = clipDataTopX(train_smashed_data_list,top=1)
-train_smashed_data_list = clipDataFirstX(train_smashed_data_list,top=10)
+# train_smashed_data_list=torch.stack(train_smashed_data_list).squeeze()
+# train_smashed_data_list=train_smashed_data_list.reshape(train_smashed_data_list.shape[0],-1)
+# # train_smashed_data_list = clipDataTopX(train_smashed_data_list,top=1)
+# train_smashed_data_list = clipDataFirstX(train_smashed_data_list,top=10)
 
-# 相对距离
-diff_data = diff_pair_data(train_smashed_data_list) # np.array
+# # 相对距离
+# diff_data = diff_pair_data(train_smashed_data_list) # np.array
 print("diff_data.shape: ", diff_data.shape)
 
 
 # 3. constructing a linear model
 # 训练direction finder
-reader = PCA_Reader(n_components=1) # 要的是numpy数据？可以要tensor数据
-# diff_data = diff_data.reshape(diff_data.shape[0],-1)
-directions = reader.get_rep_direction(diff_data)
-signs = reader.get_sign(hidden_states=train_smashed_data_list,train_labels=train_labels)
-print('direction shape of first layer: ', reader.direction.shape)
-print('signs of first layer: ', reader.direction_signs)
-
+directions,signs = repE_agent.construct_linear_model(self,train_smashed_data_list,diff_data)
+# reader = PCA_Reader(n_components=1) # 要的是numpy数据？可以要tensor数据
+# # diff_data = diff_data.reshape(diff_data.shape[0],-1)
+# directions = reader.get_rep_direction(diff_data)
+# signs = reader.get_sign(hidden_states=train_smashed_data_list,train_labels=train_labels)
+# print('direction shape of first layer: ', reader.direction.shape)
+# print('signs of first layer: ', reader.direction_signs)
+print('direction shape of first layer: ', directions.shape)
+print('signs of first layer: ', signs)
 
 # 4. 测试
-test_smashed_data_list = []
-for j, data in enumerate(tqdm.tqdm(test_loader)): # 对trainloader遍历
-    features=data.to(args['device'])
-    with torch.no_grad():
-        pred = client_net(features)
-        test_smashed_data_list.append(pred)
+# test_smashed_data_list = []
+# for j, data in enumerate(tqdm.tqdm(test_loader)): # 对trainloader遍历
+#     features=data.to(args['device'])
+#     with torch.no_grad():
+#         pred = client_net(features)
+#         test_smashed_data_list.append(pred)
 
-test_smashed_data_list=torch.stack(test_smashed_data_list).squeeze()
-test_smashed_data_list=test_smashed_data_list.reshape(test_smashed_data_list.shape[0],-1)
-# test_smashed_data_list = clipDataTopX(test_smashed_data_list,top=1)·
-test_smashed_data_list = clipDataFirstX(test_smashed_data_list,top=10)
+# test_smashed_data_list=torch.stack(test_smashed_data_list).squeeze()
+# test_smashed_data_list=test_smashed_data_list.reshape(test_smashed_data_list.shape[0],-1)
+# # test_smashed_data_list = clipDataTopX(test_smashed_data_list,top=1)·
+# test_smashed_data_list = clipDataFirstX(test_smashed_data_list,top=10)
 
-
-acc = reader.quantify_acc(hidden_states=test_smashed_data_list,test_labels=test_labels)
+# acc = reader.quantify_acc(hidden_states=test_smashed_data_list,test_labels=test_labels)
+acc = repE_agent(test_loader,client_net)
 print(f"quantified accuracy(privacy lekage): {acc} ")
 
 # nohup python -u repE.py >> 500-split2.out 2>&1  &

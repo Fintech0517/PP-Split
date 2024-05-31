@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2024-01-02 19:39:41
-LastEditTime: 2024-05-31 19:44:55
+LastEditTime: 2024-05-31 21:09:22
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/data_preprocessing/dataset.py
 Description: 
@@ -42,7 +42,7 @@ def split_trainset(trainset,batch_size):
     return trainloader1,trainloader2
 
 # 从seen data 和 unseen data中组成pair，切割成train test 的数据集
-def pair_smashed_data(trainloader1,trainloader2,num_pairs,batch_size=1):
+def pair_data(trainloader1,trainloader2,num_pairs,batch_size=1):
     # 构造数据集，每个pair是[看过的，没看过的]
     data = [[seen[0],unseen[0]] for seen,unseen in zip(trainloader1,trainloader2)]
     train_data = data[:num_pairs]

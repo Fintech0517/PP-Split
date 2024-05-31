@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2024-04-22 11:59:24
-LastEditTime: 2024-05-17 21:50:51
+LastEditTime: 2024-05-31 22:07:17
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/ppsplit/quantification/rep_reading/rep_reader.py
 Description: 
@@ -15,6 +15,7 @@ from itertools import islice
 import torch
 import torch.multiprocessing
 torch.multiprocessing.set_sharing_strategy('file_system')
+import tqdm
 
 def project_onto_direction(H, direction): # ？ 
     """Project matrix H (n, d_1) onto direction vector (d_2,)"""
@@ -43,8 +44,19 @@ def recenter(x, mean=None): # 中心化
     print(mean.shape)
     return x - mean
 
+#  Picking the top X probabilities 
+def clipDataTopX(dataToClip, top=3):
+    sorted_indices = torch.argsort(dataToClip,dim=1,descending=True)[:,:top]
+    new_data = torch.gather(dataToClip,1,sorted_indices)
+    return new_data
 
-class Rep_Reader:
+
+def clipDataFirstX(dataToClip, top=3):
+    new_data = dataToClip[:,:top]
+    return new_data
+
+
+# class Rep_Reader:
     def __init__(self) -> None:
         pass
     
@@ -71,7 +83,7 @@ class Rep_Reader:
 
 
 
-class PCA_Reader(Rep_Reader):
+class PCA_Reader(object):
     def __init__(self,n_components=1) -> None:
         self.n_components = n_components # 几个主成份
         self.H_means = None
@@ -127,3 +139,57 @@ class PCA_Reader(Rep_Reader):
         cors = np.mean([test_labels[i].index(1) == eval_func(H) for i, H in enumerate(unflattened_smashed_data)])
 
         return cors
+    
+
+class RepE:
+    def __init__(self,n_components=1) -> None:
+        self.reader = PCA_Reader(n_components=n_components) # 要的是numpy数据？可以要tensor数据
+
+    def collect_neural_activity(self, train_loader,client_net):
+
+        # 收集所有smashed data
+        train_smashed_data_list = []
+        device = next(client_net.parameters()).device
+        for j, data in enumerate(tqdm.tqdm(train_loader)): # 对trainloader遍历
+            # print("data: ", len(data))
+            features=data.to(device)
+            
+            with torch.no_grad():
+                pred = client_net(features)
+                train_smashed_data_list.append(pred)
+
+        train_smashed_data_list=torch.stack(train_smashed_data_list).squeeze()
+        train_smashed_data_list=train_smashed_data_list.reshape(train_smashed_data_list.shape[0],-1)
+        # train_smashed_data_list = clipDataTopX(train_smashed_data_list,top=1)
+        train_smashed_data_list = clipDataFirstX(train_smashed_data_list,top=10)
+        
+        # 相对距离
+        diff_data = train_smashed_data_list[::2] - train_smashed_data_list[1::2] # np.array
+        # print("diff_data.shape: ", diff_data.shape)
+
+        return train_smashed_data_list,diff_data
+    
+    def construct_linear_model(self,train_smashed_data_list,diff_data):
+        
+        # diff_data = diff_data.reshape(diff_data.shape[0],-1)
+        directions = self.reader.get_rep_direction(diff_data)
+        signs = self.reader.get_sign(hidden_states=train_smashed_data_list,train_labels=train_labels)
+
+        return directions,signs
+
+    def eval_acc(self,test_loader,client_net):
+        test_smashed_data_list = []
+        device = next(client_net.parameters()).device
+        for j, data in enumerate(tqdm.tqdm(test_loader)): # 对trainloader遍历
+            features=data.to(device)
+            with torch.no_grad():
+                pred = client_net(features)
+                test_smashed_data_list.append(pred)
+
+        test_smashed_data_list=torch.stack(test_smashed_data_list).squeeze()
+        test_smashed_data_list=test_smashed_data_list.reshape(test_smashed_data_list.shape[0],-1)
+        # test_smashed_data_list = clipDataTopX(test_smashed_data_list,top=1)·
+        test_smashed_data_list = clipDataFirstX(test_smashed_data_list,top=10)
+
+        acc = self.reader.quantify_acc(hidden_states=test_smashed_data_list,test_labels=test_labels)
+        return acc
