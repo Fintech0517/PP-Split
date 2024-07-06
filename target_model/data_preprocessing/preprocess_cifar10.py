@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-09-03 19:29:00
-LastEditTime: 2024-05-31 19:45:41
+LastEditTime: 2024-06-01 22:02:32
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/data_preprocessing/preprocess_cifar10.py
 Description: 
@@ -40,6 +40,25 @@ def get_cifar10_normalize_two_train(batch_size = 1, split_ratio=0.5):
     
     return trainloader1,trainloader2,testloader
     # return trainloader1,trainloader2
+
+
+# 根据索引取出数据，生成loader
+# index:10000维元素的数组（对应的元素为True，不满足要求的元素为False）
+def get_indexed_loader(index,batch_size = 1):
+    mu = torch.tensor([0.5,0.5,0.5],dtype=torch.float32)
+    sigma = torch.tensor([0.5,0.5,0.5],dtype=torch.float32)
+
+    transform=transforms.Compose(
+        [
+            transforms.ToTensor(),
+            transforms.Normalize(mu,sigma)
+        ]
+    )
+    testset = torchvision.datasets.CIFAR10(root='/home/dengruijun/data/FinTech/DATASET/image-dataset/cifar10/',train=False,
+                                        download=False, transform=transform)
+    selected_data = Subset(testset, np.where(index)[0])
+    testloader = torch.utils.data.DataLoader(selected_data,batch_size=batch_size,shuffle=False, num_workers=4)
+    return testloader
 
 # 用0.5来normalize的
 def get_cifar10_normalize(batch_size = 1):

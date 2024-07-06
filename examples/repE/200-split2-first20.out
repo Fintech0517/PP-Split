@@ -1,0 +1,53 @@
+features.0.weight
+features.0.bias
+features.1.weight
+features.1.bias
+features.1.running_mean
+features.1.running_var
+features.1.num_batches_tracked
+features.4.weight
+features.4.bias
+features.5.weight
+features.5.bias
+features.5.running_mean
+features.5.running_var
+features.5.num_batches_tracked
+VGG(
+  (features): Sequential(
+    (0): Conv2d(3, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): Tanh()
+    (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    (4): Conv2d(32, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (5): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (6): Tanh()
+  )
+  (denses): Sequential()
+)
+inv_sim_columns:  Index(['euc', 'mse', 'ssim'], dtype='object')
+mse_df.shape:  (10000,)
+data.size(): 10000
+sigma(prob): 0.9999999999999999
+counts[0],counts[-1],counts[49] 0.046 9.999999999999912e-05 0.0004000000000000009
+小组中的数据索引： [ True  True  True ... False  True  True]
+大组中的数据索引： [False False False ...  True False False]
+小组数据的数目:  6935
+大组数据的数目:  3065
+len(low_loader) 6935
+len(high_loader) 3065
+---prepare pair data---
+num pairs:  1532
+---prepare done----
+linear的第一对train labels:  [True, False]
+linear的第一对test labels=true的index:  1
+100%|██████████| 3064/3064 [00:03<00:00, 788.47it/s] 
+diff_data.shape:  torch.Size([1532, 20])
+direction shape of first layer:  (1, 20)
+direction of first layer:  [[0.20471215 0.22912152 0.21252196 0.21524982 0.21876824 0.2295554
+  0.21950732 0.22389567 0.22034289 0.21648166 0.20842876 0.20987701
+  0.20709513 0.19795713 0.25181118 0.14459723 0.22190714 0.2689624
+  0.27233168 0.26492012]]
+signs of first layer:  [-1.]
+100%|██████████| 3064/3064 [00:01<00:00, 2124.62it/s]
+[tensor(-0.9035), tensor(-1.9931)]
+quantified accuracy(privacy lekage): 0.5352480417754569 

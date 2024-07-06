@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2024-04-22 11:59:24
-LastEditTime: 2024-05-31 22:07:17
+LastEditTime: 2024-06-01 22:18:12
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/ppsplit/quantification/rep_reading/rep_reader.py
 Description: 
@@ -39,9 +39,9 @@ def recenter(x, mean=None): # 中心化
         mean = torch.mean(x,axis=0,keepdims=True)
     else:
         mean = torch.as_tensor(mean, device=mean.device)
-    print('in recenter: ')
-    print(x.shape)
-    print(mean.shape)
+    # print('in recenter: ')
+    # print(x.shape)
+    # print(mean.shape)
     return x - mean
 
 #  Picking the top X probabilities 
@@ -130,15 +130,6 @@ class PCA_Reader(object):
         self.direction_signs = layer_signs
         return layer_signs
     
-    def quantify_acc(self, hidden_states, test_labels):
-        hidden_states_recentered = recenter(hidden_states, mean=self.H_means)
-        transformed_hidden_states = project_onto_direction(hidden_states_recentered, self.direction[0]).cpu()
-        unflattened_smashed_data =  [list(islice(transformed_hidden_states, sum(len(c) for c in test_labels[:i]), sum(len(c) for c in test_labels[:i+1]))) for i in range(len(test_labels))]
-        print(unflattened_smashed_data[0])
-        eval_func = np.argmin if self.direction_signs==-1 else np.argmax
-        cors = np.mean([test_labels[i].index(1) == eval_func(H) for i, H in enumerate(unflattened_smashed_data)])
-
-        return cors
     
 
 class RepE:
@@ -161,7 +152,7 @@ class RepE:
         train_smashed_data_list=torch.stack(train_smashed_data_list).squeeze()
         train_smashed_data_list=train_smashed_data_list.reshape(train_smashed_data_list.shape[0],-1)
         # train_smashed_data_list = clipDataTopX(train_smashed_data_list,top=1)
-        train_smashed_data_list = clipDataFirstX(train_smashed_data_list,top=10)
+        train_smashed_data_list = clipDataFirstX(train_smashed_data_list,top=20)
         
         # 相对距离
         diff_data = train_smashed_data_list[::2] - train_smashed_data_list[1::2] # np.array
@@ -169,7 +160,7 @@ class RepE:
 
         return train_smashed_data_list,diff_data
     
-    def construct_linear_model(self,train_smashed_data_list,diff_data):
+    def construct_linear_model(self,diff_data,train_smashed_data_list,train_labels):
         
         # diff_data = diff_data.reshape(diff_data.shape[0],-1)
         directions = self.reader.get_rep_direction(diff_data)
@@ -177,7 +168,36 @@ class RepE:
 
         return directions,signs
 
-    def eval_acc(self,test_loader,client_net):
+    def _quantify_MIA_acc(self, hidden_states, test_labels):
+        hidden_states_recentered = recenter(hidden_states, mean=self.reader.H_means)
+        transformed_hidden_states = project_onto_direction(hidden_states_recentered, self.reader.direction[0]).cpu()
+        unflattened_smashed_data =  [list(islice(transformed_hidden_states, sum(len(c) for c in test_labels[:i]), sum(len(c) for c in test_labels[:i+1]))) for i in range(len(test_labels))]
+        print(unflattened_smashed_data[0])
+        eval_func = np.argmin if self.reader.direction_signs==-1 else np.argmax
+        cors = np.mean([test_labels[i].index(1) == eval_func(H) for i, H in enumerate(unflattened_smashed_data)])
+
+        return cors
+
+    def get_transformed_data(self,test_loader,client_net):
+        test_smashed_data_list = []
+        device = next(client_net.parameters()).device
+        for j, data in enumerate(tqdm.tqdm(test_loader)): # 对trainloader遍历
+            features=data[0].to(device)
+            with torch.no_grad():
+                pred = client_net(features)
+                test_smashed_data_list.append(pred)
+
+        test_smashed_data_list=torch.stack(test_smashed_data_list).squeeze()
+        test_smashed_data_list=test_smashed_data_list.reshape(test_smashed_data_list.shape[0],-1)
+        # test_smashed_data_list = clipDataTopX(test_smashed_data_list,top=1)·
+        # 调整smashed data
+        test_smashed_data_list = clipDataFirstX(test_smashed_data_list,top=20)
+        hidden_states_recentered = recenter(test_smashed_data_list, mean=self.reader.H_means)
+        transformed_hidden_states = project_onto_direction(hidden_states_recentered, self.reader.direction[0]).cpu()
+
+        return transformed_hidden_states
+
+    def eval_MIA_acc(self,test_loader,test_labels,client_net):
         test_smashed_data_list = []
         device = next(client_net.parameters()).device
         for j, data in enumerate(tqdm.tqdm(test_loader)): # 对trainloader遍历
@@ -189,7 +209,14 @@ class RepE:
         test_smashed_data_list=torch.stack(test_smashed_data_list).squeeze()
         test_smashed_data_list=test_smashed_data_list.reshape(test_smashed_data_list.shape[0],-1)
         # test_smashed_data_list = clipDataTopX(test_smashed_data_list,top=1)·
-        test_smashed_data_list = clipDataFirstX(test_smashed_data_list,top=10)
+        # 调整smashed data
+        test_smashed_data_list = clipDataFirstX(test_smashed_data_list,top=20)
 
-        acc = self.reader.quantify_acc(hidden_states=test_smashed_data_list,test_labels=test_labels)
+        # MIA attack的
+        acc = self._quantify_MIA_acc(hidden_states=test_smashed_data_list,test_labels=test_labels)
+        
         return acc
+    
+    def eval_DRA_acc(self, test_loader, client_net):
+        pass
+

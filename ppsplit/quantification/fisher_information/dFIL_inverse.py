@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-08-28 14:50:43
-LastEditTime: 2023-12-20 14:09:42
+LastEditTime: 2024-07-05 21:32:23
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/ppsplit/quantification/fisher_information/dFIL_inverse.py
 Description: 一个一个样本计算，没有平均之说
@@ -10,6 +10,12 @@ Description: 一个一个样本计算，没有平均之说
 import torch.autograd.functional as F
 import torch
 import time
+
+# nips23
+from torch.autograd.functional import jvp
+import random
+import math
+
 # import logging
 # logging.basicConfig(level = logging.INFO,format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 # logger = logging.getLogger(__name__)
@@ -19,7 +25,6 @@ os.environ['NUMEXPR_MAX_THREADS'] = '48'
 class dFILInverseMetric():
     def __init__(self) -> None:
         pass
-    
     
     def quantify(self, model, inputs, outputs = None, sigmas=0.01, with_outputs = True):
         if with_outputs:
@@ -68,6 +73,140 @@ class dFILInverseMetric():
         # print(f"eta: {eta}")
         # print('t2-t1=',t2-t1, 't3-t2', t3-t2)
         return 1.0/dFIL
+
+    def calc_tr(self, net, x, device, subsample=-1, jvp_parallelism=1): # nips'23 源码
+        '''
+        calc_tr 函数利用雅可比向量积（JVP）来估计网络对于输入数据的迹，
+        这在分析网络的灵敏度或稳定性时非常有用。
+        此外，通过支持子采样和并行处理，该函数还提供了一种在保持计算效率的同时估计迹的方法。
+        '''
+        # 定义一个局部函数 jvp_func**：这个函数接受两个参数 x 和 tgt，并返回 net.forward_first 方法的雅可比向量积（JVP）。
+        # 这意味着 jvp_func 用于计算网络对于输入 x 在方向 tgt 上的一阶导数
+        # tgt 计算雅各比向量积的向量
+        def jvp_func(x, tgt):
+            # return jvp(net.forward_first, (x,), (tgt,)) #返回 outputs, jacobian product
+            return jvp(net.forward, (x,), (tgt,)) #返回 outputs, jacobian product
+
+        # 获取一个batch中第一个数据的维度？d代表的是批次中第一个数据点展平后的特征数量，即输入数据的维度。
+        d = x[0].flatten().shape[0] # 把一个batch的x展平，获取input dim
+
+        # 用于存储每个输入数据点的迹
+        tr = torch.zeros(x.shape[0], dtype=x.dtype).to(device)
+        #print(f'd: {d}, {x.shape}')
+
+        # 加速，矩阵降维，但是这个损伤精度，或许改成特征提取更好点？
+        # Randomly subsample pixels for faster execution
+        if subsample > 0:
+            samples = random.sample(range(d), min(d, subsample))
+        else:
+            samples = range(d)
+
+        #print(x.shape, d, samples)
+        # jvp parallelism是数据并行的粒度？
+        # 函数通过分批处理样本来计算迹，每批处理 jvp_parallelism 个样本
+        for j in range(math.ceil(len(samples) / jvp_parallelism)): # 对于每个数据块
+            tgts = []
+            # 遍历每个数据块中的每个维度
+            for k in samples[j*jvp_parallelism:(j+1)*jvp_parallelism]: # 提取整个batch中每个数据的特定维度
+                tgt = torch.zeros_like(x).reshape(x.shape[0], -1) # 按照batch 排列？# 雅各比向量积的
+                # 除了当前样本索引 k 对应的元素设置为 1。这相当于在计算迹时，每次只关注一个特征维度。
+                tgt[:, k] = 1. # 提取tgt所有的样本的k的特征 计算雅各比向量积的向量，可用于计算trace
+                tgt = tgt.reshape(x.shape) # 又变回x的形状
+                tgts.append(tgt)
+            tgts = torch.stack(tgts)
+
+            def helper(tgt):
+                batch_size = x.shape[0]
+                vals_list = []
+                grads_list = []
+                for i in range(batch_size):
+                    val, grad = jvp_func(x[i], tgt[i])  # 对每个批次元素调用jvp_func
+                    vals_list.append(val)
+                    grads_list.append(grad)
+                # 将结果列表转换为张量
+                vals = torch.stack(vals_list)
+                grad = torch.stack(grads_list)
+
+
+                # vals, grad = vmap(jvp_func, randomness='same')(x, tgt)
+                #print('grad shape: ', grad.shape)
+                return torch.sum(grad * grad, dim=tuple(range(1, len(grad.shape)))), vals # 先求迹再求平方
+
+            # vmap被替换
+            trs,vals = [],[]
+            for item in tgts:
+                trs_, vals_ = helper(item)
+                trs.append(trs_)
+                vals.append(vals_)
+            trs,vals = torch.stack(trs),torch.stack(vals)
+
+            # trs, vals = vmap(helper, randomness='same')(tgts) # randomness for randomness control of dropout
+            
+            # vals are stacked results that are repeated by d (should be all the same)
+
+
+            tr += trs.sum(dim=0)
+
+        # Scale if subsampled
+        if subsample > 0:
+            tr *= d / len(samples)
+
+        tr = tr/(d*1.0)
+        tr = 1.0/tr
+        return tr, vals[0].squeeze(1)  # squeeze removes one dimension jvp puts
+
+    def calc_tr_vamp(self, net, x, device, subsample=-1, jvp_parallelism=1): # nips'23 源码
+        '''
+        calc_tr 函数利用雅可比向量积（JVP）来估计网络对于输入数据的迹，
+        这在分析网络的灵敏度或稳定性时非常有用。
+        此外，通过支持子采样和并行处理，该函数还提供了一种在保持计算效率的同时估计迹的方法。
+        '''
+        # 定义一个局部函数 jvp_func**：这个函数接受两个参数 x 和 tgt，并返回 net.forward_first 方法的雅可比向量积（JVP）。
+        # 这意味着 jvp_func 用于计算网络对于输入 x 在方向 tgt 上的一阶导数
+        # tgt 计算雅各比向量积的向量
+        def jvp_func(x, tgt):
+            return jvp(net.forward_first, (x,), (tgt,))
+
+        # 获取一个batch中第一个数据的维度？d代表的是批次中第一个数据点展平后的特征数量，即输入数据的维度。
+        d = x[0].flatten().shape[0] # 把一个batch的x展平，获取input dim
+
+        # 用于存储每个输入数据点的迹
+        tr = torch.zeros(x.shape[0], dtype=x.dtype).to(device)
+        #print(f'd: {d}, {x.shape}')
+
+        # 加速，矩阵降维，但是这个损伤精度，或许改成特征提取更好点？
+        # Randomly subsample pixels for faster execution
+        if subsample > 0:
+            samples = random.sample(range(d), min(d, subsample))
+        else:
+            samples = range(d)
+
+        #print(x.shape, d, samples)
+        # jvp parallelism是数据并行的粒度？
+        # 函数通过分批处理样本来计算迹，每批处理 jvp_parallelism 个样本
+        for j in range(math.ceil(len(samples) / jvp_parallelism)): # 对于每个数据块
+            tgts = []
+            # 遍历每个数据块中的每个维度
+            for k in samples[j*jvp_parallelism:(j+1)*jvp_parallelism]: # 提取整个batch中每个数据的特定维度
+                tgt = torch.zeros_like(x).reshape(x.shape[0], -1) # 按照batch 排列？# 雅各比向量积的
+                # 除了当前样本索引 k 对应的元素设置为 1。这相当于在计算迹时，每次只关注一个特征维度。
+                tgt[:, k] = 1. # 提取tgt所有的样本的k的特征 计算雅各比向量积的向量，可用于计算trace
+                tgt = tgt.reshape(x.shape) # 又变回x的形状
+                tgts.append(tgt)
+            tgts = torch.stack(tgts)
+            def helper(tgt):
+                vals, grad = vmap(jvp_func, randomness='same')(x, tgt)
+                #print('grad shape: ', grad.shape)
+                return torch.sum(grad * grad, dim=tuple(range(1, len(grad.shape)))), vals # 先求迹再求平方
+            trs, vals = vmap(helper, randomness='same')(tgts) # randomness for randomness control of dropout
+            # vals are stacked results that are repeated by d (should be all the same)
+
+            tr += trs.sum(dim=0)
+
+        # Scale if subsampled
+        if subsample > 0:
+            tr *= d / len(samples)
+        return tr, vals[0].squeeze(1)  # squeeze removes one dimension jvp puts
 
 
 # 多层、整个数据集上的dFIL
@@ -219,3 +358,5 @@ if __name__ == '__main__':
 
 # credit 4layer [1] 27598 [4] 22073
 # purchase 1,3,5,7 [2] 3705
+
+

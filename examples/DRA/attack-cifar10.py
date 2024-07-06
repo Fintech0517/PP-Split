@@ -1,3 +1,11 @@
+'''
+Author: Ruijun Deng
+Date: 2024-07-02 16:14:03
+LastEditTime: 2024-07-02 16:14:04
+LastEditors: Ruijun Deng
+FilePath: /PP-Split/examples/attack-cifar10.py
+Description: 
+'''
 # %%
 # 这个notebook 介绍了 如何对split learning 发起 inverse-model attack攻击
 
@@ -26,7 +34,7 @@ split_layer = 6 # 模型切割点 （split point）在该层之前的层（含�
 
 # 重要路径设置
 unit_net_route = '/home/dengruijun/data/project/Inverse_efficacy/results/VGG5/BN+Tanh/2-20240101/VGG5-params-19ep.pth'
-results_dir = f'../results/VGG5/{test_num}/'
+results_dir = f'../../results/VGG5/{test_num}/'
 inverse_dir = results_dir + 'layer'+str(split_layer)+'/'
 decoder_net_route = results_dir + f'Decoder-layer{split_layer}.pth' # 攻击的decoder net存储位置
 

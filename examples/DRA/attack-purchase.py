@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2024-01-28 21:34:55
-LastEditTime: 2024-01-28 21:44:08
+LastEditTime: 2024-07-02 16:14:25
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/examples/attack-purchase.py
 Description: 
@@ -33,7 +33,7 @@ split_layer = 8 # 模型切割点 （split point）在该层之前的层（含�
 
 # 重要路径设置
 unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/Purchase100/Purchase_bestmodel_param.pth'
-results_dir = f'../results/Purchase/{test_num}/'
+results_dir = f'../../results/Purchase/{test_num}/'
 inverse_dir = results_dir + 'layer'+str(split_layer)+'/'
 decoder_net_route = results_dir + f'Decoder-layer{split_layer}.pth' # 攻击的decoder net存储位置
 

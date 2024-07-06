@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2024-05-21 15:20:26
-LastEditTime: 2024-05-31 20:28:13
+LastEditTime: 2024-06-01 21:23:50
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/ppsplit/utils/utils.py
 Description: 
@@ -48,7 +48,7 @@ def plot_smashed_distribution(smashed_data,start = -1, end = 1):
 
     plot_array_distribution(data,start, end)
 
-def plot_array_distribution(data,start = -1, end = 1):
+def plot_array_distribution(data,start = -1, end = 1, notes=''):
     import matplotlib.pyplot as plt
     import numpy as np
     
@@ -71,6 +71,7 @@ def plot_array_distribution(data,start = -1, end = 1):
     plt.tight_layout()  # 自动调整子图布局
     plt.show()
     # plt.savefig(f'smashed_data_distribution{time.time()}.png')
+    plt.savefig(f'data_distribution{notes}.png')
 
     # 打印信息
     print("sigma(prob):",np.sum(counts)) # 查看counts的量
