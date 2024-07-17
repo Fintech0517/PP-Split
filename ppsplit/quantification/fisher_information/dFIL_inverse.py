@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-08-28 14:50:43
-LastEditTime: 2024-07-05 21:32:23
+LastEditTime: 2024-07-08 11:44:30
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/ppsplit/quantification/fisher_information/dFIL_inverse.py
 Description: 一个一个样本计算，没有平均之说
@@ -43,7 +43,8 @@ class dFILInverseMetric():
     
         # 计算jacobian
         J = F.jacobian(model, inputs)
-        J = J.reshape(J.shape[0],outputs.numel(),inputs.numel()) # (batch, out_size, in_size)
+        # J = J.reshape(J.shape[0],outputs.numel(),inputs.numel()) # (batch, out_size, in_size)
+        J = J.reshape(outputs.numel(),inputs.numel()) # (batch, out_size, in_size)
         # print(f"J2.shape: {J.shape}, J2.prod: {torch.prod(torch.tensor(list(J.shape)))}")
 
         # 计算eta
@@ -62,24 +63,60 @@ class dFILInverseMetric():
     
         # 计算jacobian
         J = F.jacobian(model, inputs)
-        J = J.reshape(J.shape[0],outputs.numel(),inputs.numel()) # (batch, out_size, in_size)
+        # J = J.reshape(J.shape[0],outputs.numel(),inputs.numel()) # (batch, out_size, in_size)
+        J = J.reshape(outputs.numel(),inputs.numel()) # (batch, out_size, in_size)
         # print(f"J2.shape: {J.shape}, J2.prod: {torch.prod(torch.tensor(list(J.shape)))}")
 
         # 计算eta
-        I = 1.0/(sigmas)*torch.matmul(J[0].t(), J[0])
-        # print(f"I.shape: ", I.shape)
+        JtJ = torch.matmul(J.t(), J)
+        # print("Jt*J: ", JtJ)
+        # print("Jt*J: ", JtJ.shape, JtJ)
+        I = 1.0/(sigmas)*JtJ
+        # print("I.shape: ", I.shape)
         dFIL = I.trace().div(inputs.numel())
         # eta = dFIL
         # print(f"eta: {eta}")
         # print('t2-t1=',t2-t1, 't3-t2', t3-t2)
         return 1.0/dFIL
 
-    def calc_tr(self, net, x, device, subsample=-1, jvp_parallelism=1): # nips'23 源码
+    def _computing_det_with_outputs(self, model, inputs, outputs, sigmas): # sigma_square
+        # batchsize:
+        batch_size = inputs.shape[0] # 一个batch的样本数目
+        output_size = outputs[0].numel() # 一个样本的outputs长度
+        input_size = inputs[0].numel() # 一个样本的outputs长度
+        effect_fisher_sum = 0.0
+
+        # 遍历单个样本:
+        for i in range(batch_size):
+            input_i = inputs[i].unsqueeze(0)
+
+            # 计算jacobian
+            J = F.jacobian(model, input_i)
+            # J = J.reshape(J.shape[0],outputs.numel(),inputs.numel()) # (batch, out_size, in_size)
+            J = J.reshape(output_size, input_size) # (batch, out_size, in_size)
+            # print(f"J2.shape: {J.shape}, J2.prod: {torch.prod(torch.tensor(list(J.shape)))}")
+            # 计算eta
+            JtJ = torch.matmul(J.t(), J)
+            I = 1.0/(sigmas)*JtJ
+            effect_fisher = 0.5 * (input_size * torch.log(2*torch.pi*torch.exp(torch.tensor(1.0))) - torch.logdet(I))
+            effect_fisher_sum+=effect_fisher
+
+        # print("Jt*J: ", JtJ)
+        # print("Jt*J: ", JtJ.shape, JtJ)
+        # print("I.shape: ", I.shape)
+        # eta = dFIL
+        # print(f"eta: {eta}")
+        # print('t2-t1=',t2-t1, 't3-t2', t3-t2)
+        return effect_fisher_sum.cpu().detach().numpy()
+    
+    def calc_tr(self, net, x, device, sigmas=0.01, subsample=-1, jvp_parallelism=1): # nips'23 源码
         '''
         calc_tr 函数利用雅可比向量积（JVP）来估计网络对于输入数据的迹，
         这在分析网络的灵敏度或稳定性时非常有用。
         此外，通过支持子采样和并行处理，该函数还提供了一种在保持计算效率的同时估计迹的方法。
         '''
+        print(f'x.shape: {x.shape}')
+        
         # 定义一个局部函数 jvp_func**：这个函数接受两个参数 x 和 tgt，并返回 net.forward_first 方法的雅可比向量积（JVP）。
         # 这意味着 jvp_func 用于计算网络对于输入 x 在方向 tgt 上的一阶导数
         # tgt 计算雅各比向量积的向量
@@ -152,62 +189,10 @@ class dFILInverseMetric():
             tr *= d / len(samples)
 
         tr = tr/(d*1.0)
-        tr = 1.0/tr
-        return tr, vals[0].squeeze(1)  # squeeze removes one dimension jvp puts
+        tr = 1.0/tr*sigmas
 
-    def calc_tr_vamp(self, net, x, device, subsample=-1, jvp_parallelism=1): # nips'23 源码
-        '''
-        calc_tr 函数利用雅可比向量积（JVP）来估计网络对于输入数据的迹，
-        这在分析网络的灵敏度或稳定性时非常有用。
-        此外，通过支持子采样和并行处理，该函数还提供了一种在保持计算效率的同时估计迹的方法。
-        '''
-        # 定义一个局部函数 jvp_func**：这个函数接受两个参数 x 和 tgt，并返回 net.forward_first 方法的雅可比向量积（JVP）。
-        # 这意味着 jvp_func 用于计算网络对于输入 x 在方向 tgt 上的一阶导数
-        # tgt 计算雅各比向量积的向量
-        def jvp_func(x, tgt):
-            return jvp(net.forward_first, (x,), (tgt,))
-
-        # 获取一个batch中第一个数据的维度？d代表的是批次中第一个数据点展平后的特征数量，即输入数据的维度。
-        d = x[0].flatten().shape[0] # 把一个batch的x展平，获取input dim
-
-        # 用于存储每个输入数据点的迹
-        tr = torch.zeros(x.shape[0], dtype=x.dtype).to(device)
-        #print(f'd: {d}, {x.shape}')
-
-        # 加速，矩阵降维，但是这个损伤精度，或许改成特征提取更好点？
-        # Randomly subsample pixels for faster execution
-        if subsample > 0:
-            samples = random.sample(range(d), min(d, subsample))
-        else:
-            samples = range(d)
-
-        #print(x.shape, d, samples)
-        # jvp parallelism是数据并行的粒度？
-        # 函数通过分批处理样本来计算迹，每批处理 jvp_parallelism 个样本
-        for j in range(math.ceil(len(samples) / jvp_parallelism)): # 对于每个数据块
-            tgts = []
-            # 遍历每个数据块中的每个维度
-            for k in samples[j*jvp_parallelism:(j+1)*jvp_parallelism]: # 提取整个batch中每个数据的特定维度
-                tgt = torch.zeros_like(x).reshape(x.shape[0], -1) # 按照batch 排列？# 雅各比向量积的
-                # 除了当前样本索引 k 对应的元素设置为 1。这相当于在计算迹时，每次只关注一个特征维度。
-                tgt[:, k] = 1. # 提取tgt所有的样本的k的特征 计算雅各比向量积的向量，可用于计算trace
-                tgt = tgt.reshape(x.shape) # 又变回x的形状
-                tgts.append(tgt)
-            tgts = torch.stack(tgts)
-            def helper(tgt):
-                vals, grad = vmap(jvp_func, randomness='same')(x, tgt)
-                #print('grad shape: ', grad.shape)
-                return torch.sum(grad * grad, dim=tuple(range(1, len(grad.shape)))), vals # 先求迹再求平方
-            trs, vals = vmap(helper, randomness='same')(tgts) # randomness for randomness control of dropout
-            # vals are stacked results that are repeated by d (should be all the same)
-
-            tr += trs.sum(dim=0)
-
-        # Scale if subsampled
-        if subsample > 0:
-            tr *= d / len(samples)
-        return tr, vals[0].squeeze(1)  # squeeze removes one dimension jvp puts
-
+        # print('tr: ',tr.shape, tr)
+        return tr.cpu().item(), vals[0].squeeze(1)  # squeeze removes one dimension jvp puts
 
 # 多层、整个数据集上的dFIL
 if __name__ == '__main__':

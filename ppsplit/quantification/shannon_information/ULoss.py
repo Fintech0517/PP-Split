@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-08-28 14:50:08
-LastEditTime: 2024-01-13 22:24:27
+LastEditTime: 2024-07-09 10:45:08
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/ppsplit/quantification/shannon_information/ULoss.py
 Description:  目前这个版本只适应 1 sample，还不能适应batch, 这个是可以求平均的
@@ -40,6 +40,27 @@ class ULossMetric():
         # print("y.shape: ",y.shape)
         return -np.sum(y) # 熵
 
+    def _entropy_prob_batch(self, x,base='e'): 
+        if x.ndim == 1:
+            x = x.reshape(1,-1)
+        x = x.reshape(x.shape[0],-1) # 把x拉平
+
+        entropy_list = []
+        for x_i in x: # 对每一个样本
+            entropy_i = self._entropy_prob(x_i.cpu().detach())
+            entropy_list.append(entropy_i)
+
+        # if base == 'e':
+        #     y = x * torch.log(x+1e-9)
+        # else:
+        #     log_base = torch.log(torch.tensor(base, dtype=x.dtype, device=x.device))
+        #     y = x * (torch.log(x + 1e-9) / log_base)
+
+        # entropy_mean = -torch.sum(y,dim=1).mean()
+
+        entropy_mean = np.array(entropy_list).mean()
+        return entropy_mean
+            
     # 基于分布图的normalize后的熵（yjr）
     def _entropy_prob(self, x):
         x = x.flatten()

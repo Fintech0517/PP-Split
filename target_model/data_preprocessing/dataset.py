@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2024-01-02 19:39:41
-LastEditTime: 2024-06-01 20:50:28
+LastEditTime: 2024-07-14 13:57:59
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/data_preprocessing/dataset.py
 Description: 
@@ -126,7 +126,7 @@ def get_one_data(dataloader,batch_size = 1): # 得到一个dataloader中第一�
     # inverse_data_list = [(first[0],first[1])]
     inverse_data_list = []
     for i in range(batch_size):
-        first = testIter.next()
+        first = next(testIter)
         inverse_data_list.append((first[0],first[1]))
 
     dataset = ListDataset(inverse_data_list)

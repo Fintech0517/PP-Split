@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-09-03 19:29:00
-LastEditTime: 2024-06-01 22:02:32
+LastEditTime: 2024-07-09 09:29:23
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/data_preprocessing/preprocess_cifar10.py
 Description: 
@@ -25,7 +25,7 @@ def get_cifar10_normalize_two_train(batch_size = 1, split_ratio=0.5):
 
     transform=transforms.Compose(
         [
-            transforms.ToTensor(),
+            transforms.ToTensor(), # 映射到[0,1]
             transforms.Normalize(mu,sigma)
         ]
     )

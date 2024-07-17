@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2024-01-03 15:19:20
-LastEditTime: 2024-05-22 22:49:44
+LastEditTime: 2024-07-09 09:23:54
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/ppsplit/attacks/membership_inference/Mentr_attack.py
 Description: Usenix sec'21-Systematic Evaluation of Privacy Risks of Machine Learning Models
@@ -81,7 +81,7 @@ class MentrAttack(object):
         self.t_te_m_entr = self._m_entr_comp(self.t_te_outputs, self.t_te_labels)
         # return shadow_train_performance,shadow_test_performance,target_train_performance,target_test_performance
 
-    def _log_value(self, probs, small_value=1e-30):
+    def _log_value(self, probs, small_value=1e-30): # 按元素操作，形状不变
         return -np.log(np.maximum(probs, small_value))
     
     def _entr_comp(self, probs): # 计算entropy

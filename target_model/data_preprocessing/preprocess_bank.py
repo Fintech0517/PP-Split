@@ -2,7 +2,7 @@
 Author: yjr 949804347@qq.com
 Date: 2023-09-09 20:35:31
 LastEditors: Ruijun Deng
-LastEditTime: 2024-04-15 20:20:42
+LastEditTime: 2024-07-15 21:55:14
 FilePath: /PP-Split/target_model/data_preprocessing/preprocess_bank.py
 Description: none
 '''
@@ -75,7 +75,8 @@ def preprocess_bank_dataset(dataPath):
     target = df['y'] # target列
 
     # 连续列缩放到[-1,1]之间
-    scaler = MinMaxScaler(feature_range=(-1, 1))
+    # scaler = MinMaxScaler(feature_range=(-1, 1))
+    scaler = MinMaxScaler(feature_range=(0, 1)) # 先改一下
     df[df_num_col] = scaler.fit_transform(df[df_num_col])
     # print(df.iloc[0])
     # 离散列进行one_hot编码

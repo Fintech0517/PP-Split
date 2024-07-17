@@ -2,7 +2,7 @@
 Author: yjr 949804347@qq.com
 Date: 2023-09-09 20:35:31
 LastEditors: Ruijun Deng
-LastEditTime: 2024-04-15 20:21:05
+LastEditTime: 2024-07-15 22:04:54
 FilePath: /PP-Split/target_model/data_preprocessing/preprocess_credit.py
 Description: none
 '''
@@ -80,7 +80,8 @@ def preprocess_credit_dataset(dataPath):
     target = df['TARGET']
 
     # 连续列缩放到[-1,1]之间
-    scaler = MinMaxScaler(feature_range=(-1, 1))
+    # scaler = MinMaxScaler(feature_range=(-1, 1))
+    scaler = MinMaxScaler(feature_range=(0, 1))
     df[df_num_col] = scaler.fit_transform(df[df_num_col])
 
     # -----------------------划分训练集和测试集-------------------------
