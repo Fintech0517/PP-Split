@@ -2,7 +2,7 @@
 Author: yjr 949804347@qq.com
 Date: 2023-09-09 20:35:31
 LastEditors: Ruijun Deng
-LastEditTime: 2024-07-18 20:56:09
+LastEditTime: 2024-07-19 22:18:12
 FilePath: /PP-Split/target_model/data_preprocessing/preprocess_Iris.py
 Description: none
 '''
@@ -36,6 +36,7 @@ def preprocess_Iris_dataset(dataPath):
     df1.drop(['Id'],axis=1,inplace=True)
     X = df1.drop(["Species"],axis=1).values
     y = df1["Species"].values
+    # y = df1["Species"].values - 1
 
     df = pd.read_csv(dataPath, delimiter=';',quotechar='"') # 读取文件生成df
     # df.head()
@@ -56,6 +57,10 @@ def preprocess_Iris_dataset(dataPath):
     print("y_train.shape:", y_train.shape)
     print("y_test.shape:", y_test.shape, type(y_test))
 
+    X_train = torch.FloatTensor(X_train)
+    X_test = torch.FloatTensor(X_test)
+    y_train = torch.LongTensor(y_train)
+    y_test = torch.LongTensor(y_test)
     print("===============processing data end===============")
 
     return [X_train, y_train], [X_test, y_test]

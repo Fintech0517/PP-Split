@@ -7,6 +7,7 @@ from .models.VGG import VGG,VGG5Decoder,model_cfg
 from .models.BankNet import BankNet1,bank_cfg
 from .models.CreditNet import CreditNet1,credit_cfg
 from .models.PurchaseNet import PurchaseClassifier1,purchase_cfg
+from .models.IrisNet import IrisNet,Iris_cfg
 
 # 数据预处理方法
 from .data_preprocessing.preprocess_cifar10 import get_cifar10_normalize,deprocess
@@ -23,16 +24,17 @@ import torch
 
 
 
-def get_dataloader_and_model(dataset='CIFAR10', loader_bs=1, oneData_bs=1, noise_scale=0.1, result_ws='1-1', OneData=False):
+def get_dataloader_and_model(dataset='CIFAR10', loader_bs=1, oneData_bs=1, noise_scale=0.1, result_dir='1-1', OneData=False, device='cpu',split_layer=-1):
     if OneData:
         loader_bs=1
+    result_ws = result_dir
 
     # 加载模型和数据集，并从unit模型中切割出client_model
     if dataset=='CIFAR10':
         # 超参数
         testset_len = 10000 # 10000个数据一次 整个测试集合的长度
         # split_layer_list = list(range(len(model_cfg['VGG5'])))
-        split_layer = 1 # 定成3吧？
+        split_layer = 1 if split_layer==-1 else split_layer # 定成3吧？
         test_num = 2 # 试验序号
 
         # 关键路径
@@ -57,7 +59,7 @@ def get_dataloader_and_model(dataset='CIFAR10', loader_bs=1, oneData_bs=1, noise
         test_num = 1 # 试验序号
         testset_len = 61503 # for the mutual information
         split_layer_list = [0,3,6,9]
-        split_layer = 3
+        split_layer = 3 if split_layer==-1 else split_layer
         # split_layer_list = ['linear1', 'linear2']
 
         # 关键路径
@@ -82,7 +84,7 @@ def get_dataloader_and_model(dataset='CIFAR10', loader_bs=1, oneData_bs=1, noise
         testset_len=8238
         # split_layer_list = ['linear1', 'linear2']
         split_layer_list = [0,2,4,6]
-        split_layer = 2
+        split_layer = 2 if split_layer==-1 else split_layer
 
         # 关键路径
         unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/Bank/bank-20ep_params.pth'
@@ -109,7 +111,7 @@ def get_dataloader_and_model(dataset='CIFAR10', loader_bs=1, oneData_bs=1, noise
         # split_layer = 2
 
         # 关键路径
-        # unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/Bank/bank-20ep_params.pth'
+        unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/Iris/1/Iris-100ep.pth'
         results_dir  = f"../results/{result_ws}/Iris/{test_num}/"
         # decoder_route = f"../results/{result_ws}/Iris/{test_num}/Decoder-layer{split_layer}.pth"
         decoder_route = None
@@ -119,12 +121,12 @@ def get_dataloader_and_model(dataset='CIFAR10', loader_bs=1, oneData_bs=1, noise
         one_data_loader = get_one_data(testloader,batch_size = oneData_bs) #拿到第一个测试数据 
 
         # # 模型加载
-        # client_net = BankNet1(layer=split_layer,noise_scale=noise_scale)
-        # pweights = torch.load(unit_net_route)
-        # if split_layer < len(bank_cfg):
-        #     pweights = split_weights_client(pweights,client_net.state_dict())
-        # client_net.load_state_dict(pweights)    
-        client_net = None
+        client_net = IrisNet(layer=split_layer,noise_scale=noise_scale)
+        pweights = torch.load(unit_net_route)
+        if split_layer < len(bank_cfg):
+            pweights = split_weights_client(pweights,client_net.state_dict())
+        client_net.load_state_dict(pweights)    
+        # client_net = None
 
     elif dataset=='purchase':
         # 超参数
@@ -137,7 +139,7 @@ def get_dataloader_and_model(dataset='CIFAR10', loader_bs=1, oneData_bs=1, noise
         unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/Purchase100/Purchase_bestmodel_param.pth'
         results_dir = f"../../results/{result_ws}/Purchase/{test_num}/"
         decoder_route = f"../../results/{result_ws}/Purchase/{test_num}/Decoder-layer{split_layer}.pth"
-        
+
         # 数据集加载
         trainloader,testloader = preprocess_purchase(batch_size = loader_bs)
         one_data_loader = get_one_data(testloader,batch_size = oneData_bs) #拿到第一个测试数据
@@ -153,7 +155,7 @@ def get_dataloader_and_model(dataset='CIFAR10', loader_bs=1, oneData_bs=1, noise
     else:
         exit(-1)
 
-    # client_net.to(args['device'])
+    client_net.to(device)
     create_dir(results_dir)
 
     if OneData:

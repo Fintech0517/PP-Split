@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-08-28 14:50:43
-LastEditTime: 2024-07-08 11:44:30
+LastEditTime: 2024-07-19 20:21:52
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/ppsplit/quantification/fisher_information/dFIL_inverse.py
 Description: 一个一个样本计算，没有平均之说
@@ -57,6 +57,7 @@ class dFILInverseMetric():
         return 1.0/dFIL
     
         # model的smashed data需要在[0,1]之间，才能保证输出的eta也在[0,1]之间?证明？
+        
     def _computing_eta_with_outputs(self, model, inputs, outputs, sigmas): # sigma_square
         # 前向传播
         # outputs = outputs + sigma * torch.randn_like(outputs) # 加噪声 (0,1] uniform

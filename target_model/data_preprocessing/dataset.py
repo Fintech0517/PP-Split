@@ -143,7 +143,7 @@ class bank_dataset(Dataset):
         Xa = self.Xa[item]
         y = self.y[item]
 
-        return np.float32(Xa), np.float32(y)
+        return np.float32(Xa), y
 
     def __len__(self):
         return len(self.Xa)
