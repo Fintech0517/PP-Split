@@ -2,7 +2,7 @@
 Author: yjr 949804347@qq.com
 Date: 2023-09-09 20:35:31
 LastEditors: Ruijun Deng
-LastEditTime: 2024-07-22 20:56:38
+LastEditTime: 2024-08-01 21:33:05
 FilePath: /PP-Split/target_model/data_preprocessing/preprocess_Iris.py
 Description: none
 '''
@@ -64,6 +64,7 @@ def preprocess_Iris_dataset(dataPath):
     print("===============processing data end===============")
 
     return [X_train, y_train], [X_test, y_test]
+
 
 def preprocess_Iris(batch_size = 1):
     train_data, test_data = preprocess_Iris_dataset(dataPath)

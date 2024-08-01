@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-12-12 12:42:45
-LastEditTime: 2024-04-16 12:25:54
+LastEditTime: 2024-08-01 21:12:19
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/ppsplit/attacks/model_inversion/inverse_model.py
 Description: 
@@ -223,4 +223,5 @@ class InverseModelAttack():
         # pd.DataFrame({'ssim': sim_metrics.sim_metric_dict['ssim'],
         #                 'mse':sim_metrics.sim_metric_dict['mse']}).to_csv(self.inverse_dir + f'inv-sim.csv', index = False)
         sim_metrics.store_similarity(inverse_route=self.inverse_dir + f'inv-sim.csv')
+
 

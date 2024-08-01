@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-09-03 19:29:00
-LastEditTime: 2024-07-09 09:29:23
+LastEditTime: 2024-08-01 21:44:21
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/data_preprocessing/preprocess_cifar10.py
 Description: 
@@ -61,7 +61,7 @@ def get_indexed_loader(index,batch_size = 1):
     return testloader
 
 # 用0.5来normalize的
-def get_cifar10_normalize(batch_size = 1):
+def get_cifar10_normalize(batch_size = 1, test_bs = 1):
     #  数据集 CIFAR
     # 图像归一化
     mu = torch.tensor([0.5, 0.5, 0.5], dtype=torch.float32)
