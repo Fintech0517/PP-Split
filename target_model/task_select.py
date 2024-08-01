@@ -64,8 +64,8 @@ def get_dataloader_and_model(dataset='CIFAR10', loader_bs=1, oneData_bs=1, noise
 
         # 关键路径
         unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/credit/credit-20ep_params.pth'
-        results_dir  = f"../results/{result_ws}/Credit/{test_num}/"
-        decoder_route = f"../results/{result_ws}/Credit/{test_num}/Decoder-layer{split_layer}.pth"
+        results_dir  = f"../../results/{result_ws}/Credit/{test_num}/"
+        decoder_route = f"../../results/{result_ws}/Credit/{test_num}/Decoder-layer{split_layer}.pth"
 
         # 数据集加载
         trainloader,testloader = preprocess_credit(batch_size = loader_bs)
@@ -112,8 +112,8 @@ def get_dataloader_and_model(dataset='CIFAR10', loader_bs=1, oneData_bs=1, noise
 
         # 关键路径
         unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/Iris/1/Iris-100ep.pth'
-        results_dir  = f"../results/{result_ws}/Iris/{test_num}/"
-        # decoder_route = f"../results/{result_ws}/Iris/{test_num}/Decoder-layer{split_layer}.pth"
+        results_dir  = f"../../results/{result_ws}/Iris/{test_num}/"
+        decoder_route = result_dir+"/Decoder-layer{split_layer}.pth"
         decoder_route = None
     
         # 数据集加载
@@ -126,7 +126,6 @@ def get_dataloader_and_model(dataset='CIFAR10', loader_bs=1, oneData_bs=1, noise
         if split_layer < len(bank_cfg):
             pweights = split_weights_client(pweights,client_net.state_dict())
         client_net.load_state_dict(pweights)    
-        # client_net = None
 
     elif dataset=='purchase':
         # 超参数
