@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-09-03 19:29:00
-LastEditTime: 2024-08-01 21:44:21
+LastEditTime: 2024-08-01 21:45:55
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/data_preprocessing/preprocess_cifar10.py
 Description: 
@@ -61,7 +61,9 @@ def get_indexed_loader(index,batch_size = 1):
     return testloader
 
 # 用0.5来normalize的
-def get_cifar10_normalize(batch_size = 1, test_bs = 1):
+def get_cifar10_normalize(batch_size = 1, test_bs = None):
+    if test_bs == None:
+        test_bs = batch_size
     #  数据集 CIFAR
     # 图像归一化
     mu = torch.tensor([0.5, 0.5, 0.5], dtype=torch.float32)
@@ -74,7 +76,6 @@ def get_cifar10_normalize(batch_size = 1, test_bs = 1):
         # ])
 
     # 数据集加载：
-    # 测试数据集
     trainset = torchvision.datasets.CIFAR10(root='/home/dengruijun/data/FinTech/DATASET/image-dataset/cifar10/', train=True,
                                             download=False, transform=transform)
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size,
@@ -82,7 +83,7 @@ def get_cifar10_normalize(batch_size = 1, test_bs = 1):
 
     testset = torchvision.datasets.CIFAR10(root='/home/dengruijun/data/FinTech/DATASET/image-dataset/cifar10/', train=False,
                                         download=False, transform=transform)
-    testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size,
+    testloader = torch.utils.data.DataLoader(testset, batch_size=test_bs,
                                             shuffle=False, num_workers=4)
     
     return trainloader,testloader

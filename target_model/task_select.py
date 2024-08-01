@@ -22,6 +22,7 @@ from .utils import create_dir
 
 import torch
 import os
+from torch.utils.data import DataLoader, Dataset
 
 def get_dataloader(dataset='CIFAR10',
                    train_bs=1,
@@ -32,52 +33,51 @@ def get_dataloader(dataset='CIFAR10',
     if dataset=='CIFAR10':
         # 超参数
         testset_len = 10000 # 10000个数据一次 整个测试集合的长度
-
         # 数据集加载
-        trainloader,testloader = get_cifar10_normalize(batch_size = loader_bs)
-        one_data_loader = get_one_data(testloader,batch_size = oneData_bs) #拿到第一个测试数据
+        trainloader,testloader = get_cifar10_normalize(batch_size = train_bs, test_bs=test_bs)
 
     elif dataset=='credit':
         # 超参数
         testset_len = 61503 # for the mutual information
 
         # 数据集加载
-        trainloader,testloader = preprocess_credit(batch_size = loader_bs)
-        one_data_loader = get_one_data(testloader,batch_size = oneData_bs) #拿到第一个测试数据
+        trainloader,testloader = preprocess_credit(batch_size = train_bs, test_bs=test_bs)
+
 
     elif dataset=='bank':
         # 超参数
         testset_len=8238
 
         # 数据集加载
-        trainloader,testloader = preprocess_bank(batch_size = loader_bs)
-        # one_data_loader = get_one_data(testloader,batch_size = oneData_bs) #拿到第一个测试数据 
+        trainloader,testloader = preprocess_bank(batch_size = train_bs, test_bs=test_bs)
 
     elif dataset=='Iris':
         # 超参数
         testset_len=30
 
         # 数据集加载
-        trainloader,testloader = preprocess_Iris(batch_size = loader_bs) # 只针对train data，testbs = 1
-        one_data_loader = get_one_data(testloader,batch_size = oneData_bs) #拿到第一个测试数据 
+        trainloader,testloader = preprocess_Iris(batch_size = train_bs, test_bs=test_bs) # 只针对train data，testbs = 1
 
     elif dataset=='purchase':
         # 超参数
         testset_len = 39465 # test len
 
         # 数据集加载
-        trainloader,testloader = preprocess_purchase(batch_size = loader_bs)
-        one_data_loader = get_one_data(testloader,batch_size = oneData_bs) #拿到第一个测试数据
-
+        trainloader,testloader = preprocess_purchase(batch_size = train_bs, test_bs=test_bs)
 
     else:
         exit(-1)
     
+    # one loader
+    one_bs_testloader = DataLoader(testloader.dataset, batch_size=oneData_bs, shuffle=False, num_workers=4)
+    one_data_loader = get_one_data(one_bs_testloader,batch_size = oneData_bs) #拿到第一个测试数据
+
     return trainloader,testloader,one_data_loader
 
 
 def get_dataloader_and_model(dataset='CIFAR10', 
-                             loader_bs=1, 
+                             train_bs=1, 
+                             test_bs=1, 
                              oneData_bs=1, 
                              noise_scale=0.1, 
                              result_dir='1-1', 
@@ -259,6 +259,9 @@ def get_dataloader_and_model(dataset='CIFAR10',
 
     client_net.to(device)
     create_dir(results_dir)
+
+    # 数据集:
+    trainloader,testloader,one_data_loader = get_dataloader(dataset,train_bs,test_bs,oneData_bs)
 
     msg = {}
     if OneData:

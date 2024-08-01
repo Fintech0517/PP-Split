@@ -1,7 +1,7 @@
 '''
 Author: yjr && 949804347@qq.com
 Date: 2023-11-18 14:13:20
-LastEditTime: 2024-07-15 19:56:32
+LastEditTime: 2024-08-01 21:50:35
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/data_preprocessing/preprocess_purchase.py
 Description: 
@@ -32,7 +32,9 @@ def tensor_data_create(features, labels):
     return dataset
 
 # purchase数据集与处理，和那个前面的purchase_defended/undefended里面的功能一样
-def preprocess_purchase(data_path='/home/dengruijun/data/FinTech/DATASET/kaggle-dataset/Purchase100/',batch_size=1):
+def preprocess_purchase(data_path='/home/dengruijun/data/FinTech/DATASET/kaggle-dataset/Purchase100/',batch_size=1, test_bs=None):
+    if not test_bs:
+        test_bs = batch_size
     print('purchase100 dataset processing...')
     # 文件夹路径
     # DATASET_PATH='./datasets/purchase'
@@ -133,7 +135,7 @@ def preprocess_purchase(data_path='/home/dengruijun/data/FinTech/DATASET/kaggle-
     train_loader = torch.utils.data.DataLoader(train, batch_size=batch_size, shuffle=True, num_workers=8,drop_last=True)
 
     test = tensor_data_create(test_data, test_label)
-    test_loader = torch.utils.data.DataLoader(test, batch_size=batch_size, shuffle=False, num_workers=8,drop_last=True)
+    test_loader = torch.utils.data.DataLoader(test, batch_size=test_bs, shuffle=False, num_workers=8,drop_last=True)
     print('Data loading finished')
     
     return train_loader, test_loader

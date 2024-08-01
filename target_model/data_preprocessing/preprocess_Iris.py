@@ -2,7 +2,7 @@
 Author: yjr 949804347@qq.com
 Date: 2023-09-09 20:35:31
 LastEditors: Ruijun Deng
-LastEditTime: 2024-08-01 21:33:05
+LastEditTime: 2024-08-01 21:52:17
 FilePath: /PP-Split/target_model/data_preprocessing/preprocess_Iris.py
 Description: none
 '''
@@ -66,7 +66,9 @@ def preprocess_Iris_dataset(dataPath):
     return [X_train, y_train], [X_test, y_test]
 
 
-def preprocess_Iris(batch_size = 1):
+def preprocess_Iris(batch_size = 1, test_bs = None):
+    if test_bs == None:
+        test_bs = batch_size
     train_data, test_data = preprocess_Iris_dataset(dataPath)
     # print("test_data:", test_data[0])
     
@@ -78,7 +80,7 @@ def preprocess_Iris(batch_size = 1):
 
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True,
                                               num_workers=8, drop_last=False)
-    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False,
+    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=test_bs, shuffle=False,
                                              num_workers=8, drop_last=True)
 
     return train_loader,test_loader
