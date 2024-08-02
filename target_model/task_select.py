@@ -84,8 +84,7 @@ def get_dataloader_and_model(dataset='CIFAR10',
                              OneData=False, 
                              device='cpu',
                              split_layer=-1):
-    if OneData:
-        loader_bs=1
+
     result_ws = result_dir
     image_deprocess = None
 
@@ -101,10 +100,6 @@ def get_dataloader_and_model(dataset='CIFAR10',
         unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/VGG5/BN+Tanh/VGG5-params-20ep.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
         results_dir  = f"../../results/{result_ws}/VGG5/{test_num}/"
         decoder_route = f"../../results/{result_ws}/VGG5/{test_num}/Decoder-layer{split_layer}.pth"
-
-        # 数据集加载
-        trainloader,testloader = get_cifar10_normalize(batch_size = loader_bs)
-        one_data_loader = get_one_data(testloader,batch_size = oneData_bs) #拿到第一个测试数据
 
         # 切割成client model
         # vgg5_unit.load_state_dict(torch.load(unit_net_route,map_location=torch.device('cpu'))) # 完整的模型
@@ -137,10 +132,6 @@ def get_dataloader_and_model(dataset='CIFAR10',
         results_dir  = f"../../results/{result_ws}/Credit/{test_num}/"
         decoder_route = f"../../results/{result_ws}/Credit/{test_num}/Decoder-layer{split_layer}.pth"
 
-        # 数据集加载
-        trainloader,testloader = preprocess_credit(batch_size = loader_bs)
-        one_data_loader = get_one_data(testloader,batch_size = oneData_bs) #拿到第一个测试数据
-
         # client模型切割加载
         client_net = CreditNet1(layer=split_layer,noise_scale=noise_scale)
         pweights = torch.load(unit_net_route)
@@ -168,10 +159,6 @@ def get_dataloader_and_model(dataset='CIFAR10',
         unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/Bank/bank-20ep_params.pth'
         results_dir  = f"../results/{result_ws}/Bank/{test_num}/"
         decoder_route = f"../results/{result_ws}/Bank/{test_num}/Decoder-layer{split_layer}.pth"
-    
-        # 数据集加载
-        trainloader,testloader = preprocess_bank(batch_size = loader_bs)
-        # one_data_loader = get_one_data(testloader,batch_size = oneData_bs) #拿到第一个测试数据 
 
         # 模型加载
         client_net = BankNet1(layer=split_layer,noise_scale=noise_scale)
@@ -202,10 +189,6 @@ def get_dataloader_and_model(dataset='CIFAR10',
         results_dir  = f"../../results/{result_ws}/Iris/{test_num}/"
         decoder_route = result_dir+"/Decoder-layer{split_layer}.pth"
         decoder_route = None
-    
-        # 数据集加载
-        trainloader,testloader = preprocess_Iris(batch_size = loader_bs) # 只针对train data，testbs = 1
-        one_data_loader = get_one_data(testloader,batch_size = oneData_bs) #拿到第一个测试数据 
 
         # # 模型加载
         client_net = IrisNet(layer=split_layer,noise_scale=noise_scale)
@@ -234,10 +217,6 @@ def get_dataloader_and_model(dataset='CIFAR10',
         results_dir = f"../../results/{result_ws}/Purchase/{test_num}/"
         decoder_route = f"../../results/{result_ws}/Purchase/{test_num}/Decoder-layer{split_layer}.pth"
 
-        # 数据集加载
-        trainloader,testloader = preprocess_purchase(batch_size = loader_bs)
-        one_data_loader = get_one_data(testloader,batch_size = oneData_bs) #拿到第一个测试数据
-
         # 模型加载
         client_net = PurchaseClassifier1(layer=split_layer,noise_scale=noise_scale)
         # pweights = torch.load(unit_net_route,map_location=torch.device('cpu'))
@@ -263,23 +242,16 @@ def get_dataloader_and_model(dataset='CIFAR10',
     # 数据集:
     trainloader,testloader,one_data_loader = get_dataloader(dataset,train_bs,test_bs,oneData_bs)
 
-    msg = {}
-    if OneData:
-        msg['one_data_loader'] = one_data_loader
-        msg['client_net'] = client_net
-        msg['results_dir'] = results_dir
-        msg['decoder_net'] = decoder_net
-        msg['decoder_route'] = decoder_route
+    # 返回值
+    msg={}
 
-        # return one_data_loader,client_net,results_dir,decoder_route
-    else:
-        msg['trainloader'] = trainloader
-        msg['testloader'] = testloader
-        msg['client_net'] = client_net
-        msg['results_dir'] = results_dir
-        msg['decoder_net'] = decoder_net
-        msg['decoder_route'] = decoder_route
-
-        # return trainloader,testloader,client_net,results_dir,decoder_route
     msg['image_deprocess'] = image_deprocess
+    msg['trainloader'] = trainloader
+    msg['testloader'] = testloader
+    msg['one_data_loader'] = one_data_loader
+    msg['client_net'] = client_net
+    msg['results_dir'] = results_dir
+    msg['decoder_net'] = decoder_net
+    msg['decoder_route'] = decoder_route
+
     return msg
