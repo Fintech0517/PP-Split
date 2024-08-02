@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-12-12 16:00:55
-LastEditTime: 2024-04-16 16:50:43
+LastEditTime: 2024-08-02 11:28:44
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/ppsplit/utils/similarity_metrics.py
 Description: 
@@ -151,6 +151,7 @@ class SimilarityMetrics():
                      raw_net_route,inverted_net_route,
                      raw_loader,fake_loader,test_loader,
                      rawNet=None,fakeNet=None):
+        # TODO: 未完成
         print("---test using ML efficacy----")
         # 先将csv数据载入
         inverse_data = pd.read_csv(fake_data_route, low_memory=False,  header=None, index_col=False)

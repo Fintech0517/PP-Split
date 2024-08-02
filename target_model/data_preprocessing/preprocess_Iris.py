@@ -2,7 +2,7 @@
 Author: yjr 949804347@qq.com
 Date: 2023-09-09 20:35:31
 LastEditors: Ruijun Deng
-LastEditTime: 2024-08-01 21:52:17
+LastEditTime: 2024-08-02 11:30:18
 FilePath: /PP-Split/target_model/data_preprocessing/preprocess_Iris.py
 Description: none
 '''
@@ -21,8 +21,10 @@ dataPath = '/home/dengruijun/data/project/data/iris/Iris.csv'
 num_columns = ['SepalLengthCm', 'SepalWidthCm', 'PetalLengthCm', 'PetalWidthCm']
 y_columns = ['Species']
 
+
 tabinfo_Iris = {
-    'numList': [i for i in range(4)] # 后面是数值列
+    'numList': [i for i in range(4)], # 后面是数值列
+    'onehot': {} # 没有类别列
 }
 
 def preprocess_Iris_dataset(dataPath):
