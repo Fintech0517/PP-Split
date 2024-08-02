@@ -76,7 +76,7 @@ def get_dataloader(args):
     
     # msg
     msg = {}
-    msg['tab_info']= tab_info
+    msg['tabinfo']= tab_info
     msg['trainloader'] = trainloader
     msg['testloader'] = testloader
     msg['one_data_loader'] = one_data_loader
@@ -105,7 +105,7 @@ def get_models(args):
         # 关键路径
         unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/VGG5/BN+Tanh/VGG5-params-20ep.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
         results_dir  = f"../../results/{result_ws}/VGG5/{test_num}/"
-        decoder_route = results_dir + "/Decoder-layer{split_layer}.pth"
+        decoder_route = results_dir + f"/Decoder-layer{split_layer}.pth"
 
         # 切割成client model
         # vgg5_unit.load_state_dict(torch.load(unit_net_route,map_location=torch.device('cpu'))) # 完整的模型
@@ -136,7 +136,7 @@ def get_models(args):
         # 关键路径
         unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/credit/credit-20ep_params.pth'
         results_dir  = f"../../results/{result_ws}/Credit/{test_num}/"
-        decoder_route = results_dir + "/Decoder-layer{split_layer}.pth"
+        decoder_route = results_dir + f"/Decoder-layer{split_layer}.pth"
 
         # client模型切割加载
         client_net = CreditNet1(layer=split_layer,noise_scale=noise_scale)
@@ -164,7 +164,7 @@ def get_models(args):
         # 关键路径
         unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/Bank/bank-20ep_params.pth'
         results_dir  = f"../../results/{result_ws}/Bank/{test_num}/"
-        decoder_route = results_dir + "/Decoder-layer{split_layer}.pth"
+        decoder_route = results_dir + f"/Decoder-layer{split_layer}.pth"
 
         # 模型加载
         client_net = BankNet1(layer=split_layer,noise_scale=noise_scale)
@@ -190,7 +190,7 @@ def get_models(args):
         # 关键路径
         unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/Iris/1/Iris-100ep.pth'
         results_dir  = f"../../results/{result_ws}/Iris/{test_num}/"
-        decoder_route = results_dir+"/Decoder-layer{split_layer}.pth"
+        decoder_route = results_dir+f"/Decoder-layer{split_layer}.pth"
 
         # # 模型加载
         client_net = IrisNet(layer=split_layer,noise_scale=noise_scale)
@@ -217,7 +217,7 @@ def get_models(args):
         # 关键路径
         unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/Purchase100/Purchase_bestmodel_param.pth'
         results_dir = f"../../results/{result_ws}/Purchase/{test_num}/"
-        decoder_route = results_dir + "Decoder-layer{split_layer}.pth"
+        decoder_route = results_dir + f"Decoder-layer{split_layer}.pth"
 
         # 模型加载
         client_net = PurchaseClassifier1(layer=split_layer,noise_scale=noise_scale)
