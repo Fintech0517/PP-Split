@@ -2,7 +2,7 @@
 Author: yjr && 949804347@qq.com
 Date: 2023-09-09 20:31:05
 LastEditors: Ruijun Deng
-LastEditTime: 2024-07-19 22:17:43
+LastEditTime: 2024-08-06 22:37:57
 FilePath: /PP-Split/target_model/models/IrisNet.py
 Description: 
 '''
@@ -21,6 +21,18 @@ Iris_cfg = [
     ('D',64,3), # 4
     ('Tanh'), # 5
 ]
+# Iris_cfg = [
+#     ('D',4,64), # 0
+#     ('Tanh'), # 1
+#     ('D',64,64), # 2
+#     ('Tanh'), # 3
+#     ('D',64,32), # 4
+#     ('Tanh'), # 5
+#     ('D',32,12), # 6
+#     ('Tanh'), # 7
+#     ('D',12,3), # 8
+#     ('Tanh'), # 9
+# ]
 
 
 class IrisNet(nn.Module):

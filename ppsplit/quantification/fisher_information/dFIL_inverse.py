@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-08-28 14:50:43
-LastEditTime: 2024-07-19 20:21:52
+LastEditTime: 2024-08-04 22:43:26
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/ppsplit/quantification/fisher_information/dFIL_inverse.py
 Description: 一个一个样本计算，没有平均之说
@@ -128,7 +128,7 @@ class dFILInverseMetric():
         # 获取一个batch中第一个数据的维度？d代表的是批次中第一个数据点展平后的特征数量，即输入数据的维度。
         d = x[0].flatten().shape[0] # 把一个batch的x展平，获取input dim
 
-        # 用于存储每个输入数据点的迹
+        # 用于存储每个输入数据点的迹，求迹的和。
         tr = torch.zeros(x.shape[0], dtype=x.dtype).to(device)
         #print(f'd: {d}, {x.shape}')
 
@@ -144,7 +144,15 @@ class dFILInverseMetric():
         # 函数通过分批处理样本来计算迹，每批处理 jvp_parallelism 个样本
         for j in range(math.ceil(len(samples) / jvp_parallelism)): # 对于每个数据块
             tgts = []
+
             # 遍历每个数据块中的每个维度
+            '''
+            在这个函数中，tgt 是用于计算雅可比向量积（JVP）的向量。具体来说，tgt 的作用如下：
+            构建雅可比向量积的向量：tgt 是一个与输入 x 形状相同的张量，但它的元素大部分为零，只有一个特定位置的元素为 1。这个特定位置对应于我们在计算迹时关注的特征维度。
+            计算 JVP：在 helper 函数中，tgt 被传递给 jvp_func，用于计算网络对于输入 x 在方向 tgt 上的一阶导数。具体来说，jvp_func 计算的是网络输出相对于输入 x 的雅可比矩阵与 tgt 的乘积。
+            估计迹：通过在不同的特征维度上重复上述过程，可以估计网络对于输入数据的迹。迹的计算涉及到对所有特征维度的导数进行求和，而 tgt 的作用就是在每次计算时只关注一个特征维度。
+            简而言之，tgt 是一个用于选择特定特征维度的向量，通过它可以逐个计算每个特征维度的导数，从而最终估计整个输入数据的迹。
+            '''
             for k in samples[j*jvp_parallelism:(j+1)*jvp_parallelism]: # 提取整个batch中每个数据的特定维度
                 tgt = torch.zeros_like(x).reshape(x.shape[0], -1) # 按照batch 排列？# 雅各比向量积的
                 # 除了当前样本索引 k 对应的元素设置为 1。这相当于在计算迹时，每次只关注一个特征维度。
@@ -153,6 +161,8 @@ class dFILInverseMetric():
                 tgts.append(tgt)
             tgts = torch.stack(tgts)
 
+            # 定义一个辅助函数 helper，该函数接受一个目标张量 tgt并返回一个迹的张量和一个值的张量。
+            # jvp wrapper，遍历每个batchsize
             def helper(tgt):
                 batch_size = x.shape[0]
                 vals_list = []
@@ -161,20 +171,23 @@ class dFILInverseMetric():
                     val, grad = jvp_func(x[i], tgt[i])  # 对每个批次元素调用jvp_func
                     vals_list.append(val)
                     grads_list.append(grad)
-                # 将结果列表转换为张量
+                # 将结果列表转换为张量, 多个batch的给stack起来
                 vals = torch.stack(vals_list)
                 grad = torch.stack(grads_list)
 
 
                 # vals, grad = vmap(jvp_func, randomness='same')(x, tgt)
                 #print('grad shape: ', grad.shape)
-                return torch.sum(grad * grad, dim=tuple(range(1, len(grad.shape)))), vals # 先求迹再求平方
+                # 因此，矩阵平方的迹和迹的平方通常是不相等的。
+                # 先求平方再求迹
+                return torch.sum(grad * grad, dim=tuple(range(1, len(grad.shape)))), vals 
 
-            # vmap被替换
+            # vmap被替换，
+            # 遍历每个数据块
             trs,vals = [],[]
             for item in tgts:
                 trs_, vals_ = helper(item)
-                trs.append(trs_)
+                trs.append(trs_) # 每个batch对应一个向量
                 vals.append(vals_)
             trs,vals = torch.stack(trs),torch.stack(vals)
 
@@ -183,12 +196,13 @@ class dFILInverseMetric():
             # vals are stacked results that are repeated by d (should be all the same)
 
 
-            tr += trs.sum(dim=0)
+            tr += trs.sum(dim=0) # 对每个数据块的迹求和
 
         # Scale if subsampled
         if subsample > 0:
             tr *= d / len(samples)
 
+        # 1/dFIL = d/tr(I)
         tr = tr/(d*1.0)
         tr = 1.0/tr*sigmas
 

@@ -72,6 +72,7 @@ def get_dataloader(args):
     
     # one loader
     one_bs_testloader = DataLoader(testloader.dataset, batch_size=1, shuffle=False, num_workers=4)
+    # one_bs_testloader = DataLoader(trainloader.dataset, batch_size=1, shuffle=False, num_workers=4)
     one_data_loader = get_one_data(one_bs_testloader,batch_size = oneData_bs) #拿到第一个测试数据
     
     # msg
@@ -84,7 +85,6 @@ def get_dataloader(args):
     return msg
 
 def get_models(args):
-    
     # 参数提取
     dataset=args['dataset']
     noise_scale=args['noise_scale']
@@ -93,14 +93,15 @@ def get_models(args):
     split_layer=args['split_layer']
     result_ws = result_dir
     image_deprocess = None
+    test_num = args['test_num']
 
     # 加载模型和数据集，并从unit模型中切割出client_model
     if dataset=='CIFAR10':
         # 超参数
         testset_len = 10000 # 10000个数据一次 整个测试集合的长度
         # split_layer_list = list(range(len(model_cfg['VGG5'])))
-        split_layer = 1 if split_layer==-1 else split_layer # 定成3吧？
-        test_num = 2 # 试验序号
+        split_layer = 2 if split_layer==-1 else split_layer # 定成3吧？
+        # test_num = 2 # 试验序号
 
         # 关键路径
         unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/VGG5/BN+Tanh/VGG5-params-20ep.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
@@ -127,7 +128,7 @@ def get_models(args):
 
     elif dataset=='credit':
         # 超参数
-        test_num = 1 # 试验序号
+        # test_num = 1 # 试验序号
         testset_len = 61503 # for the mutual information
         split_layer_list = [0,3,6,9]
         split_layer = 3 if split_layer==-1 else split_layer
@@ -155,7 +156,7 @@ def get_models(args):
 
     elif dataset=='bank':
         # 超参数
-        test_num = 1 # 试验序号
+        # test_num = 1 # 试验序号
         testset_len=8238
         # split_layer_list = ['linear1', 'linear2']
         split_layer_list = [0,2,4,6]
@@ -184,7 +185,7 @@ def get_models(args):
 
     elif dataset=='Iris':
         # 超参数
-        test_num = 1 # 试验序号
+        # test_num = 1 # 试验序号
         testset_len=30
 
         # 关键路径
@@ -209,7 +210,7 @@ def get_models(args):
 
     elif dataset=='purchase':
         # 超参数
-        test_num = 1 # 试验序号
+        # test_num = 1 # 试验序号
         testset_len = 39465 # test len
         # split_layer_list = [0,1,2,3,4,5,6,7,8]
         split_layer = 3
