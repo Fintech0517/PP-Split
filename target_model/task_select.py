@@ -71,8 +71,8 @@ def get_dataloader(args):
         exit(-1)
     
     # one loader
-    # one_bs_testloader = DataLoader(testloader.dataset, batch_size=1, shuffle=False, num_workers=4)
-    one_bs_testloader = DataLoader(trainloader.dataset, batch_size=1, shuffle=False, num_workers=4)
+    one_bs_testloader = DataLoader(testloader.dataset, batch_size=1, shuffle=False, num_workers=4)
+    # one_bs_testloader = DataLoader(trainloader.dataset, batch_size=1, shuffle=False, num_workers=4)
     one_data_loader = get_one_data(one_bs_testloader,batch_size = oneData_bs) #拿到第一个测试数据
     
     # msg
