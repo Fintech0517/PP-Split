@@ -46,10 +46,10 @@ def compute_info_path(data_mat, dimension_max, dimension_tot, nbtrials):
         counter=counter+1
         if dimension_max == dimension_tot:
              if counter % int(pow(2, dimension_max) / 100) == 0:
-                 logger.info("PROGRESS: at percent #%i"  % (100*counter/pow(2,dimension_max)))
+                 logger.info("PROGRESS: at percent #%i"  % (100.0*counter/pow(2,dimension_max)))
         else:
              if counter % int(tot_numb / 100) == 0:
-                 logger.info("PROGRESS: at percent #%i"  % (100*counter/tot_numb))
+                 logger.info("PROGRESS: at percent #%i"  % (100.0*counter/tot_numb))
         for x in range(0,len(tuple_var)):
            if x==0:
                matrix_temp=np.reshape(data_mat[:,tuple_var[x]-1],(data_mat[:,tuple_var[x]-1].shape[0],1))
@@ -262,9 +262,9 @@ sampling_mode : (integer: 1,2,3)
 TO BE DONE: use panda dataframe .resample to do it...                        
     """                
 
-    def _resample_matrix(self, data_matrix):
+    def _resample_matrix(self, data_matrix):# 归一化处理。将数据转换为0-1之间的数据
         if self.work_on_transpose: 
-            data_matrix = data_matrix.transpose()
+            data_matrix = data_matrix.transpose() # 转置？
     # find the Min and the Max of the matrix:
         if self.sampling_mode == 1:
             min_matrix = np.min(data_matrix, axis=0)
@@ -273,8 +273,8 @@ TO BE DONE: use panda dataframe .resample to do it...
             min_matrix = np.min(data_matrix)
             max_matrix = np.max(data_matrix)
     #create the amplitude matrix
-        ampl_matrix = max_matrix - min_matrix
-    #WE RESCALE THE MATRICE AND SAMPLE IT into  nb_of_values #
+        ampl_matrix = max_matrix - min_matrix # 幅度
+    #WE RESCALE THE MATRICE AND SAMPLE IT into  nb_of_values # 归一化处理。将数据转换为0-1之间的数据
         data_matrix = np.ceil(((data_matrix-min_matrix)*(self.nb_of_values-1))/(ampl_matrix)).astype(int)
         return data_matrix
 
@@ -289,21 +289,31 @@ For example if dimension_max=16 , then the procedure will extract all "sliding" 
     """     
 
     def convolutional_patchs(self, data_matrix):
-
+        print('original data_matrix.shape: ',data_matrix.shape)
+        # 初始化新的数据矩阵和子矩阵列表
         data_matrix_new = []
         sub_matrix = []
+        # 计算卷积块的宽度和高度
         patch_x = int(np.sqrt(self.dimension_max))
         patch_y = int(np.sqrt(self.dimension_max))  
+        # 更新 dimension_max 和 dimension_tot
         self.dimension_max = (int(np.sqrt(self.dimension_max)))*(int(np.sqrt(self.dimension_max))) 
         self.dimension_tot = self.dimension_max 
+        # 获取图像的宽度和高度
         width = data_matrix.shape[1]
         height = data_matrix.shape[0]
+        # 遍历图像的每个位置，提取卷积块
         for yyyy in range(0, height - (patch_y-1)):
             for xxxx in range(0, width - (patch_x-1)):
                 sub_matrix.append([data_matrix[yyyy: yyyy + patch_y, xxxx: xxxx + patch_x] ])       
+        # 将子矩阵列表转换为 NumPy 数组
         data_matrix_new = np.array(sub_matrix)
+        # 重新整形为 (num_patches, dimension_max) 的形状
         data_matrix_new = np.reshape(data_matrix_new, ((height - (patch_y - 1))*(width - (patch_x - 1)), self.dimension_max))    
+        # 更新 sample_size
         self.sample_size = data_matrix_new.shape[0]
+        # 返回新的数据矩阵
+        print('data_matrix_new.shape: ',data_matrix_new.shape)
         return data_matrix_new
 
 
@@ -328,6 +338,7 @@ TO DO: import the new simpler function that compute probability and compare
             x=''
             for col in range(0,data_matrix.shape[1]): # 对每列
                 x= x+str(int((data_matrix[row,col]))) # 拼接字符串 # 只取int值。这里是为了将数据转换为字符串
+                # x= x+str(np.round(data_matrix[row,col],1)) # 取一位小数
             probability[x]=probability.get(x,0)+1 # 算x出现的次数
         Nbtot=0
         for i in probability.items(): # 计算总数
@@ -461,17 +472,18 @@ https://stackoverflow.com/questions/101439/the-most-efficient-way-to-implement-a
             if self.dimension_max> 10 : # 意思如果小于10，不算很大就不需要有进度
                 #  这段代码每处理 pow(2, self.dimension_max) / 100 个组合时，记录一次进度。logger.info 会输出当前处理的百分比进度。
                  if (x) % int(pow(2,self.dimension_max) / 100) == 0:
-                     logger.info("PROGRESS: at percent #%i"  % (100*x/pow(2,self.dimension_max)))
+                     logger.info("PROGRESS: at percent #%i"  % (100.0*x/pow(2,self.dimension_max)))
             ntuple=[]
             orderInf=0
             # decode和decode_all 将整数 x 解码为 n 个元素中选取 k 个元素的组合，并将结果存储在 combinat 列表中。
             self._decode_all(x,self.dimension_max,orderInf,ntuple)
             # 现在ntuple是 list形式的组合数
-
-            # 构建 probability2（面向每个组合的）
+            # print("ntuple: ",ntuple) # 4,3,2,1, 4
+            # print('orderInf',orderInf)
+            # 构建 probability2（面向一个组合的）
             tuple_code=()
             probability2={}
-            for z in range(0,len(ntuple)):
+            for z in range(0,len(ntuple)): # 对每个组合数
                 concat=()
                 concat=(ntuple1_input[ntuple[z]-1],)
                 tuple_code=tuple_code+concat
@@ -496,8 +508,49 @@ https://stackoverflow.com/questions/101439/the-most-efficient-way-to-implement-a
             probability2={}
             probability2.clear()
             del(probability2)
+            # self._compute_entropy_once(probability)
         return (Nentropie)
 
+    def _compute_entropy_once(self, probability):
+        ntuple1_input = []
+        Nentropie = {}  # 最终返回的结果，多个组合的熵 的字典
+        self._decode(0, self.dimension_tot, self.dimension_max, ntuple1_input)
+        logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
+        logger = logging.getLogger("compute Proba-Entropy")
+        print("Percent of tuples processed : 0")
+
+        # 只计算包含所有维度的那个集合本身的熵
+        # ntuple = list(range(1, self.dimension_max + 1))
+        # ntuple = list(range(1, self.dimension_max + 1)) # 这句应该 = [] 结果也不变吧
+        # ntuple = []
+        orderInf = 0
+        # self._decode_all((2 ** self.dimension_max) - 1, self.dimension_max, orderInf, ntuple)
+        ntuple = list(range(1, self.dimension_max + 1))
+        # 构建 probability2（面向一个组合的）
+        tuple_code = ()
+        probability2 = {}
+        for z in range(0, len(ntuple)):  # 对ntuple中的每个维度
+            concat = ()
+            concat = (ntuple1_input[ntuple[z] - 1],)
+            tuple_code = tuple_code + concat
+        for x, _ in probability.items():
+            Codeproba = ''
+            length = 0
+            for w in range(1, self.dimension_max + 1):
+                if ntuple[length] != w:
+                    Codeproba = Codeproba + '0'
+                else:
+                    Codeproba = Codeproba + x[ntuple[length] - 1:ntuple[length]]
+                    if length < (len(ntuple) - 1):
+                        length = length + 1
+            probability2[Codeproba] = probability2.get(Codeproba, 0) + probability.get(x, 0)
+
+        # 计算熵
+        Nentropie[tuple_code] = 0
+        for x, y in probability2.items():
+            Nentropie[tuple_code] = Nentropie.get(tuple_code, 0) + self._information(probability2[x])
+
+        return Nentropie
 
 ###################################################################################
 ################  COMPUTE FORWARD-CO PROBABILITY AND ENTROPIES  ###################
@@ -523,13 +576,15 @@ https://stackoverflow.com/questions/101439/the-most-efficient-way-to-implement-a
         for tuple_var in list_tuples:
             ################  create a counter to display the advancement of the script (this is the computationaly costly part) 
             counter=counter+1
-            if self.dimension_max == self.dimension_tot:
-                if counter % int(pow(2, self.dimension_max) / 100) == 0:
-                    logger.info("PROGRESS: at percent #%i"  % (100*counter/pow(2,self.dimension_max)))
-            else:
-                if counter % int(tot_numb / 100) == 0:
-                    logger.info("PROGRESS: at percent #%i"  % (100*counter/tot_numb))
-            ################  create a sub-matrix of data input for all subsets of variables        
+            if self.dimension_max> 10 : # 意思如果小于10，不算很大就不需要有进度
+                if self.dimension_max == self.dimension_tot:
+                    # print('**',pow(2, self.dimension_max) / 100)
+                    if counter % int(pow(2, self.dimension_max) / 100) == 0:
+                        logger.info("PROGRESS: at percent #%i"  % (100.0*counter/pow(2,self.dimension_max)))
+                else:
+                    if counter % int(tot_numb / 100) == 0:
+                        logger.info("PROGRESS: at percent #%i"  % (100.0*counter/tot_numb))
+                ################  create a sub-matrix of data input for all subsets of variables        
             for x in range(0,len(tuple_var)):
                 if x==0:
                     matrix_temp = np.reshape(data_matrix[:,tuple_var[x]-1],(data_matrix[:,tuple_var[x]-1].shape[0],1))
@@ -548,17 +603,22 @@ https://stackoverflow.com/questions/101439/the-most-efficient-way-to-implement-a
 
     # joint entropy
     def simplicial_entropies_decomposition(self, data_matrix) :
-        self._validate_parameters()
-        data_matrix = self._resample_matrix(data_matrix)
+        self._validate_parameters() # 参数合理性检查
+        data_matrix = self._resample_matrix(data_matrix) # resample bin,归一化处理，[0,1]
+        # print("data_matrix",data_matrix)
         if self.forward_computation_mode:
+            # print('this is forward computation mode')
             Nentropie = self._compute_forward_entropies(data_matrix)
-        else:
+        else: # default
             if self.deformed_probability_mode: 
+                # print('this is deformed probability mode')
                 probability =self._compute_deformed_probability(data_matrix)
-            else:     
+            else:  # 默认情况下，两个mode都是False，走这条路。
+                # print('this is normal probability mode')
                 probability = self._compute_probability(data_matrix)
-            Nentropie = self._compute_entropy(probability)     
-        return Nentropie    
+            # Nentropie = self._compute_entropy(probability)     
+            Nentropie = self._compute_entropy_once(probability)     
+        return Nentropie
 
    
 
@@ -1924,17 +1984,23 @@ def load_data_sets( dataset_type):
 # #########################################################################
 
 if __name__ == "__main__":
-    from sklearn.datasets import load_iris, load_digits, load_boston, load_diabetes
+    # from sklearn.datasets import load_iris, load_digits, load_boston, load_diabetes
+    from sklearn.datasets import load_iris, load_digits, load_diabetes
     import pandas as pd
     import seaborn as sns
     
-    dataset_type = 3# if dataset = 1 load IRIS DATASET # if dataset = 2 load Boston house prices dataset # if dataset = 3 load DIABETES  dataset 
+    dataset_type = 6 # if dataset = 1 load IRIS DATASET # if dataset = 2 load Boston house prices dataset # if dataset = 3 load DIABETES  dataset 
     ## if dataset = 4 CAUSAL Inference data challenge http://www.causality.inf.ethz.ch/data/LUCAS.html  # if dataset = 5 Borromean  dataset
     # if dataset = 6 Digits dataset MNIST
+
+    # 数据集和 bins
     dataset, nb_of_values = load_data_sets( dataset_type)
+
     compute_info_paths = True
     if compute_info_paths and dataset_type == 4 : 
-        dataset = dataset[:,[0,1,2,3,4,5,6,7,8,9]]
+        dataset = dataset[:,[0,1,2,3,4,5,6,7,8,9]] # 切掉一点？选取前10列数据
+
+    # 其他参数
     dimension_max = dataset.shape[1]
     dimension_tot = dataset.shape[1]
     sample_size = dataset.shape[0]
@@ -1944,12 +2010,12 @@ if __name__ == "__main__":
     sampling_mode = 1
     deformed_probability_mode = False    
     convol_patch = False 
-    if dataset_type == 6:
+    if dataset_type == 6: # 面向图像数据集的卷积？有额外的设计，md
         convol_patch = True
         if convol_patch:
             forward_computation_mode = False
-            dimension_max = 16
-            sample_size = 100
+            dimension_max = 16 # 本来有64维度？但是有colv patch——16维了？
+            sample_size = 100 # test dataset size?
         else: 
             forward_computation_mode = True
             dimension_max = 5
@@ -1959,6 +2025,7 @@ if __name__ == "__main__":
     print('number of tot  dimensions:',  dimension_tot)
     print('number of values:', nb_of_values)
 
+    # 创建infotopo对象
     information_topo = infotopo(dimension_max = dimension_max, 
                                 dimension_tot = dimension_tot, 
                                 sample_size = sample_size, 
@@ -1968,62 +2035,66 @@ if __name__ == "__main__":
                                 deformed_probability_mode = deformed_probability_mode,
                                 supervised_mode = supervised_mode, 
                                 forward_computation_mode = forward_computation_mode)
+                                
 # Nentropy is dictionary (x,y) with x a list of kind (1,2,5) and y a value in bit    
     start = timeit.default_timer()
     
  
-    if convol_patch:
+    if convol_patch: # 再处理一下这个dataset
         dataset = information_topo.convolutional_patchs(dataset) 
     Nentropie = information_topo.simplicial_entropies_decomposition(dataset) 
+    print("Nentropie: ", Nentropie)
     stop = timeit.default_timer()
     print('Time for CPU(seconds) entropies: ', stop - start)
-    if dataset_type == 1 or dataset_type == 5:
-        print(Nentropie)
-    information_topo.entropy_simplicial_lanscape(Nentropie)
-    information_topo = infotopo(dimension_max = dimension_max, 
-                                dimension_tot = dimension_tot, 
-                                sample_size = sample_size, 
-                                work_on_transpose = work_on_transpose,
-                                nb_of_values = nb_of_values, 
-                                sampling_mode = sampling_mode, 
-                                deformed_probability_mode = deformed_probability_mode,
-                                supervised_mode = supervised_mode, 
-                                forward_computation_mode = forward_computation_mode,
-                                dim_to_rank = 3, number_of_max_val = 4)
-    if dataset_type != 5:
-        dico_max, dico_min = information_topo.display_higher_lower_information(Nentropie, dataset)
+
+    # 其他的复杂功能了
+    # if dataset_type == 1 or dataset_type == 5:
+    #     print(Nentropie)
+    # information_topo.entropy_simplicial_lanscape(Nentropie) # 此时已经可以分析出信息熵的landscape了，后面的其实可以不看
+    # information_topo = infotopo(dimension_max = dimension_max, 
+    #                             dimension_tot = dimension_tot, 
+    #                             sample_size = sample_size, 
+    #                             work_on_transpose = work_on_transpose,
+    #                             nb_of_values = nb_of_values, 
+    #                             sampling_mode = sampling_mode, 
+    #                             deformed_probability_mode = deformed_probability_mode,
+    #                             supervised_mode = supervised_mode, 
+    #                             forward_computation_mode = forward_computation_mode,
+    #                             dim_to_rank = 3, number_of_max_val = 4)
+    # if dataset_type != 5:
+    #     dico_max, dico_min = information_topo.display_higher_lower_information(Nentropie, dataset)
 
 # Ninfomut is a dictionary (x,y) with x a list of kind (1,2,5) and y a value in bit
-    Ntotal_correlation = information_topo.total_correlation_simplicial_lanscape(Nentropie)
-    dico_max, dico_min = information_topo.display_higher_lower_information(Ntotal_correlation, dataset)
-    start = timeit.default_timer()   
-    Ninfomut = information_topo.simplicial_infomut_decomposition(Nentropie)
-    stop = timeit.default_timer()
-    print('Time for CPU(seconds) Mutual Information: ', stop - start)
-    if dataset_type == 1 or dataset_type == 5:
-        print(Ninfomut)
-    information_topo.mutual_info_simplicial_lanscape(Ninfomut)   
-    if dataset_type != 5: 
-        dico_max, dico_min = information_topo.display_higher_lower_information(Ninfomut, dataset)
-    adjacency_matrix_mut_info = information_topo.mutual_info_pairwise_network(Ninfomut)
-    mean_info, mean_info_rate  =information_topo.display_mean_information(Ninfomut)
-    # CONDITIONAL INFO OR ENTROPY
-    NcondInfo = information_topo.conditional_info_simplicial_lanscape(Ninfomut)
-    information_topo.display_higher_lower_cond_information(NcondInfo)
-    # ENTROPY vs. ENERGY LANDSCAPE
-    information_topo.display_entropy_energy_landscape(Ntotal_correlation, Nentropie)
-    information_topo.display_entropy_energy_landscape(Ninfomut, Nentropie)
-    # Information distance and volume LANDSCAPE
-    Ninfo_volume = information_topo.information_volume_simplicial_lanscape(Nentropie, Ninfomut)
-    dico_max, dico_min = information_topo.display_higher_lower_information(Ninfo_volume, dataset)
-    adjacency_matrix_info_distance = information_topo.mutual_info_pairwise_network(Ninfo_volume)
-    # Information paths - Information complex
-    Ninfomut, Nentropie =  information_topo.fit(dataset)
-    information_topo.information_complex(Ninfomut)
-    if compute_info_paths: 
-        N_info_paths = information_topo.information_paths(Ninfomut)
-        print("N_info_paths")
-        print(N_info_paths)
+    # Ntotal_correlation = information_topo.total_correlation_simplicial_lanscape(Nentropie)
+    # dico_max, dico_min = information_topo.display_higher_lower_information(Ntotal_correlation, dataset)
+    # start = timeit.default_timer()   
+    # Ninfomut = information_topo.simplicial_infomut_decomposition(Nentropie)
+    # stop = timeit.default_timer()
+    # print('Time for CPU(seconds) Mutual Information: ', stop - start)
+    # if dataset_type == 1 or dataset_type == 5:
+    #     print(Ninfomut)
+    # information_topo.mutual_info_simplicial_lanscape(Ninfomut)   
+    # if dataset_type != 5: 
+    #     dico_max, dico_min = information_topo.display_higher_lower_information(Ninfomut, dataset)
+    # adjacency_matrix_mut_info = information_topo.mutual_info_pairwise_network(Ninfomut)
+    # mean_info, mean_info_rate  =information_topo.display_mean_information(Ninfomut)
+    # # CONDITIONAL INFO OR ENTROPY
+    # NcondInfo = information_topo.conditional_info_simplicial_lanscape(Ninfomut)
+    # information_topo.display_higher_lower_cond_information(NcondInfo)
+    # # ENTROPY vs. ENERGY LANDSCAPE
+    # information_topo.display_entropy_energy_landscape(Ntotal_correlation, Nentropie)
+    # information_topo.display_entropy_energy_landscape(Ninfomut, Nentropie)
+    # # Information distance and volume LANDSCAPE
+    # Ninfo_volume = information_topo.information_volume_simplicial_lanscape(Nentropie, Ninfomut)
+    # dico_max, dico_min = information_topo.display_higher_lower_information(Ninfo_volume, dataset)
+    # adjacency_matrix_info_distance = information_topo.mutual_info_pairwise_network(Ninfo_volume)
+    # # Information paths - Information complex
+    # Ninfomut, Nentropie =  information_topo.fit(dataset)
+    # information_topo.information_complex(Ninfomut)
+    # if compute_info_paths: 
+    #     N_info_paths = information_topo.information_paths(Ninfomut)
+    #     print("N_info_paths")
+    #     print(N_info_paths)
 
 
     

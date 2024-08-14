@@ -24,6 +24,39 @@ import torch
 import os
 from torch.utils.data import DataLoader, Dataset
 
+def get_infotopo_para(args):
+    # 提取参数
+    dataset = args['dataset']
+    # dataset,train_bs,test_bs,oneData_bs=args['dataset'],args['train_bs'],args['test_bs'],args['oneData_bs']
+    # 加载模型和数据集，并从unit模型中切割出client_model
+
+    if dataset=='CIFAR10':
+        nb_of_values=36 # nb_of_values-1=bins?
+        conv = True
+    elif dataset=='credit':
+        pass
+    elif dataset=='bank':
+        pass
+    elif dataset=='Iris':
+        nb_of_values = 9
+    elif dataset=='purchase':
+        pass
+    else:
+        exit(-1)
+    
+    
+    
+    # msg
+    msg = {}
+
+    # 填充
+    msg['nb_of_values']=nb_of_values
+    msg['conv']=conv
+
+    return msg
+
+
+
 def get_dataloader(args):
     # 提取参数
     dataset,train_bs,test_bs,oneData_bs=args['dataset'],args['train_bs'],args['test_bs'],args['oneData_bs']
