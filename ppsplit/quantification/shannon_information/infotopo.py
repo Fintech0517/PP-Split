@@ -276,6 +276,7 @@ TO BE DONE: use panda dataframe .resample to do it...
         ampl_matrix = max_matrix - min_matrix # 幅度
     #WE RESCALE THE MATRICE AND SAMPLE IT into  nb_of_values # 归一化处理。将数据转换为0-1之间的数据
         data_matrix = np.ceil(((data_matrix-min_matrix)*(self.nb_of_values-1))/(ampl_matrix)).astype(int)
+        # print('data_matrix.shape: ',data_matrix.shape)
         return data_matrix
 
 
@@ -302,7 +303,7 @@ For example if dimension_max=16 , then the procedure will extract all "sliding" 
         # 获取图像的宽度和高度
         width = data_matrix.shape[1]
         height = data_matrix.shape[0]
-        # 遍历图像的每个位置，提取卷积块
+        # 遍历图像的每个位置，提取卷积块，只做提取工作，不做其他的工作。
         for yyyy in range(0, height - (patch_y-1)):
             for xxxx in range(0, width - (patch_x-1)):
                 sub_matrix.append([data_matrix[yyyy: yyyy + patch_y, xxxx: xxxx + patch_x] ])       
@@ -605,7 +606,7 @@ https://stackoverflow.com/questions/101439/the-most-efficient-way-to-implement-a
     def simplicial_entropies_decomposition(self, data_matrix) :
         self._validate_parameters() # 参数合理性检查
         data_matrix = self._resample_matrix(data_matrix) # resample bin,归一化处理，[0,1]
-        # print("data_matrix",data_matrix)
+        print("data_matrix",data_matrix)
         if self.forward_computation_mode:
             # print('this is forward computation mode')
             Nentropie = self._compute_forward_entropies(data_matrix)
@@ -616,6 +617,7 @@ https://stackoverflow.com/questions/101439/the-most-efficient-way-to-implement-a
             else:  # 默认情况下，两个mode都是False，走这条路。
                 # print('this is normal probability mode')
                 probability = self._compute_probability(data_matrix)
+                print('probability',probability)
             # Nentropie = self._compute_entropy(probability)     
             Nentropie = self._compute_entropy_once(probability)     
         return Nentropie
