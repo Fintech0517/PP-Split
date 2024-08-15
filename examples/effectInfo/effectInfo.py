@@ -2,6 +2,14 @@
 # # 1. 基础设置
 
 # %%
+'''
+Author: Ruijun Deng
+Date: 2024-08-14 16:59:47
+LastEditTime: 2024-08-14 20:33:00
+LastEditors: Ruijun Deng
+FilePath: /PP-Split/examples/effectInfo/effectInfo.py
+Description: 
+'''
 # 导包
 import torch
 import os
@@ -21,47 +29,55 @@ from ppsplit.quantification.shannon_information.ULoss import ULossMetric
 from ppsplit.quantification.rep_reading.rep_reader import PCA_Reader
 from ppsplit.quantification.shannon_information.ITE_tools import Shannon_quantity
 
-from target_model.task_select import get_dataloader_and_model,get_dataloader_and_model, get_dataloader,get_models
+from target_model.task_select import get_dataloader_and_model,get_dataloader_and_model, get_dataloader,get_models,get_infotopo_para
 
 # utils
 from ppsplit.utils.utils import create_dir
 
 # %%
+# nohup python -u effectInfo.py > effectInfo-layer0.log 2>&1 & 
 args = {
-        # 'device':torch.device("cuda:1" if torch.cuda.is_available() else "cpu"),
-        'device':torch.device("cpu"),
-        # 'dataset':'CIFAR10',
+        'device':torch.device("cuda:1" if torch.cuda.is_available() else "cpu"),
+        # 'device':torch.device("cpu"),
+        'dataset':'CIFAR10',
         # 'dataset':'bank',
         # 'dataset':'credit',
         # 'dataset':'purchase',
-        'dataset':'Iris',
+        # 'dataset':'Iris',
         # 'result_dir': '20240702-FIL/',
         'result_dir': '20240702-effectiveInfo/',
-        'oneData_bs': 120,
+        'oneData_bs': 500,
         'test_bs': 1,
         'train_bs': 1,
         'noise_scale': 0, # 防护措施
-        'OneData':True,
-        'split_layer': 5,
+        'split_layer': 0,
         # 'test_num': 'invdFIL', # MI, invdFIL, distCor, ULoss, 
-        'test_num': 'effectiveInfo1.1'
+        'test_num': 'effectiveInfo1.2'
+        # 'test_num': 'effectEntropy1.1'
         }
-# print(args['device'])
-print(args)
+print(args['device'])
+
 
 # %%
 data_msg = get_dataloader(args)
 model_msg = get_models(args)
-msg = {**model_msg,**data_msg}
+infotopo_msg = get_infotopo_para(args)
+msg = {**model_msg,**data_msg,**infotopo_msg}
 
 # 数据集
 one_data_loader,trainloader,testloader = data_msg['one_data_loader'],data_msg['trainloader'], data_msg['testloader']
 
-# 模型和路径
+# effectEntropy Infotopo参数
+nb_of_values = msg['nb_of_values']
+conv = msg['conv']
+print("infotopo: nb_of_values: ",nb_of_values)
+
+# 模型
 client_net,decoder_net = model_msg['client_net'],model_msg['decoder_net']
 decoder_route = model_msg['decoder_route']
 image_deprocess = model_msg['image_deprocess']
 
+# 路径
 results_dir = model_msg['results_dir']
 inverse_dir = results_dir + 'layer'+str(args['split_layer'])+'/'
 data_type = 1 if args['dataset'] == 'CIFAR10' else 0
@@ -79,7 +95,6 @@ client_net.eval()
 
 # for n, p in client_net.named_parameters():
 #     print(n, p.shape)
-
 # %% [markdown]
 # # 5. effective information
 
@@ -254,27 +269,36 @@ def shannon_entropy_pyent(time_series):
 
     return ent
 
-import infotopo
-
-def shannon_entropy_infotopo(x):
+# import infotopo
+import ppsplit.quantification.shannon_information.infotopo as infotopo
+from torch.nn.functional import avg_pool2d
+def shannon_entropy_infotopo(x, conv = False):
     information_top = infotopo.infotopo(dimension_max = x.shape[1],
                                         dimension_tot = x.shape[1],
                                         sample_size = x.shape[0],
-                                        nb_of_values = 9, # 不是很懂这个意思，为什么iris对应9？
+                                        nb_of_values = nb_of_values, # 不是很懂这个意思，为什么iris对应9？
+                                        # forward_computation_mode = True,
                                         )
+    if conv:
+        images_convol = information_top.convolutional_patchs(x)
+        print('images_convol: ',images_convol.shape)
+        x = images_convol
+
     # 计算联合分布的概率？（全排列）
-    joint_prob = information_top._compute_probability(x)
-    print('joint_prob: ',joint_prob)
+    # joint_prob = information_top._compute_probability(x)
+    # print('joint_prob: ',joint_prob)
+    
     # 计算联合熵（全排列的）
     joint_prob_ent = information_top.simplicial_entropies_decomposition(x) # log2
     new_joint_prob_ent = {key: value * np.log(2) for key, value in joint_prob_ent.items()} #ln 转2为底 成 e为底
     print("joint_entropy: ",new_joint_prob_ent)
     # ent = information_top._compute_forward_entropies(x)
-    # information_top.entropy_simplicial_lanscape(joint_prob) # 画图
+    # information_top.entropy_simplicial_lanscape(joint_prob_ent) # 画图
     # ent = _entropy(np.array(list(new_joint_prob_ent.values())))
 
     joint_entropy_final = list(new_joint_prob_ent.values())[-1]
     return joint_entropy_final
+
 
 
 # %%
@@ -295,23 +319,33 @@ for j, data in enumerate(tqdm.tqdm(one_data_loader)): # 测试第一个testloade
         outputs = client_net(images).clone().detach()
         # effect entropy 
         # effecEntro= EntropyMetric._entropy_prob_batch(images) # H(x)
-        effectEntro = shannon_entropy_infotopo(images.flatten(start_dim=1).detach().cpu().numpy())
+        
+        # infotopo
+        if conv:
+            print('images: ', images.shape)
+            images_pooled = avg_pool2d(images,kernel_size=4)
+            print('images_pooled: ',images_pooled.shape)
+            effectEntro = shannon_entropy_infotopo(images_pooled.flatten(start_dim=1).detach().cpu().numpy(), conv)
+        else:
+            effectEntro = shannon_entropy_infotopo(images.flatten(start_dim=1).detach().cpu().numpy(),conv)
 
         # effecit fisher
         # outputs = client_net(images)
-        inverse_dFIL = Fishermetric.quantify(model=client_net, inputs=images, outputs=outputs,sigmas = 0.01, with_outputs=True)
-        effectFisher = computing_det_with_outputs(model=client_net, inputs=images, outputs=outputs,sigmas = 0.01)
+        # inverse_dFIL = Fishermetric.quantify(model=client_net, inputs=images, outputs=outputs,sigmas = 0.01, with_outputs=True)
+        # effectFisher = computing_det_with_outputs(model=client_net, inputs=images, outputs=outputs,sigmas = 0.01)
+        effectFisher = computing_diag_det_with_outputs(model=client_net, inputs=images, outputs=outputs,sigmas = 0.01)
 
         # 存储
         effecInfo_same_layer_list.append(effectEntro-effectFisher)
-        InversedFIL_same_layer_list.append(inverse_dFIL)
+        # InversedFIL_same_layer_list.append(inverse_dFIL)
 
         # 打印一下
         print("effecEntro: ", effectEntro)
-        print("inverse_dFIL: ",inverse_dFIL)
+        print("effecFisher: ",effectFisher)
+        # print("inverse_dFIL: ",inverse_dFIL)
 
 print(f"Layer {args['split_layer']} effecInfo: {sum(effecInfo_same_layer_list)/len(effecInfo_same_layer_list)}") # 在多个batch上再求平均，这里有点问题。
-print(f"Layer {args['split_layer']} InversedFIL: {sum(InversedFIL_same_layer_list)/len(InversedFIL_same_layer_list)}")
+# print(f"Layer {args['split_layer']} InversedFIL: {sum(InversedFIL_same_layer_list)/len(InversedFIL_same_layer_list)}")
 effecInfo_diff_layer_list.append(effecInfo_same_layer_list)
 
 
@@ -327,3 +361,4 @@ if os.path.exists(save_route):
 else:
     pd.DataFrame(data=transpose, columns=[args['split_layer']]).to_csv(save_route,index=False)
 
+# nohup python -u effectInfo.py >> effectInfo-layer0.log 2>&1 & 
