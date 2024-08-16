@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-09-03 19:29:00
-LastEditTime: 2024-08-01 21:45:55
+LastEditTime: 2024-08-16 20:44:13
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/data_preprocessing/preprocess_cifar10.py
 Description: 
@@ -61,13 +61,16 @@ def get_indexed_loader(index,batch_size = 1):
     return testloader
 
 # 用0.5来normalize的
-def get_cifar10_normalize(batch_size = 1, test_bs = None):
+def get_cifar10_normalize(batch_size = 1, test_bs = None, mu = None, sigma=None):
     if test_bs == None:
         test_bs = batch_size
     #  数据集 CIFAR
     # 图像归一化
-    mu = torch.tensor([0.5, 0.5, 0.5], dtype=torch.float32)
-    sigma = torch.tensor([0.5, 0.5, 0.5], dtype=torch.float32)
+    if mu == None:
+        mu = torch.tensor([0.5, 0.5, 0.5], dtype=torch.float32)
+    if sigma == None:
+        sigma = torch.tensor([0.5, 0.5, 0.5], dtype=torch.float32)
+        
     transform = transforms.Compose(
         [
             transforms.ToTensor(), # 数据中的像素值转换到0～1之间
@@ -86,6 +89,50 @@ def get_cifar10_normalize(batch_size = 1, test_bs = None):
     testloader = torch.utils.data.DataLoader(testset, batch_size=test_bs,
                                             shuffle=False, num_workers=4)
     
+    return trainloader,testloader
+
+# fisher normalize
+def get_cifar10_fisher_normalize(batch_size = 1, test_bs = None):
+    from torchvision import transforms as T
+
+    if test_bs == None:
+        test_bs = batch_size
+    mean = (0.4914, 0.4822, 0.4465)
+    std = (0.2471, 0.2435, 0.2616)
+
+    transform = T.Compose(
+        [
+            T.RandomCrop(32, padding=4),
+            T.RandomHorizontalFlip(),
+            T.ToTensor(),
+            T.Normalize(mean, std),
+        ]
+    )
+    dataset = torchvision.datasets.CIFAR10(root='/home/dengruijun/data/FinTech/DATASET/image-dataset/cifar10/', train=True, transform=transform)
+    trainloader = DataLoader(
+        dataset,
+        batch_size=batch_size,
+        num_workers=4,
+        shuffle=False,
+        drop_last=True,
+        pin_memory=True,
+    )
+    
+    transform = T.Compose(
+        [
+            T.ToTensor(),
+            T.Normalize(mean, std),
+        ]
+    )
+    dataset = torchvision.datasets.CIFAR10(root='/home/dengruijun/data/FinTech/DATASET/image-dataset/cifar10/', train=False, transform=transform)
+    testloader = DataLoader(
+        dataset,
+        batch_size=test_bs,
+        num_workers=4,
+        drop_last=True,
+        shuffle=False,
+        pin_memory=True,
+    )
     return trainloader,testloader
 
 # 其他的normalize 方法

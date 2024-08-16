@@ -44,7 +44,7 @@ class VGG(nn.Module):
     def split_forward(self, x, sigma):
         for i, layer in enumerate(self.features):
             x = layer(x)
-            if i == self.split_layer:
+            if i == self.split_layer: # 加噪声
                 x += torch.stack([torch.normal(torch.zeros_like(x[j]), sigma[j]) for j in range(len(sigma))])
         x = self.avgpool(x)
         x = x.view(x.size(0), -1)

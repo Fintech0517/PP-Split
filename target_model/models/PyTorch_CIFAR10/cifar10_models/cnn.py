@@ -1,3 +1,11 @@
+'''
+Author: Ruijun Deng
+Date: 2024-08-16 15:39:58
+LastEditTime: 2024-08-16 15:39:58
+LastEditors: Ruijun Deng
+FilePath: /PP-Split/target_model/models/PyTorch_CIFAR10/cifar10_models/cnn.py
+Description: 
+'''
 import torch.nn as nn
 import torch
 
@@ -40,7 +48,7 @@ class CNN(nn.Module):
         return x
 
     def forward_second(self, x, sigma=None):
-        if sigma is not None:
+        if sigma is not None: # 加上噪声
             if len(sigma.shape) > 0:
                 noise = torch.stack([torch.normal(torch.zeros_like(x[j]), sigma[j]) for j in range(len(sigma))])
             else:

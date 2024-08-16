@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import os
 
+# TODO: 可以再优化的，client端模型不保留server 参数
 __all__ = [
     "ResNet",
     "resnet18",
@@ -10,6 +11,18 @@ __all__ = [
     "resnet50",
 ]
 
+resnet_model_cfg = {
+    'resnet18': [
+        ("conv1", 2),
+        ("pooling", 3),
+        ("layer11", 5),
+        ("layer21", 7),
+        ("layer31", 9),
+        ("layer41", 11),
+        ("avgpool", 12),
+        ("fc", 13),
+    ]
+}
 
 def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
     """3x3 convolution with padding"""
@@ -235,11 +248,26 @@ class Bottleneck(nn.Module):
                     layer.training = training
 
 
+# python3 train.py --dataset cifar10 --model resnet18 --activation gelu --bs 128 --lr 0.1 
+                    # --weight-decay 5e-4 --standardize --nesterov --test-fil --pooling avg
+                    #  --seed 123 --split-layer 7 --bottleneck-dim 8 --train-lb 1.0 
+                    # --jvp-parallelism 100 --jacloss-alpha 0.0 --save-model
+
+# split layer [2,3,5,7,9,11,12,13]
+# conv1 2
+# pooling 3
+# layer11 5
+# layer21 7
+# layer31 9
+# layer41 11
+# avgpool 12
+# fc 13
+                    
 class ResNet(nn.Module):
     def __init__(
         self,
-        block,
-        layers,
+        block, # 输入
+        layers, # 输入
         num_classes=10,
         zero_init_residual=False,
         groups=1,
@@ -248,15 +276,18 @@ class ResNet(nn.Module):
         norm_layer=None,
         out_channels=[64, 128, 256, 512],
         split_layer=-1,
-        bottleneck_dim=-1,
+        bottleneck_dim=-1, # 是否要使用压缩层宽的方式来进行
         activation='relu',
         pooling='max'
     ):
         super(ResNet, self).__init__()
+
+        # normalization layer
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
         self._norm_layer = norm_layer
 
+        # ?conv layer?
         self.inplanes = 64
         self.dilation = 1
         if replace_stride_with_dilation is None:
@@ -278,6 +309,7 @@ class ResNet(nn.Module):
         first_out = self.inplanes
         # END
 
+        # activations layer
         if activation == 'relu':
             self.act = nn.ReLU
         elif activation == 'gelu':
@@ -287,14 +319,19 @@ class ResNet(nn.Module):
         else:
             raise AssertionError('Unknown activation')
 
+        # 
         self.bn1 = norm_layer(self.inplanes)
         self.relu = self.act()
+
+        # pooling layer
         if pooling == 'max':
             self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         elif pooling == 'avg':
             self.maxpool = nn.AvgPool2d(kernel_size=3, stride=2, padding=1)
         else:
             raise AssertionError('Unknown pooling')
+        
+        # make layers
         self.layer1 = self._make_layer(block, out_channels[0], layers[0], activation=activation)
         self.layer2 = self._make_layer(
             block, out_channels[1], layers[1], stride=2, dilate=replace_stride_with_dilation[0], activation=activation
@@ -309,9 +346,19 @@ class ResNet(nn.Module):
         self.fc = nn.Linear(out_channels[3] * block.expansion, num_classes)
 
         # Test: Adding manual bottleneck layer
+        # split layer [2,3,5,7,9,11,12,13]
         self.split_layer = split_layer
-        self.layers = [self.conv1, self.bn1, self.relu, self.maxpool] + list(self.layer1) + list(self.layer2) + list(self.layer3) + list(self.layer4)
-        print(f"Num layers: {len(self.layers)}")
+        self.layers = [self.conv1, self.bn1, self.relu, self.maxpool] + \
+        list(self.layer1) + list(self.layer2) + list(self.layer3) + list(self.layer4) + \
+        [self.avgpool, self.fc]
+
+        # self.layers = nn.ModuleList(self.layers)
+        self.layers = nn.ModuleList(self.layers[:split_layer + 1])
+
+
+        print(f"Num layers: {len(self.layers)}") # Num layers: 14
+        print('Split layer:', self.split_layer)
+
         if bottleneck_dim > 0:
             sl = self.layers[split_layer]
             print(f"Split after {sl}")
@@ -326,7 +373,7 @@ class ResNet(nn.Module):
             elif sl in self.layer4:
                 in_dim = out_channels[3] * block.expansion
 
-            # keep w/h and reduce c significantly
+            # keep w/h and reduce c significantly # 这是一种防御手段吧！
             self.compress = nn.Sequential(
                     nn.Conv2d(in_dim, bottleneck_dim, kernel_size=3, padding=1),
                     #nn.BatchNorm2d, # Don't put BN yet because it is tedious to make it work with JVP..unless we need to
@@ -341,6 +388,7 @@ class ResNet(nn.Module):
             self.compress = None
             self.decompress = None
 
+        # Initialize weights
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
                 nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="relu")
@@ -407,32 +455,21 @@ class ResNet(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
-        #x = self.conv1(x)
-        #x = self.bn1(x)
-        #x = self.relu(x)
-        #x = self.maxpool(x)
-
-        #x = self.layer1(x)
-        #x = self.layer2(x)
-        ## Hardcode the compression position
-        #if self.compress:
-        #    assert(self.split_layer == 7)
-        #    x = self.compress(x)
-        #    x = self.decompress(x)
-        #x = self.layer3(x)
-        #x = self.layer4(x)
         for i, layer in enumerate(self.layers):
+            if i == 13: # 13 is the last layer FC layer
+                x = x.reshape(x.size(0), -1)
             x = layer(x)
             if i == self.split_layer:
                 if self.compress is not None:
                     x = self.compress(x)
                 if self.compress is not None:
                     x = self.decompress(x)
+                
 
-        x = self.avgpool(x)
-        x = x.reshape(x.size(0), -1)
-        x = self.fc(x)
+        # x = self.avgpool(x)
+        # x = self.fc(x)
 
+        # 改成，仅包含split layer的形式。
         return x
 
     def forward_until_emb(self, x):
@@ -527,45 +564,142 @@ class ResNet(nn.Module):
                 layer.training = training
 
 
-def _resnet(arch, block, layers, pretrained, progress, device, **kwargs):
+def _resnet(arch, block, layers, **kwargs):
     model = ResNet(block, layers, **kwargs)
-    if pretrained:
-        script_dir = os.path.dirname(__file__)
-        state_dict = torch.load(
-            script_dir + "/state_dicts/" + arch + ".pt", map_location=device
-        )
-        model.load_state_dict(state_dict)
+    # if pretrained:
+    #     script_dir = os.path.dirname(__file__) # 包含当前脚本文件的路径。os.path.dirname 函数用于获取该路径的目录部分。
+    #     state_dict = torch.load(
+    #         script_dir + "/state_dicts/" + arch + ".pt", map_location=device
+    #     )
+    #     model.load_state_dict(state_dict)
     return model
 
 
-def resnet18(pretrained=False, progress=True, device="cpu", **kwargs):
+def resnet18(pretrained=False, device='cpu', **kwargs):
     """Constructs a ResNet-18 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
     """
     return _resnet(
-        "resnet18", BasicBlock, [2, 2, 2, 2], pretrained, progress, device, **kwargs
+        "resnet18", BasicBlock, [2, 2, 2, 2], **kwargs
     )
 
 
-def resnet34(pretrained=False, progress=True, device="cpu", **kwargs):
+def resnet34(pretrained=False, device='cpu', **kwargs):
     """Constructs a ResNet-34 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
     """
     return _resnet(
-        "resnet34", BasicBlock, [3, 4, 6, 3], pretrained, progress, device, **kwargs
+        "resnet34", BasicBlock, [3, 4, 6, 3], **kwargs
     )
 
 
-def resnet50(pretrained=False, progress=True, device="cpu", **kwargs):
+def resnet50(pretrained=False, device='cpu', **kwargs):
     """Constructs a ResNet-50 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
     """
     return _resnet(
-        "resnet50", Bottleneck, [3, 4, 6, 3], pretrained, progress, device, **kwargs
+        "resnet50", Bottleneck, [3, 4, 6, 3], **kwargs
     )
+
+
+
+
+
+# decoder
+# assert(encoder_model == "resnet18")
+# # InversionNet worked the best.
+# if dataset == 'cifar10':
+#     if split_layer <= 2:
+#         inet = InversionNet(in_c=64, upconv_channels=[(128, 'same'), (3, 'same')], last_activation=last_activation)
+#     elif split_layer == 7:
+#         inet = InversionNet(last_activation=last_activation)
+#     elif split_layer == 9:
+#         inet = InversionNet(in_c=256, upconv_channels=[(256, 'up'), (256, 'up'), (3, 'up')], last_activation=last_activation)
+
+resnet_model_cfg = {
+    2: [(128, 'same'), (3, 'same')], # <=2
+    3: [(128, 'up'), (3, 'same')],
+    5: [(128, 'up'), (3, 'same')],
+    7: [(128, 'up'), (3, 'up')],
+    9: [(256, 'up'), (256, 'up'), (3, 'up')],
+    11: [(512, 'up'), (512, 'up'), (256, 'up'), (3, 'up')], # drj
+    12: [], # adaptive avgpooling这个怎么恢复，我还真不会。
+    13: [],
+}
+
+in_c_dict = {
+    2: 64,
+    3: 64,
+    5: 64,
+    7: 128,
+    9: 256,
+    11: 512,
+    12: 512,
+    13: 512,
+}
+# resnet_model_cfg = {
+#     'resnet18': [
+#         ("conv1", 2)
+#         ("pooling", 3)
+#         ("layer11", 5)
+#         ("layer21", 7)
+#         ("layer31", 9)
+#         ("layer41", 11)
+#         ("avgpool", 12)
+#         ("fc", 13)
+#     ]
+# }
+
+
+class InversionNet(nn.Module):
+    def __init__(
+        self,
+        num_conv=3, # 总共几个 conv layer
+        # upconv_channels=[(128, 'up'), (3, 'up')],
+        # in_c=128,
+        # last_activation='sigmoid'
+        last_activation=None,
+        split_layer = 7,
+    ):
+        super(InversionNet, self).__init__()
+        
+        # 根据split layer 取参数
+        upconv_channels = resnet_model_cfg[split_layer]
+        in_c = in_c_dict[split_layer]
+
+        layers = []
+
+        # conv layer
+        for _ in range(num_conv): # 不改变feature map size 和 通道数
+            layers.append(nn.Conv2d(in_c, in_c, 3, stride=1, padding=1))
+            layers.append(nn.LeakyReLU(negative_slope=0.2, inplace=True))
+
+        # convtrans layer 
+        for i, (c, mode) in enumerate(upconv_channels):
+            if mode == 'up':
+                layers.append(nn.ConvTranspose2d(in_channels=in_c, out_channels=c, kernel_size=3, stride=2, padding=1, output_padding=1))
+            elif mode == 'same':
+                layers.append(nn.ConvTranspose2d(in_channels=in_c, out_channels=c, kernel_size=3, stride=1, padding=1, output_padding=0))
+            if i != len(upconv_channels) - 1:
+                layers.append(nn.LeakyReLU(negative_slope=0.2, inplace=True))
+            in_c = c
+
+        # TODO: Try Tanh?
+        if last_activation == 'sigmoid':
+            layers.append(nn.Sigmoid())
+        elif last_activation == 'tanh':
+            layers.append(nn.Tanh())
+        self.layers = nn.Sequential(*layers)
+
+    def forward(self, x):
+        #print(x.shape)
+        for layer in self.layers:
+            x = layer(x)
+            #print(layer)
+        return x
