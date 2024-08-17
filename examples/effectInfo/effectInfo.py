@@ -5,7 +5,7 @@
 '''
 Author: Ruijun Deng
 Date: 2024-08-14 16:59:47
-LastEditTime: 2024-08-17 19:58:28
+LastEditTime: 2024-08-17 22:06:28
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/examples/effectInfo/effectInfo.py
 Description: 
@@ -48,11 +48,11 @@ args = {
         # 'model': 'VGG5',
         # 'result_dir': '20240702-FIL/',
         'result_dir': '20240702-effectiveInfo/',
-        'oneData_bs': 500,
+        'oneData_bs': ,
         'test_bs': 1,
         'train_bs': 1,
         'noise_scale': 0, # 防护措施
-        'split_layer': 0,
+        'split_layer': 7,
         # 'test_num': 'invdFIL', # MI, invdFIL, distCor, ULoss, 
         'test_num': 'effectiveInfo1.2'
         # 'test_num': 'effectEntropy1.1'
