@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2024-08-16 20:50:40
-LastEditTime: 2024-08-17 18:12:19
+LastEditTime: 2024-08-17 20:19:41
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/training/train-resnet18.py
 Description: 
@@ -37,7 +37,7 @@ from torch.optim.lr_scheduler import _LRScheduler
 
 import sys
 sys.path.append('/home/dengruijun/data/FinTech/PP-Split/')
-from target_model.models.PyTorch_CIFAR10.cifar10_models.resnet import resnet18
+from target_model.models.ResNet import resnet18
 
 
 class CIFAR10Module(pl.LightningModule):

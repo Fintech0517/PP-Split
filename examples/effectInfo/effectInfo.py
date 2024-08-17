@@ -5,7 +5,7 @@
 '''
 Author: Ruijun Deng
 Date: 2024-08-14 16:59:47
-LastEditTime: 2024-08-14 20:33:00
+LastEditTime: 2024-08-17 19:58:28
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/examples/effectInfo/effectInfo.py
 Description: 
@@ -44,6 +44,8 @@ args = {
         # 'dataset':'credit',
         # 'dataset':'purchase',
         # 'dataset':'Iris',
+        'model': 'ResNet18',
+        # 'model': 'VGG5',
         # 'result_dir': '20240702-FIL/',
         'result_dir': '20240702-effectiveInfo/',
         'oneData_bs': 500,

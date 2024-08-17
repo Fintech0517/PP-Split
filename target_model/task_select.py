@@ -8,7 +8,7 @@ from target_model.models.BankNet import BankNet1,BankNetDecoder1,bank_cfg
 from target_model.models.CreditNet import CreditNet1,CreditNetDecoder1,credit_cfg
 from target_model.models.PurchaseNet import PurchaseClassifier1,PurchaseDecoder1,purchase_cfg
 from target_model.models.IrisNet import IrisNet,IrisNetDecoder,Iris_cfg
-from target_model.models.PyTorch_CIFAR10.cifar10_models.resnet import resnet18,resnet_model_cfg,InversionNet
+from target_model.models.ResNet import resnet18,resnet_model_cfg,InversionNet
 
 
 
@@ -72,12 +72,8 @@ def get_dataloader(args):
         tab_info=None
 
         # 数据集加载
-        if model=='VGG5':
-            trainloader,testloader = get_cifar10_normalize(batch_size = train_bs, test_bs=test_bs)
-        elif model =='ResNet18':
-            trainloader,testloader = get_cifar10_normalize(batch_size = train_bs, test_bs=test_bs)
-        else:
-            exit(-1)
+        trainloader,testloader = get_cifar10_normalize(batch_size = train_bs, test_bs=test_bs)
+
     elif dataset=='credit':
         # 超参数
         testset_len = 61503 # for the mutual information
@@ -141,6 +137,7 @@ def get_models(args):
 
     # 加载模型和数据集，并从unit模型中切割出client_model
     if dataset=='CIFAR10':
+        image_deprocess = deprocess
         if model == 'VGG5':
             # 超参数
             # split_layer_list = list(range(len(model_cfg['VGG5'])))
@@ -167,16 +164,16 @@ def get_models(args):
                 print("train decoder model...")
                 decoder_net = VGG5Decoder(split_layer=split_layer)
 
-            image_deprocess = deprocess
+            
         elif model == 'ResNet18':
-            split_layer_list=[2,3,5,7,9,11,12,13]
+            split_layer_list=[2,3,5,7,9,11]
 
             # 超参数
             # split_layer_list = list(range(len(model_cfg['VGG5'])))
-            split_layer = 2 if split_layer==-1 else split_layer # 定成3吧？
+            split_layer = 7 if split_layer==-1 else split_layer # 定成3吧？
 
             # 关键路径
-            unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/CIFAR10-models/state_dicts/resnet18.pt' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+            unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/CIFAR10-models/ResNet18/32bs-ep20-relu-max-adam/resnet18-drj.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
             results_dir  = f"../../results/{result_ws}/Resnet18/{test_num}/"
             decoder_route = results_dir + f"/Decoder-layer{split_layer}.pth"
 
@@ -186,7 +183,7 @@ def get_models(args):
             pweights = torch.load(unit_net_route)
             # if split_layer < len(resnet_model_cfg['resenet18']):
                 # pweights = split_weights_client(pweights,client_net.state_dict())
-            client_net.load_state_dict(pweights) 
+            client_net.load_state_dict(pweights,strict=False) 
 
             # decoder net
             if os.path.isfile(decoder_route): # 如果已经训练好了
