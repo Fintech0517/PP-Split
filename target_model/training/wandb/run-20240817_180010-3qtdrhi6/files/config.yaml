@@ -1,0 +1,109 @@
+wandb_version: 1
+
+_wandb:
+  desc: null
+  value:
+    python_version: 3.8.13
+    cli_version: 0.17.7
+    framework: huggingface
+    huggingface_version: 4.39.1
+    is_jupyter_run: false
+    is_kaggle_kernel: true
+    start_time: 1723888810
+    t:
+      1:
+      - 1
+      - 9
+      - 11
+      - 12
+      - 41
+      - 49
+      - 55
+      - 71
+      - 103
+      2:
+      - 1
+      - 9
+      - 11
+      - 12
+      - 41
+      - 49
+      - 55
+      - 71
+      - 103
+      3:
+      - 7
+      - 13
+      - 23
+      - 66
+      4: 3.8.13
+      5: 0.17.7
+      6: 4.39.1
+      8:
+      - 2
+      - 5
+      13: linux-x86_64
+    m:
+    - 1: trainer/global_step
+      6:
+      - 3
+    - 1: loss/train
+      5: 1
+      6:
+      - 1
+    - 1: acc/train
+      5: 1
+      6:
+      - 1
+    - 1: epoch
+      5: 1
+      6:
+      - 1
+    - 1: loss/val
+      5: 1
+      6:
+      - 1
+    - 1: acc/val
+      5: 1
+      6:
+      - 1
+    - 1: acc/test
+      5: 1
+      6:
+      - 1
+data_dir:
+  desc: null
+  value: /home/dengruijun/data/FinTech/DATASET/image-dataset/cifar10/
+test_phase:
+  desc: null
+  value: 0
+dev:
+  desc: null
+  value: 0
+logger:
+  desc: null
+  value: wandb
+classifier:
+  desc: null
+  value: resnet18
+pretrained:
+  desc: null
+  value: 0
+precision:
+  desc: null
+  value: 32
+batch_size:
+  desc: null
+  value: 32
+max_epochs:
+  desc: null
+  value: 20
+num_workers:
+  desc: null
+  value: 0
+learning_rate:
+  desc: null
+  value: 0.001
+weight_decay:
+  desc: null
+  value: 0.01

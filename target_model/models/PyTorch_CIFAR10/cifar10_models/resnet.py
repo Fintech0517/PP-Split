@@ -459,11 +459,11 @@ class ResNet(nn.Module):
             if i == 13: # 13 is the last layer FC layer
                 x = x.reshape(x.size(0), -1)
             x = layer(x)
-            if i == self.split_layer:
-                if self.compress is not None:
-                    x = self.compress(x)
-                if self.compress is not None:
-                    x = self.decompress(x)
+            # if i == self.split_layer:
+            #     if self.compress is not None:
+            #         x = self.compress(x)
+            #     if self.compress is not None:
+            #         x = self.decompress(x)
                 
 
         # x = self.avgpool(x)

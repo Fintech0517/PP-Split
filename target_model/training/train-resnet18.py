@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2024-08-16 20:50:40
-LastEditTime: 2024-08-17 17:40:22
+LastEditTime: 2024-08-17 18:12:19
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/training/train-resnet18.py
 Description: 
@@ -75,24 +75,29 @@ class CIFAR10Module(pl.LightningModule):
         loss, accuracy = self.forward(batch)
         self.log("acc/test", accuracy)
 
+    # def configure_optimizers(self):
+    #     # optimizer = torch.optim.Adam(self.model.parameters())
+    #     optimizer = torch.optim.SGD(
+    #         self.model.parameters(),
+    #         lr=self.hparams.learning_rate,
+    #         weight_decay=self.hparams.weight_decay,
+    #         momentum=0.9,
+    #         nesterov=True,
+    #     )
+    #     # total_steps = self.hparams.max_epochs * len(self.train_dataloader())
+    #     total_steps = self.total_steps
+    #     scheduler = {
+    #         "scheduler": WarmupCosineLR(
+    #             optimizer, warmup_epochs=total_steps * 0.3, max_epochs=total_steps
+    #         ),
+    #         "interval": "step",
+    #         "name": "learning_rate",
+    #     }
+    #     return [optimizer], [scheduler]
+    
     def configure_optimizers(self):
-        optimizer = torch.optim.SGD(
-            self.model.parameters(),
-            lr=self.hparams.learning_rate,
-            weight_decay=self.hparams.weight_decay,
-            momentum=0.9,
-            nesterov=True,
-        )
-        # total_steps = self.hparams.max_epochs * len(self.train_dataloader())
-        total_steps = self.total_steps
-        scheduler = {
-            "scheduler": WarmupCosineLR(
-                optimizer, warmup_epochs=total_steps * 0.3, max_epochs=total_steps
-            ),
-            "interval": "step",
-            "name": "learning_rate",
-        }
-        return [optimizer], [scheduler]
+        optimizer = torch.optim.Adam(self.model.parameters())
+        return [optimizer]
 
 class CIFAR10Data(pl.LightningDataModule):
     def __init__(self, args):
@@ -343,7 +348,7 @@ if __name__ == "__main__":
 
     parser.add_argument("--precision", type=int, default=32, choices=[16, 32])
     parser.add_argument("--batch_size", type=int, default=32)
-    parser.add_argument("--max_epochs", type=int, default=1) #100
+    parser.add_argument("--max_epochs", type=int, default=20) #100
     parser.add_argument("--num_workers", type=int, default=0)
     # parser.add_argument("--gpu_id", type=str, default="1")
 
