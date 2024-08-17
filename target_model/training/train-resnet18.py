@@ -1,15 +1,17 @@
 '''
 Author: Ruijun Deng
 Date: 2024-08-16 20:50:40
-LastEditTime: 2024-08-17 17:07:18
+LastEditTime: 2024-08-17 17:40:22
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/training/train-resnet18.py
 Description: 
 '''
 import os
 from argparse import ArgumentParser
+import wandb
 
 import torch
+# torch.use_deterministic_algorithms(True)
 import requests
 from torch.utils.data import DataLoader
 from torchvision import transforms as T
@@ -25,6 +27,14 @@ from pytorch_lightning.loggers import WandbLogger, TensorBoardLogger
 from torchmetrics.classification import  Accuracy # KIWAN: For compatibility with newer version
 
 
+import math
+import warnings
+from typing import List
+
+from torch.optim import Optimizer
+from torch.optim.lr_scheduler import _LRScheduler
+
+
 import sys
 sys.path.append('/home/dengruijun/data/FinTech/PP-Split/')
 from target_model.models.PyTorch_CIFAR10.cifar10_models.resnet import resnet18
@@ -38,8 +48,8 @@ class CIFAR10Module(pl.LightningModule):
         self.criterion = torch.nn.CrossEntropyLoss()
         self.accuracy = Accuracy(task="multiclass", num_classes=10)
         
-        self.model = resnet18(pretrained=False, split_layer=-1, bottleneck_dim=-1, num_classes=10, activation='relu', pooling='max')
-        # self.model = resnet18(pretrained=False, split_layer=-1, bottleneck_dim=-1, num_classes=10, activation='gelu', pooling='avg')
+        self.model = resnet18(pretrained=False, split_layer=13, bottleneck_dim=-1, num_classes=10, activation='relu', pooling='max')
+        # self.model = resnet18(pretrained=False, split_layer=13, bottleneck_dim=-1, num_classes=10, activation='gelu', pooling='avg')
 
         self.total_steps = total_steps
 
@@ -129,14 +139,6 @@ class CIFAR10Data(pl.LightningDataModule):
 
     def test_dataloader(self):
         return self.val_dataloader()
-
-
-import math
-import warnings
-from typing import List
-
-from torch.optim import Optimizer
-from torch.optim.lr_scheduler import _LRScheduler
 
 
 class WarmupCosineLR(_LRScheduler):
@@ -286,6 +288,7 @@ def main(args):
     unit_net_dir = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/CIFAR10-models/state_dicts/' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
 
     if args.logger == "wandb":
+        # wandb.init(project="cifar10", name=args.classifier)
         logger = WandbLogger(name=args.classifier, project="cifar10")
     elif args.logger == "tensorboard":
         logger = TensorBoardLogger("cifar10", name=args.classifier)
@@ -332,9 +335,7 @@ if __name__ == "__main__":
     parser.add_argument("--data_dir", type=str, default="/home/dengruijun/data/FinTech/DATASET/image-dataset/cifar10/")
     parser.add_argument("--test_phase", type=int, default=0, choices=[0, 1])
     parser.add_argument("--dev", type=int, default=0, choices=[0, 1])
-    parser.add_argument(
-        "--logger", type=str, default="tensorboard", choices=["tensorboard", "wandb"]
-    )
+    parser.add_argument("--logger", type=str, default="wandb", choices=["tensorboard", "wandb"])
 
     # TRAINER args
     parser.add_argument("--classifier", type=str, default="resnet18")
@@ -342,7 +343,7 @@ if __name__ == "__main__":
 
     parser.add_argument("--precision", type=int, default=32, choices=[16, 32])
     parser.add_argument("--batch_size", type=int, default=32)
-    parser.add_argument("--max_epochs", type=int, default=20) #100
+    parser.add_argument("--max_epochs", type=int, default=1) #100
     parser.add_argument("--num_workers", type=int, default=0)
     # parser.add_argument("--gpu_id", type=str, default="1")
 
