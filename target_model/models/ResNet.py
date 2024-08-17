@@ -255,14 +255,6 @@ class Bottleneck(nn.Module):
                     # --jvp-parallelism 100 --jacloss-alpha 0.0 --save-model
 
 # split layer [2,3,5,7,9,11,12,13]
-# conv1 2
-# pooling 3
-# layer11 5
-# layer21 7
-# layer31 9
-# layer41 11
-# avgpool 12
-# fc 13
                     
 class ResNet(nn.Module):
     def __init__(
@@ -326,38 +318,38 @@ class ResNet(nn.Module):
 
         # pooling layer
         if pooling == 'max':
-            self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+            maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         elif pooling == 'avg':
-            self.maxpool = nn.AvgPool2d(kernel_size=3, stride=2, padding=1)
+            maxpool = nn.AvgPool2d(kernel_size=3, stride=2, padding=1)
         else:
             raise AssertionError('Unknown pooling')
         
         # make layers
-        self.layer1 = self._make_layer(block, out_channels[0], layers[0], activation=activation)
-        self.layer2 = self._make_layer(
+        layer1 = self._make_layer(block, out_channels[0], layers[0], activation=activation)
+        layer2 = self._make_layer(
             block, out_channels[1], layers[1], stride=2, dilate=replace_stride_with_dilation[0], activation=activation
         )
-        self.layer3 = self._make_layer(
+        layer3 = self._make_layer(
             block, out_channels[2], layers[2], stride=2, dilate=replace_stride_with_dilation[1], activation=activation
         )
-        self.layer4 = self._make_layer(
+        layer4 = self._make_layer(
             block, out_channels[3], layers[3], stride=2, dilate=replace_stride_with_dilation[2], activation=activation
         )
-        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
-        self.fc = nn.Linear(out_channels[3] * block.expansion, num_classes)
+        avgpool = nn.AdaptiveAvgPool2d((1, 1))
+        fc = nn.Linear(out_channels[3] * block.expansion, num_classes)
 
         # Test: Adding manual bottleneck layer
         # split layer [2,3,5,7,9,11,12,13]
         self.split_layer = split_layer
-        self.layers = [self.conv1, self.bn1, self.relu, self.maxpool] + \
-        list(self.layer1) + list(self.layer2) + list(self.layer3) + list(self.layer4) + \
-        [self.avgpool, self.fc]
+        self.layers = [self.conv1, self.bn1, self.relu, maxpool] + \
+        list(layer1) + list(layer2) + list(layer3) + list(layer4) + \
+        [avgpool, fc]
 
         # self.layers = nn.ModuleList(self.layers)
-        self.layers = nn.ModuleList(self.layers[:split_layer + 1])
+        self.selected_layers = nn.ModuleList(self.layers[:split_layer + 1])
 
 
-        print(f"Num layers: {len(self.layers)}") # Num layers: 14
+        print(f"Num unit layers: {len(layers)}") # Num layers: 14
         print('Split layer:', self.split_layer)
 
         if bottleneck_dim > 0:
@@ -456,7 +448,7 @@ class ResNet(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
-        for i, layer in enumerate(self.layers):
+        for i, layer in enumerate(self.selected_layers):
             if i == 13: # 13 is the last layer FC layer
                 x = x.reshape(x.size(0), -1)
             x = layer(x)
@@ -564,7 +556,6 @@ class ResNet(nn.Module):
             elif isinstance(layer, nn.BatchNorm2d):
                 layer.training = training
 
-
 def _resnet(arch, block, layers, **kwargs):
     model = ResNet(block, layers, **kwargs)
     # if pretrained:
@@ -574,7 +565,6 @@ def _resnet(arch, block, layers, **kwargs):
     #     )
     #     model.load_state_dict(state_dict)
     return model
-
 
 def resnet18(pretrained=False, device='cpu', **kwargs):
     """Constructs a ResNet-18 model.
@@ -586,7 +576,6 @@ def resnet18(pretrained=False, device='cpu', **kwargs):
         "resnet18", BasicBlock, [2, 2, 2, 2], **kwargs
     )
 
-
 def resnet34(pretrained=False, device='cpu', **kwargs):
     """Constructs a ResNet-34 model.
     Args:
@@ -597,7 +586,6 @@ def resnet34(pretrained=False, device='cpu', **kwargs):
         "resnet34", BasicBlock, [3, 4, 6, 3], **kwargs
     )
 
-
 def resnet50(pretrained=False, device='cpu', **kwargs):
     """Constructs a ResNet-50 model.
     Args:
@@ -607,10 +595,6 @@ def resnet50(pretrained=False, device='cpu', **kwargs):
     return _resnet(
         "resnet50", Bottleneck, [3, 4, 6, 3], **kwargs
     )
-
-
-
-
 
 # decoder
 # assert(encoder_model == "resnet18")
@@ -692,10 +676,11 @@ class InversionNet(nn.Module):
             in_c = c
 
         # TODO: Try Tanh?
-        if last_activation == 'sigmoid':
-            layers.append(nn.Sigmoid())
-        elif last_activation == 'tanh':
-            layers.append(nn.Tanh())
+        # if last_activation == 'sigmoid':
+            # layers.append(nn.Sigmoid())
+        # elif last_activation == 'tanh':
+            # layers.append(nn.Tanh())
+        layers.append(nn.Tanh())
         self.layers = nn.Sequential(*layers)
 
     def forward(self, x):
