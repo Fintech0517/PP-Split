@@ -48,7 +48,7 @@ args = {
         # 'model': 'VGG5',
         # 'result_dir': '20240702-FIL/',
         'result_dir': '20240702-effectiveInfo/',
-        'oneData_bs': ,
+        'oneData_bs': 500,
         'test_bs': 1,
         'train_bs': 1,
         'noise_scale': 0, # 防护措施
