@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-12-12 12:42:45
-LastEditTime: 2024-08-01 21:12:19
+LastEditTime: 2024-08-17 21:24:33
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/ppsplit/attacks/model_inversion/inverse_model.py
 Description: 
@@ -72,7 +72,7 @@ class InverseModelAttack():
                 optimizer.step()
 
                 batch_loss.append(loss.item())
-            epoch_loss.append(sum(batch_loss) / len(batch_loss))
+            epoch_loss.append(sum(batch_loss) / len(batch_loss)) # 多个batch的平均
 
 
             print("--- epoch: {0}, train_loss: {1}".format(epoch, epoch_loss))
