@@ -313,8 +313,8 @@ class ResNet(nn.Module):
             raise AssertionError('Unknown activation')
 
         # 
-        self.bn1 = norm_layer(self.inplanes)
-        self.relu = self.act()
+        bn1 = norm_layer(self.inplanes)
+        relu = self.act()
 
         # pooling layer
         if pooling == 'max':
@@ -341,7 +341,7 @@ class ResNet(nn.Module):
         # Test: Adding manual bottleneck layer
         # split layer [2,3,5,7,9,11,12,13]
         self.split_layer = split_layer
-        layers = [self.conv1, self.bn1, self.relu, maxpool] + \
+        layers = [conv1, bn1, relu, maxpool] + \
         list(layer1) + list(layer2) + list(layer3) + list(layer4) + \
         [avgpool, fc]
 

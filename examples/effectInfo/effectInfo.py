@@ -5,7 +5,7 @@
 '''
 Author: Ruijun Deng
 Date: 2024-08-14 16:59:47
-LastEditTime: 2024-08-17 22:06:28
+LastEditTime: 2024-08-28 06:19:46
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/examples/effectInfo/effectInfo.py
 Description: 
@@ -34,8 +34,8 @@ from target_model.task_select import get_dataloader_and_model,get_dataloader_and
 # utils
 from ppsplit.utils.utils import create_dir
 
+# nohup python -u effectInfo.py > ../../results/20240702-effectiveInfo/Resnet18/effectiveInfo1.3/effectInfo1.3-pool4-layer11.log 2>&1 &
 # %%
-# nohup python -u effectInfo.py > effectInfo-layer0.log 2>&1 & 
 args = {
         'device':torch.device("cuda:1" if torch.cuda.is_available() else "cpu"),
         # 'device':torch.device("cpu"),
@@ -52,12 +52,12 @@ args = {
         'test_bs': 1,
         'train_bs': 1,
         'noise_scale': 0, # 防护措施
-        'split_layer': 7,
-        # 'test_num': 'invdFIL', # MI, invdFIL, distCor, ULoss, 
-        'test_num': 'effectiveInfo1.2'
-        # 'test_num': 'effectEntropy1.1'
+        'split_layer': 11,
+        # 'test_num': 'invdFIL', # MI, invdFIL, distCor, ULoss,  # split layer [2,3,5,7,9,11] for ResNet18
+        'test_num': 'effectiveInfo1.3'
         }
 print(args['device'])
+print(args)
 
 
 # %%
@@ -97,8 +97,12 @@ client_net.eval()
 
 # for n, p in client_net.named_parameters():
 #     print(n, p.shape)
+
 # %% [markdown]
 # # 5. effective information
+
+# %% [markdown]
+# ## 5.1 effect Fisher
 
 # %%
 # effective fisher 计算函数
@@ -112,56 +116,6 @@ import random
 import math
 
 import pandas as pd
-
-# 自己实现的、规规矩矩的
-def computing_det_with_outputs(model, inputs, outputs, sigmas): # sigma_square
-        # batchsize:
-        batch_size = inputs.shape[0] # 一个batch的样本数目
-        output_size = outputs[0].numel() # 一个样本的outputs长度
-        input_size = inputs[0].numel() # 一个样本的outputs长度
-        effect_fisher_sum = 0.0
-
-        # 遍历单个样本: 换数据
-        for i in range(batch_size):
-            input_i = inputs[i].unsqueeze(0)
-
-            # 计算jacobian
-            J = F.jacobian(model, input_i)
-            # J = J.reshape(J.shape[0],outputs.numel(),inputs.numel()) # (batch, out_size, in_size)
-            J = J.reshape(output_size, input_size) # (batch, out_size, in_size)
-            # print(f"J2.shape: {J.shape}, J2.prod: {torch.prod(torch.tensor(list(J.shape)))}")
-            # 计算eta
-            JtJ = torch.matmul(J.t(), J)
-            I = 1.0/(sigmas)*JtJ
-            # ddFIL  = I.trace().div(input_size*input_size)
-
-            # 储存I
-            # I_np = I.cpu().detach().numpy()
-            # df = pd.DataFrame(I_np)
-            # df.to_csv(f'{i}.csv',index=False,header=False)
-
-            # print("I: ", I)
-            # w = torch.det(I)
-            # print('det I: ', I.det().log())
-
-            f1 = input_size * torch.log(2*torch.pi*torch.exp(torch.tensor(1.0)))
-            f2 = torch.logdet(I)
-            # print('log det I: ',f2 )
-            print('f1: ',f1)
-            print('f2: ',f2)
-            effect_fisher = 0.5 * (f1 - f2)
-            effect_fisher_sum+=effect_fisher
-
-            print("effect_fisher: ",effect_fisher)
-
-        # print("Jt*J: ", JtJ)
-        # print("Jt*J: ", JtJ.shape, JtJ)
-        # print("I.shape: ", I.shape)
-        # eta = dFIL
-        # print(f"eta: {eta}")
-        # print('t2-t1=',t2-t1, 't3-t2', t3-t2)
-        effect_fisher_mean = effect_fisher_sum / batch_size
-        return effect_fisher_mean.cpu().detach().numpy()
 
 # 用diag 来化简
 def computing_diag_det_with_outputs(model, inputs, outputs, sigmas): # sigma_square
@@ -183,7 +137,7 @@ def computing_diag_det_with_outputs(model, inputs, outputs, sigmas): # sigma_squ
 
         # f2需要求平均？
         # 遍历单个样本: 换数据
-        for i in range(batch_size): # 对每个batch
+        for i in range(batch_size): # 对每个样本
             input_i = inputs[i].unsqueeze(0)
 
             # 计算jacobian
@@ -213,9 +167,9 @@ def computing_diag_det_with_outputs(model, inputs, outputs, sigmas): # sigma_squ
             # w = torch.det(I)
             # print('det I: ', I.det().log())
 
-            f2 = torch.logdet(I)
+            f2 = torch.logdet(I) # 直接用torch计算
             # f2_1 = torch.logdet(I_diag)
-            f2_2 = torch.sum(torch.log(I_diagonal+1e-10)) # /I_diagonal.numel()
+            f2_2 = torch.sum(torch.log(I_diagonal+1e-10)) # /I_diagonal.numel() # diagonal后计算
 
             f2_2_avg_outer += f2_2 / batch_size
             f2_avg_outer += f2 / batch_size
@@ -226,10 +180,11 @@ def computing_diag_det_with_outputs(model, inputs, outputs, sigmas): # sigma_squ
             # print('f2_1: ',f2_1)
             print('f2_2: ',f2_2)
 
-        f2_2_avg_inner = torch.sum(torch.log(I_diagonal_batch_avg+1e-10))
+        f2_2_avg_inner = torch.sum(torch.log(I_diagonal_batch_avg+1e-10)) # 用平均后的diagonal 计算
 
         print('f2_2_avg_outer: ',f2_2_avg_outer)
         print('f2_2_avg_inner: ',f2_2_avg_inner)
+        print('f2_avg_outer: ',f2_avg_outer)
 
         # effect_fisher = 0.5 * (f1 - f2_2_avg_inner)
         effect_fisher = 0.5 * (f1 - f2_2_avg_outer)
@@ -240,6 +195,9 @@ def computing_diag_det_with_outputs(model, inputs, outputs, sigmas): # sigma_squ
         
         # effect_fisher_mean = effect_fisher_sum / batch_size
         return effect_fisher.cpu().detach().numpy()
+
+# %% [markdown]
+# ## 5.2 effect Entropy
 
 # %%
 # effect entropy 计算函数
@@ -278,7 +236,8 @@ def shannon_entropy_infotopo(x, conv = False):
     information_top = infotopo.infotopo(dimension_max = x.shape[1],
                                         dimension_tot = x.shape[1],
                                         sample_size = x.shape[0],
-                                        nb_of_values = nb_of_values, # 不是很懂这个意思，为什么iris对应9？
+                                        # nb_of_values = nb_of_values, # 不是很懂这个意思，为什么iris对应9？
+                                        nb_of_values = 17, # 不是很懂这个意思，为什么iris对应9？
                                         # forward_computation_mode = True,
                                         )
     if conv:
@@ -302,9 +261,10 @@ def shannon_entropy_infotopo(x, conv = False):
     return joint_entropy_final
 
 
+# %% [markdown]
+# ## 5.3 effect information
 
 # %%
-# effect Information 指标计算
 
 effecInfo_diff_layer_list = []
 effecInfo_same_layer_list = []
@@ -317,24 +277,32 @@ for j, data in enumerate(tqdm.tqdm(one_data_loader)): # 测试第一个testloade
     images, labels = data
     images, labels = images.to(args['device']), labels.to(args['device'])
     with torch.no_grad():
-        # inference
-        outputs = client_net(images).clone().detach()
         # effect entropy 
         # effecEntro= EntropyMetric._entropy_prob_batch(images) # H(x)
         
         # infotopo
         if conv:
             print('images: ', images.shape)
-            images_pooled = avg_pool2d(images,kernel_size=4)
-            print('images_pooled: ',images_pooled.shape)
-            effectEntro = shannon_entropy_infotopo(images_pooled.flatten(start_dim=1).detach().cpu().numpy(), conv)
-        else:
-            effectEntro = shannon_entropy_infotopo(images.flatten(start_dim=1).detach().cpu().numpy(),conv)
+            images= avg_pool2d(images,kernel_size=4)
+            print('images_pooled: ',images.shape)
 
+        effectEntro = shannon_entropy_infotopo(images.flatten(start_dim=1).detach().cpu().numpy(), conv)
+        
+        # PyEntropy
+        effectEntro_pyent = 0.0
+        for i in range(len(images[0])): # 对每个维度
+            effectEntro_pyent  += shannon_entropy_pyent(images[:,i].flatten().detach().cpu().numpy())
+            # print('effectEntro_pyent: ',effectEntro_pyent)
+        # effectEntro_pyent = shannon_entropy(images.flatten(start_dim=1).detach().cpu().numpy())
+        print('effectEntro_pyent: ',effectEntro_pyent)
+
+        
         # effecit fisher
-        # outputs = client_net(images)
+            # inference
+        outputs = client_net(images).clone().detach()
         # inverse_dFIL = Fishermetric.quantify(model=client_net, inputs=images, outputs=outputs,sigmas = 0.01, with_outputs=True)
         # effectFisher = computing_det_with_outputs(model=client_net, inputs=images, outputs=outputs,sigmas = 0.01)
+        # effectFisher = computing_diag_det_with_outputs(model=client_net, inputs=images, outputs=outputs,sigmas = 0.01)
         effectFisher = computing_diag_det_with_outputs(model=client_net, inputs=images, outputs=outputs,sigmas = 0.01)
 
         # 存储
@@ -363,4 +331,10 @@ if os.path.exists(save_route):
 else:
     pd.DataFrame(data=transpose, columns=[args['split_layer']]).to_csv(save_route,index=False)
 
-# nohup python -u effectInfo.py >> effectInfo-layer0.log 2>&1 & 
+
+
+
+
+
+
+
