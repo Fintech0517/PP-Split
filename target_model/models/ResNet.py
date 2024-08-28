@@ -296,7 +296,7 @@ class ResNet(nn.Module):
         self.base_width = width_per_group
 
         # CIFAR10: kernel_size 7 -> 3, stride 2 -> 1, padding 3->1
-        self.conv1 = nn.Conv2d(
+        conv1 = nn.Conv2d(
             3, self.inplanes, kernel_size=3, stride=1, padding=1, bias=False
         )
         first_out = self.inplanes
@@ -341,12 +341,12 @@ class ResNet(nn.Module):
         # Test: Adding manual bottleneck layer
         # split layer [2,3,5,7,9,11,12,13]
         self.split_layer = split_layer
-        self.layers = [self.conv1, self.bn1, self.relu, maxpool] + \
+        layers = [self.conv1, self.bn1, self.relu, maxpool] + \
         list(layer1) + list(layer2) + list(layer3) + list(layer4) + \
         [avgpool, fc]
 
         # self.layers = nn.ModuleList(self.layers)
-        self.selected_layers = nn.ModuleList(self.layers[:split_layer + 1])
+        self.selected_layers = nn.ModuleList(layers[:split_layer + 1])
 
 
         print(f"Num unit layers: {len(layers)}") # Num layers: 14
