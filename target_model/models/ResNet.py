@@ -1,3 +1,7 @@
+'''
+来源于 nips23 fisher的团队 改进的resnet
+'''
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
