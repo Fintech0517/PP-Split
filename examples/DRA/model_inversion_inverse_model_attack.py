@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2024-08-24 00:41:30
-LastEditTime: 2024-09-02 01:15:35
+LastEditTime: 2024-09-02 20:39:10
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/examples/DRA/model_inversion_inverse_model_attack.py
 Description: 
@@ -20,7 +20,8 @@ from ppsplit.defense.noise import Noise
 # 模型、数据集获取
 from target_model.task_select import get_dataloader_and_model, get_dataloader,get_models
 
-# nohup python -u model_inversion_inverse_model_attack.py > ../../results/inverse-model-results-20240414//VGG5/InverseModelAttack/layer6.log 2>&1 &
+# nohup python -u model_inversion_inverse_model_attack.py > ../../results/inverse-model-results-20240414/Resnet18/InverseModelAttack/layer11.log 2>&1 &
+# nohup python -u model_inversion_inverse_model_attack.py > ../../results/inverse-model-results-20240414/VGG5/InverseModelAttack/layer3.log 2>&1 &
 # 超参数
 args = {
         'device':torch.device("cuda:1" if torch.cuda.is_available() else "cpu"),
@@ -30,16 +31,17 @@ args = {
         # 'dataset':'credit',
         # 'dataset':'purchase',
         # 'dataset':'Iris',
-        # 'model': 'ResNet18',
-        'model': 'VGG5',
+        'model': 'ResNet18',
+        # 'model': 'VGG5',
         'result_dir': 'inverse-model-results-20240414/',
         'oneData_bs': 1,
         'test_bs': 1,
         'train_bs': 32,
         'noise_scale':0, # 防护措施
-        'split_layer': 6,
-        'test_num': 'InverseModelAttack'
+        'split_layer': 11,
+        'test_num': 'InverseModelAttack',
         # 'num_pairs': 10000, # RepE # 这个要另外准备
+        'no_dense': False,
         }
 
 print(args['device'])

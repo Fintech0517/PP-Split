@@ -10,8 +10,6 @@ from target_model.models.PurchaseNet import PurchaseClassifier1,PurchaseDecoder1
 from target_model.models.IrisNet import IrisNet,IrisNetDecoder,Iris_cfg
 from target_model.models.ResNet import resnet18,resnet_model_cfg,InversionNet
 
-
-
 # 数据预处理方法
 from .data_preprocessing.preprocess_cifar10 import get_cifar10_normalize,deprocess,get_cifar10_fisher_normalize
 from .data_preprocessing.preprocess_bank import bank_dataset,preprocess_bank,preprocess_bank_dataset,tabinfo_bank
@@ -134,9 +132,11 @@ def get_models(args):
     result_ws = result_dir
     image_deprocess = None
     test_num = args['test_num']
+    no_dense = args['no_dense'] # 默认为False
 
     # 加载模型和数据集，并从unit模型中切割出client_model
     if dataset=='CIFAR10':
+
         image_deprocess = deprocess
         if model == 'VGG5':
             # 超参数
@@ -153,7 +153,7 @@ def get_models(args):
             client_net = VGG('Client','VGG5',split_layer,model_cfg,noise_scale=noise_scale)
             pweights = torch.load(unit_net_route)
             if split_layer < len(model_cfg['VGG5']):
-                pweights = split_weights_client(pweights,client_net.state_dict())
+                pweights = split_weights_client(pweights,client_net.state_dict(),no_dense=no_dense)
             client_net.load_state_dict(pweights)
 
             # decoder net
@@ -181,8 +181,9 @@ def get_models(args):
             client_net = resnet18(pretrained=False, split_layer=split_layer, bottleneck_dim=-1, num_classes=10, activation='gelu', pooling='avg')
             # client_net = VGG('Client','VGG5',split_layer,model_cfg,noise_scale=noise_scale)
             pweights = torch.load(unit_net_route)
-            # if split_layer < len(resnet_model_cfg['resenet18']):
-                # pweights = split_weights_client(pweights,client_net.state_dict())
+            # 不需要划分模型参数？
+            if split_layer < len(resnet_model_cfg['resenet18']):
+                pweights = split_weights_client(pweights,client_net.state_dict())
             client_net.load_state_dict(pweights,strict=False) 
 
             # decoder net

@@ -5,7 +5,7 @@
 '''
 Author: Ruijun Deng
 Date: 2024-08-14 16:59:47
-LastEditTime: 2024-08-28 06:19:46
+LastEditTime: 2024-09-02 22:49:17
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/examples/effectInfo/effectInfo.py
 Description: 
@@ -35,26 +35,28 @@ from target_model.task_select import get_dataloader_and_model,get_dataloader_and
 from ppsplit.utils.utils import create_dir
 
 # nohup python -u effectInfo.py > ../../results/20240702-effectiveInfo/Resnet18/effectiveInfo1.3/effectInfo1.3-pool4-layer11.log 2>&1 &
+# nohup python -u effectInfo.py > ../../results/20240702-effectiveInfo/VGG5/effectiveInfo1.3/effectInfo1.3-pool4-layer6.log 2>&1 &
 # %%
 args = {
-        'device':torch.device("cuda:1" if torch.cuda.is_available() else "cpu"),
-        # 'device':torch.device("cpu"),
+        # 'device':torch.device("cuda:1" if torch.cuda.is_available() else "cpu"),
+        'device':torch.device("cpu"),
         'dataset':'CIFAR10',
         # 'dataset':'bank',
         # 'dataset':'credit',
         # 'dataset':'purchase',
         # 'dataset':'Iris',
-        'model': 'ResNet18',
-        # 'model': 'VGG5',
+        # 'model': 'ResNet18',
+        'model': 'VGG5',
         # 'result_dir': '20240702-FIL/',
         'result_dir': '20240702-effectiveInfo/',
         'oneData_bs': 500,
         'test_bs': 1,
         'train_bs': 1,
         'noise_scale': 0, # 防护措施
-        'split_layer': 11,
+        'split_layer': 6,
         # 'test_num': 'invdFIL', # MI, invdFIL, distCor, ULoss,  # split layer [2,3,5,7,9,11] for ResNet18
-        'test_num': 'effectiveInfo1.3'
+        'test_num': 'effectiveInfo1.3',
+        'no_dense':True,
         }
 print(args['device'])
 print(args)

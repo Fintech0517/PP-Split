@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-08-27 20:58:31
-LastEditTime: 2024-08-28 00:26:03
+LastEditTime: 2024-09-02 21:07:02
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/models/VGG.py
 Description: 
@@ -22,8 +22,6 @@ import collections
 
 
 # --------- VGG model ---------
-# split_layer_list = list(range(len(model_cfg['VGG5'])))
-
 # Model configration
 model_cfg = {
 	# (Type, in_channels, out_channels, kernel_size, out_size(c_out*h*w), flops(c_out*h*w*k*k*c_in))
@@ -33,13 +31,16 @@ model_cfg = {
 	('C', 32, 64, 3, 64*16*16, 64*16*16*3*3*32), #2 64*16*16=16384
     ('M', 64, 64, 2, 64*8*8, 0), # 3 64*8*8=4096
 	('C', 64, 64, 3, 64*8*8, 64*8*8*3*3*64), # 4 64*8*8=4096
-	('D', 8*8*64, 128, 1, 64, 128*8*8*64), # 5  128*8*8=8192
-	('D', 128, 10, 1, 10, 128*10)],# 6 10
+	# ('D', 8*8*64, 128, 1, 64, 128*8*8*64), # 5 128*8*8=8192
+	# ('D', 128, 10, 1, 10, 128*10)], # 6 10
+	
 	# avgpool
-	# ('D', 256, 128, 1, 64, 128*8*8*64), # 5  128*8*8=8192
-	# ('D', 128, 10, 1, 10, 128*10)],# 6 10
-	'VGG9':[#[1,4,7,9,10,11,12,13]
-		('C',3,64,3,65535,1769472), 
+	('D', 256, 128, 1, 64, 128*8*8*64), # 5  128*8*8=8192
+	('D', 128, 10, 1, 10, 128*10)], # 6 10
+
+	# [1,4,7,9,10,11,12,13]
+	'VGG9':[
+		('C',3,64,3,65535,1769472), # 0
 		('M',64,64,2,16384,0), # 1
 		('C',64,64,3,16384,9437184), 
 		('C',64,128,3,32768,18874368), 
@@ -179,6 +180,7 @@ class VGG(nn.Module):
 
 		return None
 
+
 class VGG5Decoder(nn.Module): # 这个cfg参数指的是model_cfg[vgg5]
     def __init__(self,split_layer,network='VGG5'):
         super().__init__()
@@ -256,3 +258,6 @@ class VGGBranchy(nn.Module): # TODO:
 		assert split_layer<len(cfg[vgg_name])
 		self.split_layer = split_layer
 		self.features, self.denses = self._make_layers(cfg[vgg_name])
+
+
+		
