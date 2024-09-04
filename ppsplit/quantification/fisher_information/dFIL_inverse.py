@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-08-28 14:50:43
-LastEditTime: 2024-08-04 22:43:26
+LastEditTime: 2024-09-03 23:00:59
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/ppsplit/quantification/fisher_information/dFIL_inverse.py
 Description: 一个一个样本计算，没有平均之说
@@ -31,7 +31,6 @@ class dFILInverseMetric():
             return self._computing_eta_with_outputs(model, inputs, outputs, sigmas).detach().cpu().numpy()
         else:
             return self._computing_eta_without_outputs(model, inputs,  sigmas).detach().cpu().numpy()
-        
 
     # model的smashed data需要在[0,1]之间，才能保证输出的eta也在[0,1]之间?证明？
     def _computing_eta_without_outputs(self, model, inputs,  sigmas): # sigma_square
@@ -80,6 +79,7 @@ class dFILInverseMetric():
         # print('t2-t1=',t2-t1, 't3-t2', t3-t2)
         return 1.0/dFIL
 
+# TODO: 未完成
     def _computing_det_with_outputs(self, model, inputs, outputs, sigmas): # sigma_square
         # batchsize:
         batch_size = inputs.shape[0] # 一个batch的样本数目
@@ -121,7 +121,7 @@ class dFILInverseMetric():
         # 定义一个局部函数 jvp_func**：这个函数接受两个参数 x 和 tgt，并返回 net.forward_first 方法的雅可比向量积（JVP）。
         # 这意味着 jvp_func 用于计算网络对于输入 x 在方向 tgt 上的一阶导数
         # tgt 计算雅各比向量积的向量
-        def jvp_func(x, tgt):
+        def jvp_func(x, tgt): 
             # return jvp(net.forward_first, (x,), (tgt,)) #返回 outputs, jacobian product
             return jvp(net.forward, (x,), (tgt,)) #返回 outputs, jacobian product
 
@@ -132,17 +132,17 @@ class dFILInverseMetric():
         tr = torch.zeros(x.shape[0], dtype=x.dtype).to(device)
         #print(f'd: {d}, {x.shape}')
 
-        # 加速，矩阵降维，但是这个损伤精度，或许改成特征提取更好点？
+        # 加速，矩阵降维，但是这个损伤精度，或许改成特征提取更好点？ # 也是用了矩阵降维度
         # Randomly subsample pixels for faster execution
-        if subsample > 0:
-            samples = random.sample(range(d), min(d, subsample))
+        if subsample > 0: 
+            samples = random.sample(range(d), min(d, subsample)) # 选取了部分维度
         else:
             samples = range(d)
 
-        #print(x.shape, d, samples)
+        # print(x.shape, d, samples)
         # jvp parallelism是数据并行的粒度？
         # 函数通过分批处理样本来计算迹，每批处理 jvp_parallelism 个样本
-        for j in range(math.ceil(len(samples) / jvp_parallelism)): # 对于每个数据块
+        for j in range(math.ceil(len(samples) / jvp_parallelism)): # 对于每个数据块 # 每个数据块包含不同的维度
             tgts = []
 
             # 遍历每个数据块中的每个维度
@@ -156,10 +156,11 @@ class dFILInverseMetric():
             for k in samples[j*jvp_parallelism:(j+1)*jvp_parallelism]: # 提取整个batch中每个数据的特定维度
                 tgt = torch.zeros_like(x).reshape(x.shape[0], -1) # 按照batch 排列？# 雅各比向量积的
                 # 除了当前样本索引 k 对应的元素设置为 1。这相当于在计算迹时，每次只关注一个特征维度。
-                tgt[:, k] = 1. # 提取tgt所有的样本的k的特征 计算雅各比向量积的向量，可用于计算trace
+                tgt[:, k] = 1. # 提取tgt所有的样本的k的特征 计算雅各比向量积的向量，可用于计算trace，所有行的特定几列有1值
                 tgt = tgt.reshape(x.shape) # 又变回x的形状
                 tgts.append(tgt)
-            tgts = torch.stack(tgts)
+            tgts = torch.stack(tgts) # 把多个维度的tgt vstack，一行一行拼接起来
+
 
             # 定义一个辅助函数 helper，该函数接受一个目标张量 tgt并返回一个迹的张量和一个值的张量。
             # jvp wrapper，遍历每个batchsize
@@ -167,7 +168,7 @@ class dFILInverseMetric():
                 batch_size = x.shape[0]
                 vals_list = []
                 grads_list = []
-                for i in range(batch_size):
+                for i in range(batch_size): # 对每个样本
                     val, grad = jvp_func(x[i], tgt[i])  # 对每个批次元素调用jvp_func
                     vals_list.append(val)
                     grads_list.append(grad)
@@ -175,9 +176,9 @@ class dFILInverseMetric():
                 vals = torch.stack(vals_list)
                 grad = torch.stack(grads_list)
 
-
                 # vals, grad = vmap(jvp_func, randomness='same')(x, tgt)
-                #print('grad shape: ', grad.shape)
+                
+                # print('grad shape: ', grad.shape)
                 # 因此，矩阵平方的迹和迹的平方通常是不相等的。
                 # 先求平方再求迹
                 return torch.sum(grad * grad, dim=tuple(range(1, len(grad.shape)))), vals 
@@ -192,9 +193,7 @@ class dFILInverseMetric():
             trs,vals = torch.stack(trs),torch.stack(vals)
 
             # trs, vals = vmap(helper, randomness='same')(tgts) # randomness for randomness control of dropout
-            
             # vals are stacked results that are repeated by d (should be all the same)
-
 
             tr += trs.sum(dim=0) # 对每个数据块的迹求和
 
@@ -208,6 +207,7 @@ class dFILInverseMetric():
 
         # print('tr: ',tr.shape, tr)
         return tr.cpu().item(), vals[0].squeeze(1)  # squeeze removes one dimension jvp puts
+
 
 # 多层、整个数据集上的dFIL
 if __name__ == '__main__':
@@ -349,12 +349,10 @@ if __name__ == '__main__':
 
     pd.DataFrame(data=transpose, columns=[i for i in split_layer_list]).to_csv(save_img_dir + f'dFIL-1.csv',index=False)
 
-
 # nohup python -u dFIL.py --dataset CIFAR10 >> dFIL-cifar10.out 2>&1  &
 # nohup python -u dFIL.py --dataset bank >> dFIL-bank.out 2>&1  &
 # nohup python -u dFIL.py --dataset credit >> dFIL-credit1.out 2>&1  &
 # nohup python -u dFIL.py --dataset purchase >> dFIL-purchase.out 2>&1  &
-
 
 # credit 4layer [1] 27598 [4] 22073
 # purchase 1,3,5,7 [2] 3705
