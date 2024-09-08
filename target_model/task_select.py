@@ -173,7 +173,9 @@ def get_models(args):
             split_layer = 7 if split_layer==-1 else split_layer # 定成3吧？
 
             # 关键路径
-            unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/CIFAR10-models/ResNet18/32bs-ep20-relu-max-adam/resnet18-drj.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+            # xs，原来根本没有加载参数
+            # unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/CIFAR10-models/ResNet18/32bs-ep20-relu-max-adam/resnet18-drj.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+            unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/CIFAR10-models/ResNet18/32bs-ep20-relu-max-adam/resnet18-drj-small.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
             results_dir  = f"../../results/{result_ws}/Resnet18/{test_num}/"
             decoder_route = results_dir + f"/Decoder-layer{split_layer}.pth"
 
@@ -181,8 +183,9 @@ def get_models(args):
             client_net = resnet18(pretrained=False, split_layer=split_layer, bottleneck_dim=-1, num_classes=10, activation='gelu', pooling='avg')
             # client_net = VGG('Client','VGG5',split_layer,model_cfg,noise_scale=noise_scale)
             pweights = torch.load(unit_net_route)
+            
             # 不需要划分模型参数？
-            if split_layer < len(resnet_model_cfg['resenet18']):
+            if split_layer < len(resnet_model_cfg['resnet18']):
                 pweights = split_weights_client(pweights,client_net.state_dict())
             client_net.load_state_dict(pweights,strict=False) 
 

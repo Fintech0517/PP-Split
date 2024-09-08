@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-12-12 20:28:05
-LastEditTime: 2024-09-02 21:26:33
+LastEditTime: 2024-09-05 03:37:14
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/models/splitnn_utils.py
 Description: 
@@ -24,6 +24,10 @@ import tqdm
 
 
 def split_weights_client(weights,cweights,no_dense=False):
+    # print('client_net weights: ', weights.keys())
+    # print('client_net cweights: ', cweights.keys())
+    # print('len client_net weights: ', len(weights.keys()))
+    # print('len client_net cweights: ', len(cweights.keys()))
     for key in cweights:
         print(key)
         if no_dense and 'dense' in key:

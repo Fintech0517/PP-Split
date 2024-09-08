@@ -352,14 +352,13 @@ class ResNet(nn.Module):
         # self.layers = nn.ModuleList(self.layers)
         self.selected_layers = nn.ModuleList(layers[:split_layer + 1])
 
-
         print(f"Num unit layers: {len(layers)}") # Num layers: 14
         print('Split layer:', self.split_layer)
 
         if bottleneck_dim > 0:
-            sl = self.layers[split_layer]
+            sl = self.selected_layers[split_layer]
             print(f"Split after {sl}")
-            if sl in self.layers[:3]:
+            if sl in self.selected_layers[:3]:
                 in_dim = first_out
             elif sl in self.layer1:
                 in_dim = out_channels[0] * block.expansion
@@ -470,7 +469,7 @@ class ResNet(nn.Module):
         return x
 
     def forward_until_emb(self, x):
-        print(self.layers)
+        print(self.selected_layers)
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)
@@ -510,7 +509,7 @@ class ResNet(nn.Module):
     def forward_first(self, x, for_jacobian=True):
         # For parallel jacobian calculation using functorch, we need to handle BN specially, hence a new forward.
         # Forward till split_layer and add Gaussian noise
-        for layer in self.layers[:self.split_layer + 1]:
+        for layer in self.selected_layers[:self.split_layer + 1]:
             if for_jacobian:
                 if isinstance(layer, BasicBlock) or isinstance(layer, Bottleneck):
                     x = layer.forward_for_jacobian(x)
@@ -535,7 +534,7 @@ class ResNet(nn.Module):
             x = x + noise
         if self.compress is not None:
             x = self.decompress(x)
-        for layer in self.layers[self.split_layer + 1:]:
+        for layer in self.selected_layers[self.split_layer + 1:]:
             x = layer(x)
 
         x = self.avgpool(x)
@@ -545,7 +544,7 @@ class ResNet(nn.Module):
         return x
 
     def freeze_up_to_split(self):
-        for i, layer in enumerate(self.layers):
+        for i, layer in enumerate(self.selected_layers):
             for param in layer.parameters():
                 param.requires_grad = False
             if i == self.split_layer:
@@ -554,7 +553,7 @@ class ResNet(nn.Module):
     def set_bn_training(self, training):
         # Set batchnorm training to True or False, without touching anything else.
         # This is for functorch jacobian calculation.
-        for i, layer in enumerate(self.layers):
+        for i, layer in enumerate(self.selected_layers):
             if isinstance(layer, BasicBlock) or isinstance(layer, Bottleneck):
                 layer.set_bn_training(training)
             elif isinstance(layer, nn.BatchNorm2d):
@@ -611,7 +610,7 @@ def resnet50(pretrained=False, device='cpu', **kwargs):
 #     elif split_layer == 9:
 #         inet = InversionNet(in_c=256, upconv_channels=[(256, 'up'), (256, 'up'), (3, 'up')], last_activation=last_activation)
 
-resnet_model_cfg = {
+resnet_decoder_model_cfg = {
     2: [(128, 'same'), (3, 'same')], # <=2
     3: [(128, 'up'), (3, 'same')],
     5: [(128, 'up'), (3, 'same')],
@@ -659,7 +658,7 @@ class InversionNet(nn.Module):
         super(InversionNet, self).__init__()
         
         # 根据split layer 取参数
-        upconv_channels = resnet_model_cfg[split_layer]
+        upconv_channels = resnet_decoder_model_cfg[split_layer]
         in_c = in_c_dict[split_layer]
 
         layers = []
@@ -685,11 +684,11 @@ class InversionNet(nn.Module):
         # elif last_activation == 'tanh':
             # layers.append(nn.Tanh())
         layers.append(nn.Tanh())
-        self.layers = nn.Sequential(*layers)
+        self.selected_layers = nn.Sequential(*layers)
 
     def forward(self, x):
         #print(x.shape)
-        for layer in self.layers:
+        for layer in self.selected_layers:
             x = layer(x)
             #print(layer)
         return x
