@@ -5,9 +5,9 @@
 '''
 Author: Ruijun Deng
 Date: 2024-08-14 16:59:47
-LastEditTime: 2024-09-02 22:49:17
+LastEditTime: 2024-09-08 07:11:25
 LastEditors: Ruijun Deng
-FilePath: /PP-Split/examples/effectInfo/effectInfo.py
+FilePath: /PP-Split/examples/effectInfo/effectInfo1.3.py
 Description: 
 '''
 # 导包
@@ -116,6 +116,7 @@ import time
 from torch.autograd.functional import jvp
 import random
 import math
+
 
 import pandas as pd
 
