@@ -617,7 +617,7 @@ https://stackoverflow.com/questions/101439/the-most-efficient-way-to-implement-a
             else:  # 默认情况下，两个mode都是False，走这条路。
                 # print('this is normal probability mode')
                 probability = self._compute_probability(data_matrix)
-                print('probability',probability)
+                # print('probability',probability)
             # Nentropie = self._compute_entropy(probability)     
             Nentropie = self._compute_entropy_once(probability)     
         return Nentropie

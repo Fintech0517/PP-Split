@@ -5,9 +5,9 @@
 '''
 Author: Ruijun Deng
 Date: 2024-08-14 16:59:47
-LastEditTime: 2024-09-17 01:17:43
+LastEditTime: 2024-09-17 06:22:35
 LastEditors: Ruijun Deng
-FilePath: /PP-Split/examples/effectInfo/effectInfo1.6.py
+FilePath: /PP-Split/examples/effectInfo/effectInfo1.7.py
 Description: 
 '''
 # 导包
@@ -38,28 +38,28 @@ from ppsplit.utils.utils import create_dir
 
 # %%
 # %%
-# nohup python -u effectInfo1.6.py > ../../results/20240702-effectiveInfo/Resnet18/effectiveInfo1.6/effectInfo1.6-pool4-layer11-gpu.log 2>&1 &
-# nohup python -u effectInfo1.6.py > ../../results/20240702-effectiveInfo/VGG5/effectiveInfo1.6/effectInfo1.6-pool4-layer7-gpu.log 2>&1 &
+# nohup python -u effectInfo1.7.py > ../../results/20240702-effectiveInfo/Resnet18/effectiveInfo1.7/effectInfo1.6-pool4-layer11-gpu.log 2>&1 &
+# nohup python -u effectInfo1.7.py > ../../results/20240702-effectiveInfo/VGG5/effectiveInfo1.7/effectInfo1.6-pool4-layer6-gpu.log 2>&1 &
 
 args = {
-        'device':torch.device("cuda:1" if torch.cuda.is_available() else "cpu"),
+        'device':torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
         # 'device':torch.device("cpu"),
         'dataset':'CIFAR10',
         # 'dataset':'bank',
         # 'dataset':'credit',
         # 'dataset':'purchase',
         # 'dataset':'Iris',
-        'model': 'ResNet18',
-        # 'model': 'VGG5',
+        # 'model': 'ResNet18',
+        'model': 'VGG5',
         # 'result_dir': '20240702-FIL/',
         'result_dir': '20240702-effectiveInfo/',
         'oneData_bs': 500,
         'test_bs': 1,
         'train_bs': 1,
         'noise_scale': 0, # 防护措施
-        'split_layer': 11,
+        'split_layer': 6,
         # 'test_num': 'invdFIL', # MI, invdFIL, distCor, ULoss,  # split layer [2,3,5,7,9,11] for ResNet18
-        'test_num': 'effectiveInfo1.6',
+        'test_num': 'effectiveInfo1.7',
         'no_dense':True,
         }
 print(args['device'])
@@ -78,7 +78,8 @@ one_data_loader,trainloader,testloader = data_msg['one_data_loader'],data_msg['t
 
 # effectEntropy Infotopo参数
 nb_of_values = msg['nb_of_values']
-conv = msg['conv']
+# conv = msg['conv']
+conv = False
 print("infotopo: nb_of_values: ",nb_of_values)
 
 # 模型
@@ -121,7 +122,6 @@ import time
 from torch.autograd.functional import jvp
 import random
 import math
-
 
 import pandas as pd
 
@@ -307,6 +307,7 @@ def f2_trace(net,x,device):
     # f2 = torch.log(tr)
     return tr
 
+
 # %% [markdown]
 # ## 5.2 effect uniform
 
@@ -346,6 +347,13 @@ def calculate_effect_normalize_batch(inputs):
         total_entropy += calculate_effect_normalize_hetero(input_i)
     
     return total_entropy/batch_size
+
+# 示例向量
+vector = torch.rand(192)
+entropy = calculate_effect_normalize(vector)
+print(f"Entropy of the vector: {entropy}")
+
+# print(type(entropy))
 
 # %% [markdown]
 # ## 5.3 effect Entropy
@@ -412,6 +420,10 @@ def shannon_entropy_infotopo(x, conv = False):
     return joint_entropy_final
 
 
+# %%
+# effective entorpy
+
+
 
 # %% [markdown]
 # ## 5.3 effectInfo
@@ -433,8 +445,8 @@ for j, data in enumerate(tqdm.tqdm(one_data_loader)): # 测试第一个testloade
         # effecEntro= EntropyMetric._entropy_prob_batch(images) # H(x)
         
         # infotopo
+        print('images: ', images.shape)
         if conv:
-            print('images: ', images.shape)
             images= avg_pool2d(images,kernel_size=4)
             print('images_pooled: ',images.shape)
 
@@ -490,3 +502,4 @@ if os.path.exists(save_route):
     df.to_csv(save_route,index=False)
 else:
     pd.DataFrame(data=transpose, columns=[args['split_layer']]).to_csv(save_route,index=False)
+
