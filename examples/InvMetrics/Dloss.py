@@ -46,7 +46,7 @@ args = {
         'train_bs': 1,
         'noise_scale': 0, # 防护措施
         'split_layer': 5,
-        'test_num': 'MI', # MI, invdFIL, distCor, ULoss,  # split layer [2,3,5,7,9,11] for ResNet18
+        'test_num': 'distCor', # MI, invdFIL, distCor, ULoss,  # split layer [2,3,5,7,9,11] for ResNet18
         'no_dense':True,
         }
 
@@ -83,41 +83,33 @@ create_dir(results_dir)
 # client_net使用
 client_net = client_net.to(args['device'])
 client_net.eval()
+# distance correlation指标计算
 
-# mutual information指标计算
+distCorr_diff_layer_list = []
+distCorr_same_layer_list = []
 
-MI_diff_layer_list = []
-MI_same_layer_list = []
-metric = MuInfoMetric()
-avg_MI = []
 
-# for e in range(20):
+metric = distCorMetric()
+
 # for j, data in enumerate(tqdm.tqdm(testloader)): # 对testloader遍历
 for j, data in enumerate(tqdm.tqdm(one_data_loader)): # 测试第一个testloader
-    images, labels = data
-    images, labels = images.to(args['device']), labels.to(args['device'])
+    tab, labels = data
+    tab, labels = tab.to(args['device']), labels.to(args['device'])
     with torch.no_grad():
-        # inference
-        if conv:
-            print('images: ', images.shape)
-            images= avg_pool2d(images,kernel_size=4)
-            print('images_pooled: ',images.shape)
+        pred = client_net(tab).cpu().detach()
+        inputs = tab.cpu().detach()
 
-        outputs = client_net(images).clone().detach()
-        inputs = images.cpu().detach()
-        mi = metric.quantify(inputs=inputs, outputs = outputs)
-        MI_same_layer_list.append(mi)
-        
-print(f"Layer {args['split_layer']} MI: {sum(MI_same_layer_list)/len(MI_same_layer_list)}")
-MI_diff_layer_list.append(MI_same_layer_list)
+        distCorr = metric.quantify(inputs=inputs,outputs=pred) # x,z
+        distCorr_same_layer_list.append(distCorr)
 
+
+print(f"Layer {args['split_layer']} Avg distCorr: {sum(distCorr_same_layer_list)/len(distCorr_same_layer_list)}")
+distCorr_diff_layer_list.append(distCorr_same_layer_list)
 
 # 保存到csv中
-matrix = np.array(MI_diff_layer_list) # 有点大，x
+matrix = np.array(distCorr_diff_layer_list) # 有点大，x
 transpose = matrix.T # 一行一条数据，一列代表一个layer 
-# pd.DataFrame(data=transpose, columns=[i for i in split_layer_list]).to_csv(results_dir + f'MI-bs{batch_size}.csv',index=False)
-# pd.DataFrame(data=transpose, columns=[split_layer]).to_csv(results_dir + f'MILoss-layer{split_layer}.csv',index=False)
-save_route = results_dir + f'MI.csv'
+save_route = results_dir + f'Dloss.csv'
 if os.path.exists(save_route):
     df = pd.read_csv(save_route)
     df[args['split_layer']] = transpose

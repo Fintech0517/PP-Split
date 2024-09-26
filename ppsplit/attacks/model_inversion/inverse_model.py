@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-12-12 12:42:45
-LastEditTime: 2024-08-17 21:24:33
+LastEditTime: 2024-09-26 07:47:55
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/ppsplit/attacks/model_inversion/inverse_model.py
 Description: 
@@ -22,9 +22,12 @@ import torchvision
 import time
 
 class InverseModelAttack():
-    def __init__(self,gpu=True,decoder_route=None,data_type=0,inverse_dir=None) -> None:
+    def __init__(self,gpu=True,decoder_route=None,data_type=0,inverse_dir=None,device=None) -> None:
         self.data_type=data_type # 0 是表格数据集，1是图像数据集
-        self.device = torch.device("cuda:1" if torch.cuda.is_available() and gpu else "cpu")
+        if not device:
+            self.device = torch.device("cuda:1" if torch.cuda.is_available() and gpu else "cpu")
+        else:
+            self.device = device
         # 储存或加载攻击模型的路径
 
         self.inverse_dir = inverse_dir if inverse_dir else './inverted/'

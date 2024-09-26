@@ -80,7 +80,7 @@ print('decoder_route:',decoder_route)
 
 # 准备inverse_model attack使用到的东西
 # 创建Inverse Model Attack对象
-im_attack = InverseModelAttack(decoder_route=decoder_route,data_type=data_type,inverse_dir=inverse_dir)
+im_attack = InverseModelAttack(decoder_route=decoder_route,data_type=data_type,inverse_dir=inverse_dir,device=args['device'])
 
 # 加载decoder模型
 if not os.path.isfile(decoder_route): # 如果没有训练decoder
