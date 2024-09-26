@@ -1,11 +1,3 @@
-'''
-Author: Ruijun Deng
-Date: 2024-08-24 00:41:30
-LastEditTime: 2024-09-02 20:39:10
-LastEditors: Ruijun Deng
-FilePath: /PP-Split/examples/DRA/model_inversion_inverse_model_attack.py
-Description: 
-'''
 # 导包
 import sys
 sys.path.append('/home/dengruijun/data/FinTech/PP-Split/')
@@ -20,32 +12,53 @@ from ppsplit.defense.noise import Noise
 # 模型、数据集获取
 from target_model.task_select import get_dataloader_and_model, get_dataloader,get_models
 
-# nohup python -u model_inversion_inverse_model_attack.py > ../../results/inverse-model-results-20240414/Resnet18/InverseModelAttack/layer11.log 2>&1 &
-# nohup python -u model_inversion_inverse_model_attack.py > ../../results/inverse-model-results-20240414/VGG5/InverseModelAttack/layer3.log 2>&1 &
-# 超参数
-args = {
-        'device':torch.device("cuda:1" if torch.cuda.is_available() else "cpu"),
-        # 'device':torch.device("cpu"),
-        'dataset':'CIFAR10',
-        # 'dataset':'bank',
-        # 'dataset':'credit',
-        # 'dataset':'purchase',
-        # 'dataset':'Iris',
-        'model': 'ResNet18',
-        # 'model': 'VGG5',
-        'result_dir': 'inverse-model-results-20240414/',
-        'oneData_bs': 1,
-        'test_bs': 1,
-        'train_bs': 32,
-        'noise_scale':0, # 防护措施
-        'split_layer': 11,
-        'test_num': 'InverseModelAttack',
-        # 'num_pairs': 10000, # RepE # 这个要另外准备
-        'no_dense': False,
-        }
 
-print(args['device'])
+
+import argparse
+# parser
+parser = argparse.ArgumentParser(description='PP-Split')
+parser.add_argument('--device', type=str, default="cuda:0", help='device')
+parser.add_argument('--dataset', type=str, default="CIFAR10", help='dataset') # 'bank', 'credit', 'purchase', 'Iris',
+parser.add_argument('--model', type=str, default="ResNet18", help='model')  # 'ResNet18',' VGG5'
+parser.add_argument('--result_dir', type=str, default="20240702-effectiveInfo/", help='result_dir')
+parser.add_argument('--oneData_bs', type=int, default=1, help='oneData_bs')
+parser.add_argument('--test_bs', type=int, default=1, help='test_bs')
+parser.add_argument('--train_bs', type=int, default=32, help='train_bs')
+parser.add_argument('--noise_scale', type=int, default=0.1, help='noise_scale')
+parser.add_argument('--split_layer', type=int, default=2, help='split_layer')
+parser.add_argument('--test_num', type=str, default='InverseModelAttack-defense0.1', help='test_num')
+parser.add_argument('--no_dense', action='store_true', help='no_dense')
+
+args_python = parser.parse_args()
+args = vars(args_python)
+
+
+# # 超参数
+# args = {
+#         'device':torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
+#         # 'device':torch.device("cpu"),
+#         'dataset':'CIFAR10',
+#         # 'dataset':'bank',
+#         # 'dataset':'credit',
+#         # 'dataset':'purchase',
+#         # 'dataset':'Iris',
+#         # 'model': 'ResNet18',
+#         'model': 'VGG5',
+#         # 'result_dir': '20240702-FIL/',
+#         'result_dir': 'inverse-model-results-20240414/',
+#         'oneData_bs': 1,
+#         'test_bs': 1,
+#         'train_bs': 32,
+#         'noise_scale': 0.1, # 防护措施
+#         'split_layer': 0,
+#         # 'test_num': 'invdFIL', # MI, invdFIL, distCor, ULoss,  # split layer [2,3,5,7,9,11] for ResNet18
+#         'test_num': 'InverseModelAttack-defense0.1',
+#         'no_dense':True,
+#         }
+
+# print(args['device'])
 print(args)
+
 
 # 获取模型和数据集
 # msg = get_dataloader_and_model(**args)
@@ -53,7 +66,7 @@ print(args)
 model_msg = get_models(args)
 
 # one_data_loader,trainloader,testloader = model_msg['one_data_loader'],model_msg['trainloader'], model_msg['testloader']
-client_net,decoder_net = model_msg['client_net'],model_msg['decoder_net']
+client_net,decoder_net = model_msg['client_net'], model_msg['decoder_net']
 decoder_route = model_msg['decoder_route']
 image_deprocess = model_msg['image_deprocess']
 
@@ -64,7 +77,6 @@ data_type = 1 if args['dataset'] == 'CIFAR10' else 0
 print('results_dir:',results_dir)
 print('inverse_dir:',inverse_dir)
 print('decoder_route:',decoder_route)
-
 
 # 准备inverse_model attack使用到的东西
 # 创建Inverse Model Attack对象
@@ -85,7 +97,6 @@ else:
 
 print(decoder_net)
 
-
 # 实现攻击,恢复testloader中所有图片
 # trainloader,testloader = get_cifar10_normalize(batch_size=1)
 args['train_bs']=1
@@ -97,10 +108,4 @@ im_attack.inverse(client_net=client_net,decoder_net=decoder_net,
                   deprocess=image_deprocess,
                   save_fake=True,
                   tab=msg_data['tabinfo'])
-
-
-
-
-
-
 

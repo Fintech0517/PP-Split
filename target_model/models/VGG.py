@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-08-27 20:58:31
-LastEditTime: 2024-09-17 06:22:20
+LastEditTime: 2024-09-26 05:50:36
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/models/VGG.py
 Description: 
@@ -120,8 +120,10 @@ class VGG(nn.Module):
 			out = self.denses(out)
 
 		if self.noise_scale!=0: # 需要加laplace noise
-			self._noise = torch.distributions.Laplace(0.0, self.noise_scale)
-			return out+self._noise.sample(out.size()).to(out.device)
+			# self._noise = torch.distributions.Laplace(0.0, self.noise_scale)
+			# return out+self._noise.sample(out.size()).to(out.device)
+			self._noise= torch.randn_like(out) * self.noise_scale
+			return out+self._noise
 		return out
 
 	def _make_layers(self, cfg):

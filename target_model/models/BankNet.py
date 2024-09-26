@@ -2,7 +2,7 @@
 Author: yjr && 949804347@qq.com
 Date: 2023-09-09 20:31:05
 LastEditors: Ruijun Deng
-LastEditTime: 2024-04-14 21:37:19
+LastEditTime: 2024-09-26 05:34:21
 FilePath: /PP-Split/target_model/models/BankNet.py
 Description: 
 '''
@@ -92,8 +92,10 @@ class BankNet1(nn.Module):
         for layer in self.children():
             in_ = layer(in_)
         if self.noise_scale!=0: # 需要加laplace noise
-            self._noise = torch.distributions.Laplace(0.0, self.noise_scale)
-            return in_+self._noise.sample(in_.size()).to(in_.device)
+            # self._noise = torch.distributions.Laplace(0.0, self.noise_scale)
+            # return in_+self._noise.sample(in_.size()).to(in_.device)
+            self._noise= torch.randn_like(in_) * self.noise_scale
+            return in_+self._noise
         return in_
     
 

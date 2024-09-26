@@ -1,7 +1,7 @@
 '''
 Author: yjr && 949804347@qq.com
 Date: 2023-11-19 15:05:05
-LastEditTime: 2024-05-19 22:57:05
+LastEditTime: 2024-09-26 05:34:45
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/models/PurchaseNet.py
 Description: 
@@ -80,8 +80,10 @@ class PurchaseClassifier1(nn.Module):
         for layer in self.children():
             in_ = layer(in_)
         if self.noise_scale!=0: # 需要加laplace noise   
-            self._noise = torch.distributions.Laplace(0.0, self.noise_scale)
-            return in_+self._noise.sample(in_.size()).to(in_.device)
+            # self._noise = torch.distributions.Laplace(0.0, self.noise_scale)
+            # return in_+self._noise.sample(in_.size()).to(in_.device)
+            self._noise= torch.randn_like(in_) * self.noise_scale
+            return in_+self._noise
         return in_
     
 

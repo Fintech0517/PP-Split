@@ -1,7 +1,7 @@
 '''
 Author: yjr && 949804347@qq.com
 Date: 2023-09-26 20:45:13
-LastEditTime: 2024-04-14 21:36:27
+LastEditTime: 2024-09-26 05:34:33
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/models/CreditNet.py
 Description:
@@ -115,8 +115,10 @@ class CreditNet1(nn.Module):
         for layer in self.children():
             in_ = layer(in_)
         if self.noise_scale!=0: # 需要加laplace noise
-            self._noise = torch.distributions.Laplace(0.0, self.noise_scale)
-            return in_+self._noise.sample(in_.size()).to(in_.device)
+            # self._noise = torch.distributions.Laplace(0.0, self.noise_scale)
+            # return in_+self._noise.sample(in_.size()).to(in_.device)
+            self._noise= torch.randn_like(in_) * self.noise_scale
+            return in_+self._noise
         return in_
     
     def initialize_weights(self, module):
