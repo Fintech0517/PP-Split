@@ -124,8 +124,8 @@ eta_diff_layer_list=[]
 
 metric = dFILInverseMetric()
 # 对traingloader遍历计算所有 inverse dFIL
-# for j, data in enumerate(tqdm.tqdm(testloader)):
-for j, data in enumerate(tqdm.tqdm(one_data_loader)): # 测试第一个testloader
+for j, data in enumerate(tqdm.tqdm(testloader)):
+# for j, data in enumerate(tqdm.tqdm(one_data_loader)): # 测试第一个testloader
     # if j < 31705:
         # continue
     inputs, labels = data
@@ -136,7 +136,7 @@ for j, data in enumerate(tqdm.tqdm(one_data_loader)): # 测试第一个testloade
 
     eta = metric.quantify(model=client_net, inputs=inputs, outputs=outputs, with_outputs=True)
     # 打印
-    # print(str(j)+": "+str(eta.item()))
+    print(str(j)+": "+str(eta.item()))
     eta_same_layer_list.append(eta)
 eta_diff_layer_list.append(eta_same_layer_list)
 

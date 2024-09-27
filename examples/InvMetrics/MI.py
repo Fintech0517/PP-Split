@@ -92,8 +92,8 @@ metric = MuInfoMetric()
 avg_MI = []
 
 # for e in range(20):
-# for j, data in enumerate(tqdm.tqdm(testloader)): # 对testloader遍历
-for j, data in enumerate(tqdm.tqdm(one_data_loader)): # 测试第一个testloader
+for j, data in enumerate(tqdm.tqdm(testloader)): # 对testloader遍历
+# for j, data in enumerate(tqdm.tqdm(one_data_loader)): # 测试第一个testloader
     images, labels = data
     images, labels = images.to(args['device']), labels.to(args['device'])
     with torch.no_grad():

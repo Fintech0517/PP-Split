@@ -20,7 +20,7 @@ parser = argparse.ArgumentParser(description='PP-Split')
 parser.add_argument('--device', type=str, default="cuda:0", help='device')
 parser.add_argument('--dataset', type=str, default="CIFAR10", help='dataset') # 'bank', 'credit', 'purchase', 'Iris',
 parser.add_argument('--model', type=str, default="ResNet18", help='model')  # 'ResNet18',' VGG5'
-parser.add_argument('--result_dir', type=str, default="20240702-effectiveInfo/", help='result_dir')
+parser.add_argument('--result_dir', type=str, default="inverse-model-results-20240414/", help='result_dir')
 parser.add_argument('--oneData_bs', type=int, default=1, help='oneData_bs')
 parser.add_argument('--test_bs', type=int, default=1, help='test_bs')
 parser.add_argument('--train_bs', type=int, default=32, help='train_bs')
