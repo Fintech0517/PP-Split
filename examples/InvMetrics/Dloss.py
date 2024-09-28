@@ -29,26 +29,44 @@ from ppsplit.utils.utils import create_dir
 # nohup python -u MI.py > ../../results/InvMetric-202403/VGG5/MI/MI-layer5.log 2>&1 &
 # 超参数
 
-args = {
-        'device':torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
-        # 'device':torch.device("cpu"),
-        'dataset':'CIFAR10',
-        # 'dataset':'bank',
-        # 'dataset':'credit',
-        # 'dataset':'purchase',
-        # 'dataset':'Iris',
-        # 'model': 'ResNet18',
-        'model': 'VGG5',
-        # 'result_dir': '20240702-FIL/',
-        'result_dir': 'InvMetric-202403/',
-        'oneData_bs': 500,
-        'test_bs': 500,
-        'train_bs': 1,
-        'noise_scale': 0, # 防护措施
-        'split_layer': 5,
-        'test_num': 'distCor', # MI, invdFIL, distCor, ULoss,  # split layer [2,3,5,7,9,11] for ResNet18
-        'no_dense':True,
-        }
+# args = {
+#         'device':torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
+#         # 'device':torch.device("cpu"),
+#         'dataset':'CIFAR10',
+#         # 'dataset':'bank',
+#         # 'dataset':'credit',
+#         # 'dataset':'purchase',
+#         # 'dataset':'Iris',
+#         # 'model': 'ResNet18',
+#         'model': 'VGG5',
+#         # 'result_dir': '20240702-FIL/',
+#         'result_dir': 'InvMetric-202403/',
+#         'oneData_bs': 10000,
+#         'test_bs': 500,
+#         'train_bs': 1,
+#         'noise_scale': 0, # 防护措施
+#         'split_layer': 5,
+#         'test_num': 'distCor', # MI, invdFIL, distCor, ULoss,  # split layer [2,3,5,7,9,11] for ResNet18
+#         'no_dense':True,
+#     }
+
+import argparse 
+parser = argparse.ArgumentParser(description='PP-Split')
+parser.add_argument('--device', type=str, default="cuda:0", help='device')
+parser.add_argument('--dataset', type=str, default="CIFAR10", help='dataset') # 'bank', 'credit', 'purchase', 'Iris',
+parser.add_argument('--model', type=str, default="ResNet18", help='model')  # 'ResNet18'
+parser.add_argument('--result_dir', type=str, default="InvMetric-202403/", help='result_dir')
+parser.add_argument('--oneData_bs', type=int, default=10000, help='oneData_bs')
+parser.add_argument('--test_bs', type=int, default=500, help='test_bs')
+parser.add_argument('--train_bs', type=int, default=1, help='train_bs')
+parser.add_argument('--noise_scale', type=int, default=0, help='noise_scale')
+parser.add_argument('--split_layer', type=int, default=2, help='split_layer')
+parser.add_argument('--test_num', type=str, default='distCor', help='test_num')
+parser.add_argument('--no_dense', action='store_true', help='no_dense')
+
+
+args_python = parser.parse_args()
+args = vars(args_python)
 
 print(args['device'])
 print(args)
@@ -91,8 +109,8 @@ distCorr_same_layer_list = []
 
 metric = distCorMetric()
 
-# for j, data in enumerate(tqdm.tqdm(testloader)): # 对testloader遍历
-for j, data in enumerate(tqdm.tqdm(one_data_loader)): # 测试第一个testloader
+for j, data in enumerate(tqdm.tqdm(testloader)): # 对testloader遍历
+# for j, data in enumerate(tqdm.tqdm(one_data_loader)): # 测试第一个testloader
     tab, labels = data
     tab, labels = tab.to(args['device']), labels.to(args['device'])
     with torch.no_grad():
