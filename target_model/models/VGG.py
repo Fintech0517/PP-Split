@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-08-27 20:58:31
-LastEditTime: 2024-09-26 05:50:36
+LastEditTime: 2024-09-29 06:27:51
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/models/VGG.py
 Description: 
@@ -54,7 +54,33 @@ model_cfg = {
 		('D',1024,4096,1,4096,4194304), # 11
 		('D',4096,4096,1,4096,16777216),  # 12
 		('D',4096,10,1,10,40960), # 13
-	]
+	],
+	'VGG5_MNIST' : [ # 最后一列可能是错的
+    ('C', 1, 32, 3, 32*28*28, 32*28*28*3*3*3), # 0 32*32*32=32768
+    ('M', 32, 32, 2, 32*14*14, 0),  # 1 32*16*16=8192
+	('C', 32, 64, 3, 64*14*14, 64*14*14*3*3*32), #2 64*16*16=16384
+    ('M', 64, 64, 2, 64*7*7, 0), # 3 64*8*8=4096
+	('C', 64, 64, 3, 64*7*7, 64*7*7*3*3*64), # 4 64*8*8=4096
+	('D', 7*7*64, 128, 1, 64, 128*7*7*64), # 5 128*8*8=8192
+	('D', 128, 10, 1, 10, 128*10)], # 6 10
+
+
+	'VGG9_MNIST':[ # 最后一列可能是错的
+	('C',1,64,3,64*28*28,1769472), # 0
+	('M',64,64,2,64*14*14,0), # 1
+	('C',64,64,3,64*14*14,9437184), 
+	('C',64,128,3,128*14*14,18874368), 
+	('M',128,128,2,128*7*7,0),# 4
+	('C',128,128,3,128*7*7,9437184),
+	('C',128,256,3,256*7*7,18874368),
+	('M',256,256,2,256*3*3,0), #7
+	('C',256,256,3,256*3*3,9437184),
+	('M',256,256,2,256*1*1,0), #9
+	('C',256,256,3,256*1*1,2359296), #10
+	('D',256,1024,1,4096,4194304), # 11
+	('D',1024,1024,1,4096,16777216),  # 12
+	('D',1024,10,1,10,40960), # 13
+	],
 }
 model_name = 'VGG5'
 # model_name = 'VGG9'
@@ -205,9 +231,14 @@ class VGG5Decoder(nn.Module): # 这个cfg参数指的是model_cfg[vgg5]
             out = self.denses(out)
             if self.network_name == 'VGG5':
                 out = out.view([out.size(0),64,8,8]) # vgg5
-            else:
+            elif self.network_name == 'VGG9':
                 out = out.view([out.size(0),256,2,2]) # vgg9
-                 
+            elif self.network_name == 'VGG5_MNIST': 
+                out = out.view([out.size(0),64,7,7]) # vgg5_mnist
+            elif self.network_name == 'VGG9_MNIST':
+                out = out.view([out.size(0),256,1,1])
+            else:
+                raise RuntimeError("unknown network name")
         if len(self.features) > 0:
             out = self.features(out)
         return out

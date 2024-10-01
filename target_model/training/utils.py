@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2024-04-14 15:58:18
-LastEditTime: 2024-05-30 11:01:43
+LastEditTime: 2024-09-28 04:26:36
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/training/utils.py
 Description: 
@@ -30,7 +30,7 @@ from ppsplit.utils.similarity_metrics import SimilarityMetrics
 # 评估edge模型测试精度，多分类任务，还是单纯针对多分类吧，用softmax
 # argmax
 # cifar10可用
-def evalTest(testloader, net, gpu = True):
+def evalTest(testloader, net, device):
     def acc(pred_logits, true_label):
         # 针对单个batch的 logits 用 argmax进行与 int 类型的true label的对比
         pred = np.argmax(pred_logits.cpu().detach().numpy(), axis = 1)
@@ -44,9 +44,8 @@ def evalTest(testloader, net, gpu = True):
     for i, data in enumerate(tqdm.tqdm(testIter, 0)):
         NBatch += 1
         batchX, batchY = data
-        if gpu:
-            batchX = batchX.cuda()
-            batchY = batchY.cuda()
+        batchX = batchX.to(device)
+        batchY = batchY.to(device)
         logits = net.forward(batchX) 
         prob = softmax(logits)
         # 没有用 softmax？,用了argmax（hardmax）？

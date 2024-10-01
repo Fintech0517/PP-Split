@@ -72,7 +72,7 @@ image_deprocess = model_msg['image_deprocess']
 
 results_dir = model_msg['results_dir']
 inverse_dir = results_dir + 'layer'+str(args['split_layer'])+'/'
-data_type = 1 if args['dataset'] == 'CIFAR10' else 0
+data_type = 1 if args['dataset'] in ['CIFAR10','MNIST'] else 0
 
 print('results_dir:',results_dir)
 print('inverse_dir:',inverse_dir)
@@ -81,6 +81,7 @@ print('decoder_route:',decoder_route)
 # 准备inverse_model attack使用到的东西
 # 创建Inverse Model Attack对象
 im_attack = InverseModelAttack(decoder_route=decoder_route,data_type=data_type,inverse_dir=inverse_dir,device=args['device'])
+
 
 # 加载decoder模型
 if not os.path.isfile(decoder_route): # 如果没有训练decoder
@@ -94,6 +95,7 @@ if not os.path.isfile(decoder_route): # 如果没有训练decoder
                             epochs=20)
 else:
     print("Load decoder model from:",decoder_route)
+
 
 print(decoder_net)
 

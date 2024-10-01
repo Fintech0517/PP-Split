@@ -272,10 +272,11 @@ class ResNet(nn.Module):
         replace_stride_with_dilation=None,
         norm_layer=None,
         out_channels=[64, 128, 256, 512],
+        in_channel = 3,
         split_layer=-1,
         bottleneck_dim=-1, # 是否要使用压缩层宽的方式来进行
         activation='relu',
-        pooling='max'
+        pooling='max',
     ):
         super(ResNet, self).__init__()
 
@@ -301,7 +302,7 @@ class ResNet(nn.Module):
 
         # CIFAR10: kernel_size 7 -> 3, stride 2 -> 1, padding 3->1
         conv1 = nn.Conv2d(
-            3, self.inplanes, kernel_size=3, stride=1, padding=1, bias=False
+            in_channel, self.inplanes, kernel_size=3, stride=1, padding=1, bias=False
         )
         first_out = self.inplanes
         # END
@@ -616,7 +617,9 @@ resnet_decoder_model_cfg = {
     5: [(128, 'up'), (3, 'same')],
     7: [(128, 'up'), (3, 'up')],
     9: [(256, 'up'), (256, 'up'), (3, 'up')],
-    11: [(512, 'up'), (512, 'up'), (256, 'up'), (3, 'up')], # drj
+    # 11: [(512, 'up'), (512, 'up'), (256, 'up'), (3, 'up')], # drj
+    11: [(512, 'up'), (256, 'up'), (256, 'up'), (3, 'up')], # drj
+    # 11: [(512, 'same'), (512, 'up'), (256,'up'), (128, 'up'), (3, 'up')], # drj
     12: [], # adaptive avgpooling这个怎么恢复，我还真不会。
     13: [],
 }

@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2024-03-07 14:19:17
-LastEditTime: 2024-03-13 16:04:52
+LastEditTime: 2024-09-28 04:01:00
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/models/LeNet.py
 Description: DLG那篇文章的源码
@@ -17,16 +17,14 @@ def weights_init(m):
         m.bias.data.uniform_(-0.5, 0.5)
 
         
-class LeNet(nn.Module):
+class LeNet_MNIST(nn.Module):
     def __init__(self):
-        super(LeNet, self).__init__()
-        act = nn.Sigmoid
+        super(LeNet_MNIST, self).__init__()
+        act = nn.Tanh
         self.body = nn.Sequential(
-            nn.Conv2d(3, 12, kernel_size=5, padding=5//2, stride=2),
+            nn.Conv2d(1, 6, kernel_size=5, padding=0, stride=1),
             act(),
-            nn.Conv2d(12, 12, kernel_size=5, padding=5//2, stride=2),
-            act(),
-            nn.Conv2d(12, 12, kernel_size=5, padding=5//2, stride=1),
+            nn.Conv2d(6, 16, kernel_size=5, padding=0, stride=1),
             act(),
         )
         self.fc = nn.Sequential(

@@ -5,7 +5,7 @@
 '''
 Author: Ruijun Deng
 Date: 2024-08-14 16:59:47
-LastEditTime: 2024-09-25 00:02:55
+LastEditTime: 2024-09-28 06:09:04
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/examples/effectInfo/effectInfo1.8.py
 Description: 
@@ -45,12 +45,12 @@ from ppsplit.utils.utils import create_dir
 args = {
         'device':torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
         # 'device':torch.device("cpu"),
-        'dataset':'CIFAR10',
+        # 'dataset':'CIFAR10',
         # 'dataset':'bank'·
         # 'dataset':'credit',
-        # 'dataset':'purchase',
+        'dataset':'purchase',
         # 'dataset':'Iris',
-        'model': 'ResNet18',
+        # 'model': 'ResNet18',
         # 'model': 'VGG5',
         # 'result_dir': '20240702-FIL/',
         'result_dir': '20240702-effectiveInfo/',
@@ -58,7 +58,7 @@ args = {
         'test_bs': 1,
         'train_bs': 1,
         'noise_scale': 0, # 防护措施
-        'split_layer': 11,
+        'split_layer': 3,
         # 'test_num': 'invdFIL', # MI, invdFIL, distCor, ULoss,  # split layer [2,3,5,7,9,11] for ResNet18
         'test_num': 'effectiveInfo1.8',
         'no_dense':True,

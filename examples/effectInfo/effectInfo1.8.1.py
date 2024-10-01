@@ -5,7 +5,7 @@
 '''
 Author: Ruijun Deng
 Date: 2024-08-14 16:59:47
-LastEditTime: 2024-09-26 04:30:38
+LastEditTime: 2024-09-29 05:52:29
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/examples/effectInfo/effectInfo1.8.1.py
 Description: 
@@ -46,7 +46,7 @@ parser.add_argument('--device', type=str, default="cuda:0", help='device')
 parser.add_argument('--dataset', type=str, default="CIFAR10", help='dataset') # 'bank', 'credit', 'purchase', 'Iris',
 parser.add_argument('--model', type=str, default="ResNet18", help='model')  # 'ResNet18'
 parser.add_argument('--result_dir', type=str, default="20240702-effectiveInfo/", help='result_dir')
-parser.add_argument('--oneData_bs', type=int, default=1, help='oneData_bs')
+parser.add_argument('--oneData_bs', type=int, default=5, help='oneData_bs')
 parser.add_argument('--test_bs', type=int, default=500, help='test_bs')
 parser.add_argument('--train_bs', type=int, default=1, help='train_bs')
 parser.add_argument('--noise_scale', type=int, default=0, help='noise_scale')
@@ -94,6 +94,7 @@ msg = {**model_msg,**data_msg,**infotopo_msg}
 
 # 数据集
 one_data_loader,trainloader,testloader = data_msg['one_data_loader'],data_msg['trainloader'], data_msg['testloader']
+data_interval = data_msg['data_interval']
 
 # effectEntropy Infotopo参数
 nb_of_values = msg['nb_of_values']
@@ -109,7 +110,7 @@ image_deprocess = model_msg['image_deprocess']
 # 路径
 results_dir = model_msg['results_dir']
 inverse_dir = results_dir + 'layer' + str(args['split_layer'])+'/'
-data_type = 1 if args['dataset'] == 'CIFAR10' else 0
+data_type = 1 if args['dataset'] in ['CIFAR10','MNIST'] else 0
 split_layer = args['split_layer']
 
 print('results_dir:', results_dir)
@@ -242,9 +243,10 @@ def computing_diag_det_with_outputs(model, inputs, outputs, sigmas=1.0): # sigma
 # Effect uniform
 import numpy as np
 import torch
-def calculate_effect_normalize(input_vector,interval=2.0):
+def calculate_effect_normalize(input_vector,interval=(-1.0,1.0)):
+    interval_len = interval[1] - interval[0]
     # 确定每个维度的取值范围
-    a = torch.tensor(interval)
+    a = torch.tensor(interval_len)
     # 计算每个维度的熵
     entropy_per_dimension = torch.log(a)
     # 总熵是每个维度的熵的总和
@@ -253,25 +255,25 @@ def calculate_effect_normalize(input_vector,interval=2.0):
     return total_entropy
 
 
-def calculate_effect_normalize_hetero(input_vector):
+def calculate_effect_normalize_hetero(input_vector, interval=(1.0,-1.0)):
     size = input_vector.numel()
     input_flattened = input_vector.reshape(-1)
     total_entropy_single = 0.0
     for i in range(size):
-        l = 2*torch.min(torch.abs(input_flattened[i]-torch.tensor(-1.0)),torch.abs(input_flattened[i]-torch.tensor(1.0)))
+        l = 2*torch.min(torch.abs(input_flattened[i]-torch.tensor(interval[0])),torch.abs(input_flattened[i]-torch.tensor(interval[1])))
         total_entropy_single += torch.log(l+1e-10)
     print(f"entropy for single_input: {total_entropy_single}")
     return total_entropy_single 
 
 
-def calculate_effect_normalize_hetero_batch(inputs):
+def calculate_effect_normalize_hetero_batch(inputs, interval=(1.0,-1.0)):
     # batchsize:
     batch_size = inputs.shape[0] # 一个batch的样本数目
     total_entropy = 0.0
 
     for i in range(batch_size):
         input_i = inputs[i].unsqueeze(0)
-        total_entropy += calculate_effect_normalize_hetero(input_i)
+        total_entropy += calculate_effect_normalize_hetero(input_i,interval)
     
     return total_entropy/batch_size
 
@@ -318,7 +320,7 @@ def shannon_entropy_infotopo(x, conv = False):
                                         sample_size = x.shape[0],
                                         # nb_of_values = nb_of_values, # 不是很懂这个意思，为什么iris对应9？
                                         # nb_of_values = 17, # 不是很懂这个意思，为什么iris对应9？
-                                        nb_of_values = 9, # 不是很懂这个意思，为什么iris对应9？
+                                        nb_of_values = nb_of_values, # 不是很懂这个意思，为什么iris对应9？
                                         # forward_computation_mode = True,
                                         )
     if conv:
@@ -383,10 +385,10 @@ for j, data in enumerate(tqdm.tqdm(testloader)): # 对testloader遍历
         # effectFisher = computing_diag_det_with_outputs(model=client_net, inputs=images, outputs=outputs,sigmas = 0.01)
         effectFisher = computing_diag_det_with_outputs(model=client_net, inputs=images, outputs=outputs,sigmas = 0.01)
 
-        # effect uniform
-        effectUniform = calculate_effect_normalize_hetero_batch(images)
+        # effect Uniform 
+        effectUniform = calculate_effect_normalize_hetero_batch(images,data_interval)
         # uniform interval
-        effectUniform_interval = calculate_effect_normalize(images[0]) # 用第一张图片就可
+        effectUniform_interval = calculate_effect_normalize(images[0],data_interval) # 用第一张图片就可
 
         # 存储
         # effecInfo_same_layer_list.append(effectEntro-effectFisher)

@@ -1,7 +1,7 @@
 '''
 Author: yjr && 949804347@qq.com
 Date: 2023-11-19 15:05:05
-LastEditTime: 2024-09-26 05:34:45
+LastEditTime: 2024-09-28 06:13:23
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/models/PurchaseNet.py
 Description: 
@@ -164,12 +164,12 @@ class PurchaseDecoder(nn.Module):  # cifar10 relu22 decoder网络 （目前结�
 
 
 class PurchaseDecoder1(nn.Module):  # cifar10 relu22 decoder网络 （目前结构就完全是和edge net的相反的层）
-    def __init__(self,layer):
-        purchase_inv_cfg = purchase_cfg[:layer+1][::-1]
+    def __init__(self,split_layer):
+        purchase_inv_cfg = purchase_cfg[:split_layer+1][::-1]
         print(purchase_inv_cfg)
         super().__init__()
         linear_idx = 1
-        assert layer < len(purchase_cfg)
+        assert split_layer < len(purchase_cfg)
         for i, component in enumerate(purchase_inv_cfg):
             if component[0]=='D':
                 out_,in_ = component[1],component[2]

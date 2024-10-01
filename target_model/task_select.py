@@ -16,6 +16,7 @@ from .data_preprocessing.preprocess_bank import bank_dataset,preprocess_bank,pre
 from .data_preprocessing.preprocess_credit import preprocess_credit,tabinfo_credit
 from .data_preprocessing.preprocess_purchase import preprocess_purchase,tabinfo_purchase
 from .data_preprocessing.preprocess_Iris import preprocess_Iris, tabinfo_Iris
+from .data_preprocessing.preprocess_mnist import get_mnist_normalize
 from .data_preprocessing.dataset import get_one_data
 
 # utils
@@ -40,8 +41,14 @@ def get_infotopo_para(args):
         pass
     elif dataset=='Iris':
         nb_of_values = 9
+        conv = False
     elif dataset=='purchase':
-        pass
+        nb_of_values =2
+        conv = False
+    elif dataset=='MNIST':
+        nb_of_values = 17
+        # conv = True
+        conv = False
     else:
         exit(-1)
     
@@ -71,6 +78,7 @@ def get_dataloader(args):
 
         # 数据集加载
         trainloader,testloader = get_cifar10_normalize(batch_size = train_bs, test_bs=test_bs)
+        data_interval = (-1.0,1.0) # [-1,1]
 
     elif dataset=='credit':
         # 超参数
@@ -104,7 +112,18 @@ def get_dataloader(args):
         trainloader,testloader = preprocess_purchase(batch_size = train_bs, test_bs=test_bs)
         tab_info=tabinfo_purchase
 
+        data_interval = (0.0,1.0) # [0,1]
+
+    elif dataset=='MNIST':
+        # 超参数
+        testset_len = 10000
+        tab_info=None
+
+        # 数据集加载
+        trainloader,testloader = get_mnist_normalize(batch_size = train_bs, test_bs=test_bs)
+        data_interval = (-1.0,1.0)
     else:
+        print('get_dataloader error')
         exit(-1)
     
     # one loader
@@ -118,7 +137,7 @@ def get_dataloader(args):
     msg['trainloader'] = trainloader
     msg['testloader'] = testloader
     msg['one_data_loader'] = one_data_loader
-
+    msg['data_interval'] = data_interval
     return msg
 
 def get_models(args):
@@ -164,6 +183,32 @@ def get_models(args):
                 print("train decoder model...")
                 decoder_net = VGG5Decoder(split_layer=split_layer)
 
+        elif model == 'VGG9':
+            # 超参数
+            # split_layer_list = list(range(len(model_cfg['VGG5'])))
+            split_layer = 4 if split_layer==-1 else split_layer # 定成3吧？
+
+            # 关键路径
+            unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/VGG9/CIFAR10/VGG9-CIFAR10-20ep.pth' # VGG9-BN+Tanh # 存储的是模型参数，不包括模型结构
+            results_dir  = f"../../results/{result_ws}/VGG9/{test_num}/"
+            decoder_route = results_dir + f"/Decoder-layer{split_layer}.pth"
+
+            # 切割成client model
+            # vgg5_unit.load_state_dict(torch.load(unit_net_route,map_location=torch.device('cpu'))) # 完整的模型
+            client_net = VGG('Client','VGG9',split_layer,model_cfg,noise_scale=noise_scale)
+            pweights = torch.load(unit_net_route)
+            if split_layer < len(model_cfg['VGG9']):
+                pweights = split_weights_client(pweights,client_net.state_dict(),no_dense=no_dense)
+            client_net.load_state_dict(pweights)
+
+            # decoder net
+            if os.path.isfile(decoder_route): # 如果已经训练好了
+                print("=> loading decoder model '{}'".format(decoder_route))
+                decoder_net = torch.load(decoder_route)
+            else: # 如果没有,加载一个
+                print("train decoder model...")
+                decoder_net = VGG5Decoder(split_layer=split_layer,network='VGG9')
+
             
         elif model == 'ResNet18':
             split_layer_list=[2,3,5,7,9,11]
@@ -199,6 +244,62 @@ def get_models(args):
 
         else:
             exit(-1)
+
+    elif dataset =='MNIST':
+        image_deprocess = deprocess
+        if model == 'VGG5':
+            # 超参数
+            # split_layer_list = list(range(len(model_cfg['VGG5'])))
+            split_layer = 2 if split_layer==-1 else split_layer # 定成3吧？
+
+            # 关键路径
+            unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/VGG5/MNIST/VGG5-MNIST-20ep.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+            results_dir  = f"../../results/{result_ws}/VGG5_MNIST/{test_num}/"
+            decoder_route = results_dir + f"/Decoder-layer{split_layer}.pth"
+
+            # 切割成client model
+            # vgg5_unit.load_state_dict(torch.load(unit_net_route,map_location=torch.device('cpu'))) # 完整的模型
+            client_net = VGG('Client','VGG5_MNIST',split_layer,model_cfg,noise_scale=noise_scale)
+            pweights = torch.load(unit_net_route)
+            if split_layer < len(model_cfg['VGG5_MNIST']):
+                pweights = split_weights_client(pweights,client_net.state_dict(),no_dense=no_dense)
+            client_net.load_state_dict(pweights)
+
+            # decoder net
+            if os.path.isfile(decoder_route): # 如果已经训练好了
+                print("=> loading decoder model '{}'".format(decoder_route))
+                decoder_net = torch.load(decoder_route)
+            else: # 如果没有,加载一个
+                print("train decoder model...")
+                decoder_net = VGG5Decoder(split_layer=split_layer,network='VGG5_MNIST')
+                # print("decoder_net:",decoder_net)
+
+        elif model == 'VGG9':
+            # 超参数
+            # split_layer_list = list(range(len(model_cfg['VGG5'])))
+            split_layer = 4 if split_layer==-1 else split_layer # 定成3吧？
+
+            # 关键路径
+            unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/VGG9/MNIST/VGG9-MNIST-20ep.pth' # VGG9-BN+Tanh # 存储的是模型参数，不包括模型结构
+            results_dir  = f"../../results/{result_ws}/VGG9_MNIST/{test_num}/"
+            decoder_route = results_dir + f"/Decoder-layer{split_layer}.pth"
+
+            # 切割成client model
+            # vgg5_unit.load_state_dict(torch.load(unit_net_route,map_location=torch.device('cpu'))) # 完整的模型
+            client_net = VGG('Client','VGG9_MNIST',split_layer,model_cfg,noise_scale=noise_scale)
+            pweights = torch.load(unit_net_route)
+            if split_layer < len(model_cfg['VGG9_MNIST']):
+                pweights = split_weights_client(pweights,client_net.state_dict(),no_dense=no_dense)
+            client_net.load_state_dict(pweights)
+
+            # decoder net
+            if os.path.isfile(decoder_route): # 如果已经训练好了
+                print("=> loading decoder model '{}'".format(decoder_route))
+                decoder_net = torch.load(decoder_route)
+            else: # 如果没有,加载一个
+                print("train decoder model...")
+                decoder_net = VGG5Decoder(split_layer=split_layer,network='VGG9')
+
 
     elif dataset=='credit':
         # 超参数
@@ -310,6 +411,7 @@ def get_models(args):
             decoder_net = PurchaseDecoder1(split_layer=split_layer)
 
     else:
+        print("get_models error")
         exit(-1)
 
     client_net.to(device)

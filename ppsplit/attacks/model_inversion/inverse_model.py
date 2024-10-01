@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-12-12 12:42:45
-LastEditTime: 2024-09-26 07:47:55
+LastEditTime: 2024-09-29 05:47:14
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/ppsplit/attacks/model_inversion/inverse_model.py
 Description: 
@@ -92,7 +92,7 @@ class InverseModelAttack():
                 tab=None):
         if self.data_type==1 and deprocess==None: # 图像数据集没给deprocess方法
             print("图像数据没给deprocess 函数")
-            exit(0)
+            exit(-1)
         
         if self.data_type==0: # 表格数据
             return self._inverse_tab(client_net,decoder_net,train_loader,test_loader,save_fake,tab)
