@@ -1,0 +1,64 @@
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+  | Name      | Type               | Params
+-------------------------------------------------
+0 | criterion | CrossEntropyLoss   | 0
+1 | accuracy  | MulticlassAccuracy | 0
+2 | model     | ResNet             | 4.6 M
+-------------------------------------------------
+4.6 M     Trainable params
+0         Non-trainable params
+4.6 M     Total params
+18.482    Total estimated model params size (MB)
+/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/pytorch_lightning/trainer/connectors/data_connector.py:441: The 'val_dataloader' does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` to `num_workers=47` in the `DataLoader` to improve performance.
+Sanity Checking DataLoader 0:   0%|                                                                                        | 0/2 [00:00<?, ?it/s]0 :  torch.Size([32, 3, 32, 32])
+Traceback (most recent call last):
+  File "train-resnet18.py", line 489, in <module>
+    main(args)
+  File "train-resnet18.py", line 456, in main
+    trainer.fit(model, train_dataloaders=data)
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/pytorch_lightning/trainer/trainer.py", line 544, in fit
+    call._call_and_handle_interrupt(
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/pytorch_lightning/trainer/call.py", line 44, in _call_and_handle_interrupt
+    return trainer_fn(*args, **kwargs)
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/pytorch_lightning/trainer/trainer.py", line 580, in _fit_impl
+    self._run(model, ckpt_path=ckpt_path)
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/pytorch_lightning/trainer/trainer.py", line 989, in _run
+    results = self._run_stage()
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/pytorch_lightning/trainer/trainer.py", line 1033, in _run_stage
+    self._run_sanity_check()
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/pytorch_lightning/trainer/trainer.py", line 1062, in _run_sanity_check
+    val_loop.run()
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/pytorch_lightning/loops/utilities.py", line 182, in _decorator
+    return loop_run(self, *args, **kwargs)
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/pytorch_lightning/loops/evaluation_loop.py", line 134, in run
+    self._evaluation_step(batch, batch_idx, dataloader_idx, dataloader_iter)
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/pytorch_lightning/loops/evaluation_loop.py", line 391, in _evaluation_step
+    output = call._call_strategy_hook(trainer, hook_name, *step_args)
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/pytorch_lightning/trainer/call.py", line 309, in _call_strategy_hook
+    output = fn(*args, **kwargs)
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/pytorch_lightning/strategies/strategy.py", line 403, in validation_step
+    return self.lightning_module.validation_step(*args, **kwargs)
+  File "train-resnet18.py", line 227, in validation_step
+    loss, accuracy = self.forward(batch)
+  File "train-resnet18.py", line 216, in forward
+    loss = self.criterion(predictions, labels)
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/torch/nn/modules/loss.py", line 1164, in forward
+    return F.cross_entropy(input, target, weight=self.weight,
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/torch/nn/functional.py", line 3014, in cross_entropy
+    return torch._C._nn.cross_entropy_loss(input, target, weight, _Reduction.get_enum(reduction), ignore_index, label_smoothing)
+RuntimeError: nll_loss2d_forward_out_cuda_template does not have a deterministic implementation, but you set 'torch.use_deterministic_algorithms(True)'. You can turn off determinism just for this operation, or you can use the 'warn_only=True' option, if that's acceptable for your application. You can also file an issue at https://github.com/pytorch/pytorch/issues to help us prioritize adding deterministic support for this operation.
+1 :  torch.Size([32, 64, 32, 32])
+2 :  torch.Size([32, 64, 32, 32])
+3 :  torch.Size([32, 64, 32, 32])
+4 :  torch.Size([32, 64, 16, 16])
+5 :  torch.Size([32, 64, 16, 16])
+6 :  torch.Size([32, 64, 16, 16])
+7 :  torch.Size([32, 64, 16, 16])
+8 :  torch.Size([32, 128, 8, 8])
+9 :  torch.Size([32, 128, 8, 8])
+10 :  torch.Size([32, 128, 8, 8])
+11 :  torch.Size([32, 128, 8, 8])
+12 :  torch.Size([32, 256, 4, 4])
+13 :  torch.Size([32, 256, 4, 4])

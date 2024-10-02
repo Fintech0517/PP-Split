@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-09-03 19:29:00
-LastEditTime: 2024-08-16 20:44:13
+LastEditTime: 2024-10-02 01:11:45
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/data_preprocessing/preprocess_cifar10.py
 Description: 
@@ -74,9 +74,9 @@ def get_cifar10_normalize(batch_size = 1, test_bs = None, mu = None, sigma=None)
     transform = transforms.Compose(
         [
             transforms.ToTensor(), # 数据中的像素值转换到0～1之间
-            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]) # 接近+-1？ 从[0,1] 不是从[0,255]
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)), # 接近+-1？ 从[0,1] 不是从[0,255]
             # transforms.Normalize(mu.tolist(), sigma.tolist())
-        # ])
+        ])
 
     # 数据集加载：
     trainset = torchvision.datasets.CIFAR10(root='/home/dengruijun/data/FinTech/DATASET/image-dataset/cifar10/', train=True,

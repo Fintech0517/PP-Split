@@ -35,6 +35,7 @@ def get_infotopo_para(args):
     if dataset=='CIFAR10':
         nb_of_values=36 # nb_of_values-1=bins?
         conv = True
+        pool_size = 4
     elif dataset=='credit':
         pass
     elif dataset=='bank':
@@ -46,9 +47,9 @@ def get_infotopo_para(args):
         nb_of_values =2
         conv = False
     elif dataset=='MNIST':
-        nb_of_values = 17
-        # conv = True
-        conv = False
+        nb_of_values = 2
+        conv = True
+        pool_size = 2
     else:
         exit(-1)
     
@@ -60,6 +61,7 @@ def get_infotopo_para(args):
     # 填充
     msg['nb_of_values']=nb_of_values
     msg['conv']=conv
+    msg['pool_size']=pool_size
 
     return msg
 

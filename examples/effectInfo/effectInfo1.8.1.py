@@ -5,7 +5,7 @@
 '''
 Author: Ruijun Deng
 Date: 2024-08-14 16:59:47
-LastEditTime: 2024-09-29 05:52:29
+LastEditTime: 2024-10-02 03:12:05
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/examples/effectInfo/effectInfo1.8.1.py
 Description: 
@@ -98,7 +98,9 @@ data_interval = data_msg['data_interval']
 
 # effectEntropy Infotopo参数
 nb_of_values = msg['nb_of_values']
+
 conv = msg['conv']
+pool_size = msg['pool_size']
 # conv = False
 print("infotopo: nb_of_values: ",nb_of_values)
 
@@ -110,7 +112,7 @@ image_deprocess = model_msg['image_deprocess']
 # 路径
 results_dir = model_msg['results_dir']
 inverse_dir = results_dir + 'layer' + str(args['split_layer'])+'/'
-data_type = 1 if args['dataset'] in ['CIFAR10','MNIST'] else 0
+data_type = 1 if args['dataset'] == 'CIFAR10' else 0
 split_layer = args['split_layer']
 
 print('results_dir:', results_dir)
@@ -125,7 +127,6 @@ client_net.eval()
 
 # for n, p in client_net.named_parameters():
 #     print(n, p.shape)
-
 # %% [markdown]
 # # 5. effective information
 
@@ -367,7 +368,7 @@ for j, data in enumerate(tqdm.tqdm(testloader)): # 对testloader遍历
         print('images: ', images.shape)
         
         if conv:
-            images= avg_pool2d(images,kernel_size=4)
+            images= avg_pool2d(images,kernel_size=pool_size)
             print('images_pooled: ',images.shape)
         if image_dimension ==-1:
             image_dimension = images[0].numel()

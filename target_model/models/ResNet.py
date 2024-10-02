@@ -350,8 +350,12 @@ class ResNet(nn.Module):
         list(layer1) + list(layer2) + list(layer3) + list(layer4) + \
         [avgpool, fc]
 
+        self.layer_len = len(layers)
         # self.layers = nn.ModuleList(self.layers)
-        self.selected_layers = nn.ModuleList(layers[:split_layer + 1])
+        if split_layer == -1:
+            self.selected_layers = nn.ModuleList(layers)
+        else:
+            self.selected_layers = nn.ModuleList(layers[:split_layer + 1])
 
         print(f"Num unit layers: {len(layers)}") # Num layers: 14
         print('Split layer:', self.split_layer)
@@ -453,7 +457,8 @@ class ResNet(nn.Module):
 
     def forward(self, x):
         for i, layer in enumerate(self.selected_layers):
-            if i == 13: # 13 is the last layer FC layer
+            # print(i,': ',x.shape)
+            if i == self.layer_len-1: # 13 is the last layer FC layer # 为啥要这个？输入fc前拉平
                 x = x.reshape(x.size(0), -1)
             x = layer(x)
             # if i == self.split_layer:

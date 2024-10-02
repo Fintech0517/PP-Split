@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2024-08-16 20:50:40
-LastEditTime: 2024-08-17 20:19:41
+LastEditTime: 2024-10-02 00:51:33
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/training/train-resnet18.py
 Description: 
@@ -15,8 +15,10 @@ import torch
 import requests
 from torch.utils.data import DataLoader
 from torchvision import transforms as T
-from torchvision.datasets import CIFAR10
+from torchvision.datasets import CIFAR10,CIFAR100
 from tqdm import tqdm
+torch.optim.lr_scheduler.LRScheduler = torch.optim.lr_scheduler._LRScheduler # debug for torch<=1.13.5
+
 
 import pytorch_lightning as pl
 from pytorch_lightning import Trainer, seed_everything
@@ -25,6 +27,7 @@ from pytorch_lightning.loggers import WandbLogger, TensorBoardLogger
 
 # from torchmetrics.functional import accuracy as Accuracy # KIWAN: For compatibility with newer version
 from torchmetrics.classification import  Accuracy # KIWAN: For compatibility with newer version
+
 
 
 import math
@@ -37,7 +40,7 @@ from torch.optim.lr_scheduler import _LRScheduler
 
 import sys
 sys.path.append('/home/dengruijun/data/FinTech/PP-Split/')
-from target_model.models.ResNet import resnet18
+from target_model.models.ResNet import resnet18,resnet34,resnet50
 
 
 class CIFAR10Module(pl.LightningModule):
@@ -132,7 +135,7 @@ class CIFAR10Data(pl.LightningDataModule):
                 T.Normalize(self.mean, self.std),
             ]
         )
-        dataset = CIFAR10(root=self.hparams.data_dir, train=False, transform=transform)
+        dataset = CIFAR100(root=self.hparams.data_dir, train=False, transform=transform)
         dataloader = DataLoader(
             dataset,
             batch_size=self.hparams.batch_size,
@@ -144,6 +147,120 @@ class CIFAR10Data(pl.LightningDataModule):
 
     def test_dataloader(self):
         return self.val_dataloader()
+
+
+class CIFAR100Data(pl.LightningDataModule):
+    def __init__(self, args):
+        super().__init__()
+        self.save_hyperparameters(args)
+        self.mean = (0.5, 0.5, 0.5)
+        self.std = (0.5, 0.5, 0.5)
+
+    def train_dataloader(self):
+        transform = T.Compose(
+        [
+            T.ToTensor(), # 数据中的像素值转换到0～1之间
+            T.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+            ]
+            ) # 接近+-1？ 从[0,1] 不是从[0,255]
+            
+        dataset = CIFAR100(root=self.hparams.data_dir, train=True, transform=transform)
+        dataloader = DataLoader(
+            dataset,
+            batch_size=self.hparams.batch_size,
+            num_workers=self.hparams.num_workers,
+            shuffle=True,
+            drop_last=True,
+            pin_memory=True,
+        )
+        return dataloader
+
+    def val_dataloader(self):
+        transform = T.Compose(
+            [
+                T.ToTensor(),
+                T.Normalize(self.mean, self.std),
+            ]
+        )
+        dataset = CIFAR100(root=self.hparams.data_dir, train=False, transform=transform)
+        dataloader = DataLoader(
+            dataset,
+            batch_size=self.hparams.batch_size,
+            num_workers=self.hparams.num_workers,
+            drop_last=True,
+            pin_memory=True,
+        )
+        return dataloader
+
+    def test_dataloader(self):
+        return self.val_dataloader()
+
+class CIFAR100Module(pl.LightningModule):
+    def __init__(self, hparams, total_steps):
+        super().__init__()
+        # self.hparams = hparams
+        self.save_hyperparameters(hparams)
+        self.criterion = torch.nn.CrossEntropyLoss()
+        self.accuracy = Accuracy(task="multiclass", num_classes=100)
+        
+        if args.classifier == 'resnet18':
+            self.model = resnet18(pretrained=False, split_layer=13, bottleneck_dim=-1, num_classes=100, activation='gelu', pooling='avg')
+        elif args.classifier == 'resnet34':
+            self.model = resnet34(pretrained=False, split_layer=-1, bottleneck_dim=-1, num_classes=100, activation='gelu', pooling='avg')
+        elif args.classifier == 'resnet50':
+            self.model = resnet50(pretrained=False, split_layer=-1, bottleneck_dim=-1, num_classes=100, activation='gelu', pooling='avg')
+
+        # self.model = resnet18(pretrained=False, split_layer=13, bottleneck_dim=-1, num_classes=100, activation='relu', pooling='max')
+
+        self.total_steps = total_steps
+
+    def forward(self, batch):
+        images, labels = batch
+        predictions = self.model(images)
+        loss = self.criterion(predictions, labels)
+        accuracy = self.accuracy(predictions, labels)
+        return loss, accuracy * 100
+
+    def training_step(self, batch, batch_nb):
+        loss, accuracy = self.forward(batch)
+        self.log("loss/train", loss)
+        self.log("acc/train", accuracy)
+        return loss
+
+    def validation_step(self, batch, batch_nb):
+        loss, accuracy = self.forward(batch)
+        self.log("loss/val", loss)
+        self.log("acc/val", accuracy)
+
+    def test_step(self, batch, batch_nb):
+        loss, accuracy = self.forward(batch)
+        self.log("acc/test", accuracy)
+
+    def configure_optimizers(self):
+        # optimizer = torch.optim.Adam(self.model.parameters())
+        optimizer = torch.optim.SGD(
+            self.model.parameters(),
+            lr=self.hparams.learning_rate,
+            weight_decay=self.hparams.weight_decay,
+            momentum=0.9,
+            nesterov=True,
+        )
+        # total_steps = self.hparams.max_epochs * len(self.train_dataloader())
+        total_steps = self.total_steps
+        scheduler = {
+            "scheduler": WarmupCosineLR(
+                optimizer, warmup_epochs=total_steps * 0.3, max_epochs=total_steps
+            ),
+            "interval": "step",
+            "name": "learning_rate",
+        }
+        return [optimizer], [scheduler]
+    
+    # def configure_optimizers(self):
+    #     optimizer = torch.optim.Adam(self.model.parameters())
+    #     return [optimizer]
+
+
 
 
 class WarmupCosineLR(_LRScheduler):
@@ -288,9 +405,9 @@ class WarmupCosineLR(_LRScheduler):
 
 def main(args):
     seed_everything(0)
-    # os.environ["CUDA_VISIBLE_DEVICES"] = 1
-    unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/CIFAR10-models/state_dicts/resnet18-drj.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
-    unit_net_dir = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/CIFAR10-models/state_dicts/' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+    os.environ["CUDA_VISIBLE_DEVICES"] = '0'
+    unit_net_route = f'/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ResNet/{args.classifier}/{args.dataset}/{args.classifier}-drj.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+    unit_net_dir = f'/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ResNet/{args.classifier}/{args.dataset}/' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
 
     if args.logger == "wandb":
         # wandb.init(project="cifar10", name=args.classifier)
@@ -298,7 +415,7 @@ def main(args):
     elif args.logger == "tensorboard":
         logger = TensorBoardLogger("cifar10", name=args.classifier)
 
-    checkpoint = ModelCheckpoint(monitor="acc/val", mode="max", dirpath=unit_net_dir,filename='resnet18-drj.pth')
+    checkpoint = ModelCheckpoint(monitor="acc/val", mode="max", dirpath=unit_net_dir,filename=f'{args.classifier}-drj.pth')
 
     trainer = Trainer(
         fast_dev_run=bool(args.dev),
@@ -313,10 +430,15 @@ def main(args):
         precision=args.precision,
     )
 
-    data = CIFAR10Data(args)
-    total_steps = len(data.train_dataloader())*args.max_epochs
-    
-    model = CIFAR10Module(args,total_steps=total_steps)
+    if args.dataset == "CIFAR10":
+        data = CIFAR10Data(args)
+        total_steps = len(data.train_dataloader())*args.max_epochs
+        model = CIFAR10Module(args,total_steps=total_steps)
+    elif args.dataset == "CIFAR100":
+        data = CIFAR100Data(args)
+        total_steps = len(data.train_dataloader())*args.max_epochs
+        model = CIFAR100Module(args,total_steps=total_steps)
+
 
     if bool(args.pretrained): # 训练好了
         print("trained models loading ... ")
@@ -332,22 +454,27 @@ def main(args):
         trainer.fit(model, train_dataloaders=data)
         trainer.test(model, data.test_dataloader())
 
+# cifar100+resnet18
+# python3 train.py --dataset cifar100 --model resnet18 --activation gelu 
+# --bs 128 --lr 0.1 --weight-decay 5e-4 --standardize --nesterov --test-fil 
+# --pooling avg --seed 123 --split-layer 7 --bottleneck-dim 2 --jvp-parallelism 
+# 100 --save-model --jacloss-alpha 0.1
 
 if __name__ == "__main__":
     parser = ArgumentParser()
 
     # PROGRAM level args
-    parser.add_argument("--data_dir", type=str, default="/home/dengruijun/data/FinTech/DATASET/image-dataset/cifar10/")
+    parser.add_argument("--data_dir", type=str, default="/home/dengruijun/data/FinTech/DATASET/image-dataset/cifar100/")
     parser.add_argument("--test_phase", type=int, default=0, choices=[0, 1])
     parser.add_argument("--dev", type=int, default=0, choices=[0, 1])
     parser.add_argument("--logger", type=str, default="wandb", choices=["tensorboard", "wandb"])
 
     # TRAINER args
-    parser.add_argument("--classifier", type=str, default="resnet18")
+    parser.add_argument("--classifier", type=str, default="resnet50")
     parser.add_argument("--pretrained", type=int, default=0, choices=[0, 1]) # 加载与训练的
 
     parser.add_argument("--precision", type=int, default=32, choices=[16, 32])
-    parser.add_argument("--batch_size", type=int, default=32)
+    parser.add_argument("--batch_size", type=int, default=128)
     parser.add_argument("--max_epochs", type=int, default=20) #100
     parser.add_argument("--num_workers", type=int, default=0)
     # parser.add_argument("--gpu_id", type=str, default="1")
@@ -355,6 +482,7 @@ if __name__ == "__main__":
     parser.add_argument("--learning_rate", type=float, default=1e-2)
     parser.add_argument("--weight_decay", type=float, default=1e-2)
 
+    parser.add_argument("--dataset", type=str, default='CIFAR100') # CIFAR10
     args = parser.parse_args()
     main(args)
 

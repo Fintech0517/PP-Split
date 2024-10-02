@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2024-09-28 01:37:27
-LastEditTime: 2024-09-29 05:18:50
+LastEditTime: 2024-10-02 01:20:56
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/data_preprocessing/preprocess_mnist.py
 Description: 
@@ -29,17 +29,16 @@ def get_mnist_normalize(batch_size = 1,test_bs = None, mu = None, sigma=None):
     transform = transforms.Compose(
         [
             transforms.ToTensor(), # 数据中的像素值转换到0～1之间
-            transforms.Normalize((0.5), (0.5))]) # 接近+-1？ 从[0,1] 不是从[0,255]
-            # transforms.Normalize(mu.tolist(), sigma.tolist())
-        # ])
+            transforms.Normalize(mu, sigma),
+        ]) # 接近+-1？ 从[0,1] 不是从[0,255]
 
     # 数据集加载：
     trainset = torchvision.datasets.MNIST(root='/home/dengruijun/data/project/data/mnist/', train=True,
-                                            download=False, transform=transforms.ToTensor())
+                                            download=False, transform=transform)
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size,shuffle=False, num_workers=4)
 
     testset = torchvision.datasets.MNIST(root='/home/dengruijun/data/project/data/mnist/', train=False,
-                                        download=False, transform=transforms.ToTensor())
+                                        download=False, transform=transform)
     testloader = torch.utils.data.DataLoader(testset, batch_size=test_bs,shuffle=False, num_workers=4)
     
     return trainloader,testloader
