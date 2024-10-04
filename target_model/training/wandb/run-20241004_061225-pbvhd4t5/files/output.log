@@ -1,0 +1,383 @@
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0,1]
+  | Name      | Type               | Params
+-------------------------------------------------
+0 | criterion | CrossEntropyLoss   | 0
+1 | accuracy  | MulticlassAccuracy | 0
+2 | model     | ResNet             | 11.2 M
+-------------------------------------------------
+11.2 M    Trainable params
+0         Non-trainable params
+11.2 M    Total params
+44.696    Total estimated model params size (MB)
+/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/pytorch_lightning/trainer/connectors/data_connector.py:441: The 'val_dataloader' does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` to `num_workers=47` in the `DataLoader` to improve performance.
+Sanity Checking DataLoader 0:   0%|          | 0/2 [00:00<?, ?it/s]
+
+/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/pytorch_lightning/trainer/connectors/data_connector.py:441: The 'train_dataloader' does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` to `num_workers=47` in the `DataLoader` to improve performance.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Epoch 0: 100%|██████████| 390/390 [00:31<00:00, 12.57it/s, v_num=d4t5]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Epoch 1: 100%|██████████| 390/390 [00:26<00:00, 14.68it/s, v_num=d4t5]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Epoch 2: 100%|██████████| 390/390 [00:28<00:00, 13.72it/s, v_num=d4t5]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Epoch 3: 100%|██████████| 390/390 [00:30<00:00, 12.71it/s, v_num=d4t5]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Epoch 4: 100%|██████████| 390/390 [00:34<00:00, 11.45it/s, v_num=d4t5]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Epoch 5: 100%|██████████| 390/390 [00:35<00:00, 11.14it/s, v_num=d4t5]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Epoch 6: 100%|██████████| 390/390 [00:34<00:00, 11.22it/s, v_num=d4t5]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Epoch 7: 100%|██████████| 390/390 [00:34<00:00, 11.31it/s, v_num=d4t5]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Epoch 8: 100%|██████████| 390/390 [00:35<00:00, 11.03it/s, v_num=d4t5]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Epoch 9: 100%|██████████| 390/390 [00:35<00:00, 11.08it/s, v_num=d4t5]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Epoch 10: 100%|██████████| 390/390 [00:33<00:00, 11.62it/s, v_num=d4t5]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Epoch 11: 100%|██████████| 390/390 [00:33<00:00, 11.68it/s, v_num=d4t5]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Epoch 12: 100%|██████████| 390/390 [00:27<00:00, 14.43it/s, v_num=d4t5]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Epoch 13: 100%|██████████| 390/390 [00:33<00:00, 11.78it/s, v_num=d4t5]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Epoch 14: 100%|██████████| 390/390 [00:34<00:00, 11.22it/s, v_num=d4t5]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Epoch 15: 100%|██████████| 390/390 [00:33<00:00, 11.51it/s, v_num=d4t5]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Epoch 16: 100%|██████████| 390/390 [00:33<00:00, 11.51it/s, v_num=d4t5]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Epoch 17: 100%|██████████| 390/390 [00:34<00:00, 11.26it/s, v_num=d4t5]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Epoch 18: 100%|██████████| 390/390 [00:34<00:00, 11.34it/s, v_num=d4t5]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Epoch 19: 100%|██████████| 390/390 [00:33<00:00, 11.51it/s, v_num=d4t5]
+
+Validation DataLoader 0:  74%|███████▍  | 58/78 [00:02<00:00, 25.94it/s]
+
+Testing DataLoader 0:  24%|██▍       | 19/78 [00:00<00:02, 28.63it/s]
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0,1]
+Testing DataLoader 0: 100%|██████████| 78/78 [00:02<00:00, 31.71it/s]
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃        Test metric        ┃       DataLoader 0        ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│         acc/test          │     79.05648803710938     │
+└───────────────────────────┴───────────────────────────┘

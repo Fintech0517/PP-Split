@@ -1,0 +1,21 @@
+  0%|                                                                                        | 0/313 [00:00<?, ?it/s]
+Traceback (most recent call last):
+  File "train-vgg5.py", line 160, in <module>
+    train(args)
+  File "train-vgg5.py", line 78, in train
+    acc_test = evalTest(testloader, net, device)  # 测试一下模型精度
+  File "/home/dengruijun/data/FinTech/PP-Split/target_model/training/utils.py", line 49, in evalTest
+    logits = net.forward(batchX)
+  File "/home/dengruijun/data/FinTech/PP-Split/target_model/models/VGG.py", line 147, in forward
+    out = self.features(x)
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/torch/nn/modules/container.py", line 139, in forward
+    input = module(input)
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/torch/nn/modules/conv.py", line 457, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/torch/nn/modules/conv.py", line 453, in _conv_forward
+    return F.conv2d(input, weight, bias, self.stride,
+RuntimeError: Given groups=1, weight of size [64, 3, 3, 3], expected input[32, 1, 28, 28] to have 3 channels, but got 1 channels instead

@@ -1,0 +1,74 @@
+
+Model saved for epoch 0
+Epoch:  0 Loss:  1.340063362570049 Train accuracy:  0.5206933781190011
+100%|█████████████████████████████████████████████████████████████████████████████| 313/313 [00:01<00:00, 254.43it/s]
+Test accuracy:  0.6041333865814696
+Model saved for epoch 0
+Epoch:  1 Loss:  1.0509141173907317 Train accuracy:  0.627499200255919
+100%|█████████████████████████████████████████████████████████████████████████████| 313/313 [00:01<00:00, 238.27it/s]
+Test accuracy:  0.643370607028754
+Model saved for epoch 1
+Epoch:  2 Loss:  0.9380279054682913 Train accuracy:  0.6698656429942451
+ 93%|███████████████████████████████████████████████████████████████████████▎     | 290/313 [00:01<00:00, 251.96it/s]
+Test accuracy:  0.6565495207667732
+
+100%|█████████████████████████████████████████████████████████████████████████████| 313/313 [00:01<00:00, 232.84it/s]
+Epoch:  3 Loss:  0.8567816751055127 Train accuracy:  0.7011356365962921
+100%|█████████████████████████████████████████████████████████████████████████████| 313/313 [00:01<00:00, 233.75it/s]
+Test accuracy:  0.6567492012779552
+Model saved for epoch 3
+Epoch:  4 Loss:  0.7864400138476675 Train accuracy:  0.7266274792066556
+ 88%|████████████████████████████████████████████████████████████████████▏        | 277/313 [00:01<00:00, 283.35it/s]
+Test accuracy:  0.6467651757188498
+
+100%|█████████████████████████████████████████████████████████████████████████████| 313/313 [00:01<00:00, 259.27it/s]
+ 13%|██████████▍                                                                   | 42/313 [00:00<00:01, 221.70it/s]
+Epoch:  5 Loss:  0.7193188821838523 Train accuracy:  0.7523192578374938
+Test accuracy:  0.6353833865814696
+
+100%|█████████████████████████████████████████████████████████████████████████████| 313/313 [00:01<00:00, 283.49it/s]
+Epoch:  6 Loss:  0.6543232290811901 Train accuracy:  0.7760916506717872
+100%|█████████████████████████████████████████████████████████████████████████████| 313/313 [00:01<00:00, 254.31it/s]
+Test accuracy:  0.6311900958466453
+Model saved for epoch 6
+ 50%|██████████████████████████████████████▍                                      | 156/313 [00:00<00:00, 265.81it/s]
+
+100%|█████████████████████████████████████████████████████████████████████████████| 313/313 [00:01<00:00, 255.91it/s]
+Test accuracy:  0.6242012779552716
+Model saved for epoch 7
+ 70%|█████████████████████████████████████████████████████▋                       | 218/313 [00:00<00:00, 260.27it/s]
+
+100%|█████████████████████████████████████████████████████████████████████████████| 313/313 [00:01<00:00, 234.47it/s]
+Test accuracy:  0.6187100638977636
+Model saved for epoch 8
+Traceback (most recent call last):
+  File "train-vgg5.py", line 153, in <module>
+    args = vars(args_parsed)
+  File "train-vgg5.py", line 82, in train
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/torch/utils/data/dataloader.py", line 681, in __next__
+    data = self._next_data()
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/torch/utils/data/dataloader.py", line 1359, in _next_data
+    idx, data = self._get_data()
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/torch/utils/data/dataloader.py", line 1325, in _get_data
+    success, data = self._try_get_data()
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/torch/utils/data/dataloader.py", line 1163, in _try_get_data
+    data = self._data_queue.get(timeout=timeout)
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/multiprocessing/queues.py", line 116, in get
+    return _ForkingPickler.loads(res)
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/torch/multiprocessing/reductions.py", line 297, in rebuild_storage_fd
+    fd = df.detach()
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/multiprocessing/resource_sharer.py", line 57, in detach
+    with _resource_sharer.get_connection(self._id) as conn:
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/multiprocessing/resource_sharer.py", line 87, in get_connection
+    c = Client(address, authkey=process.current_process().authkey)
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/multiprocessing/connection.py", line 509, in Client
+    deliver_challenge(c, authkey)
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/multiprocessing/connection.py", line 740, in deliver_challenge
+    response = connection.recv_bytes(256)        # reject large message
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/multiprocessing/connection.py", line 216, in recv_bytes
+    buf = self._recv_bytes(maxlength)
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/multiprocessing/connection.py", line 414, in _recv_bytes
+    buf = self._recv(4)
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/multiprocessing/connection.py", line 379, in _recv
+    chunk = read(handle, remaining)
+KeyboardInterrupt

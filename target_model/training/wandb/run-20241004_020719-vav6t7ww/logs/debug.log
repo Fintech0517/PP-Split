@@ -1,0 +1,35 @@
+2024-10-04 02:07:19,006 INFO    MainThread:2873887 [wandb_setup.py:_flush():76] Current SDK version is 0.17.7
+2024-10-04 02:07:19,006 INFO    MainThread:2873887 [wandb_setup.py:_flush():76] Configure stats pid to 2873887
+2024-10-04 02:07:19,006 INFO    MainThread:2873887 [wandb_setup.py:_flush():76] Loading settings from /home/dengruijun/.config/wandb/settings
+2024-10-04 02:07:19,007 INFO    MainThread:2873887 [wandb_setup.py:_flush():76] Loading settings from /home/dengruijun/data/FinTech/PP-Split/target_model/training/wandb/settings
+2024-10-04 02:07:19,007 INFO    MainThread:2873887 [wandb_setup.py:_flush():76] Loading settings from environment variables: {}
+2024-10-04 02:07:19,007 INFO    MainThread:2873887 [wandb_setup.py:_flush():76] Applying setup settings: {'_disable_service': False}
+2024-10-04 02:07:19,007 INFO    MainThread:2873887 [wandb_setup.py:_flush():76] Inferring run settings from compute environment: {'program_relpath': 'target_model/training/train-vgg5.py', 'program_abspath': '/home/dengruijun/data/FinTech/PP-Split/target_model/training/train-vgg5.py', 'program': 'train-vgg5.py'}
+2024-10-04 02:07:19,007 INFO    MainThread:2873887 [wandb_setup.py:_flush():76] Applying login settings: {}
+2024-10-04 02:07:19,007 INFO    MainThread:2873887 [wandb_init.py:_log_setup():524] Logging user logs to /home/dengruijun/data/FinTech/PP-Split/target_model/training/wandb/run-20241004_020719-vav6t7ww/logs/debug.log
+2024-10-04 02:07:19,007 INFO    MainThread:2873887 [wandb_init.py:_log_setup():525] Logging internal logs to /home/dengruijun/data/FinTech/PP-Split/target_model/training/wandb/run-20241004_020719-vav6t7ww/logs/debug-internal.log
+2024-10-04 02:07:19,007 INFO    MainThread:2873887 [wandb_init.py:init():607] calling init triggers
+2024-10-04 02:07:19,007 INFO    MainThread:2873887 [wandb_init.py:init():614] wandb.init called with sweep_config: {}
+config: {}
+2024-10-04 02:07:19,008 INFO    MainThread:2873887 [wandb_init.py:init():657] starting backend
+2024-10-04 02:07:19,008 INFO    MainThread:2873887 [wandb_init.py:init():661] setting up manager
+2024-10-04 02:07:19,013 INFO    MainThread:2873887 [backend.py:_multiprocessing_setup():105] multiprocessing start_methods=fork,spawn,forkserver, using: spawn
+2024-10-04 02:07:19,016 INFO    MainThread:2873887 [wandb_init.py:init():669] backend started and connected
+2024-10-04 02:07:19,022 INFO    MainThread:2873887 [wandb_init.py:init():764] updated telemetry
+2024-10-04 02:07:19,053 INFO    MainThread:2873887 [wandb_init.py:init():797] communicating run to backend with 90.0 second timeout
+2024-10-04 02:07:19,850 WARNING MainThread:2873887 [wandb_init.py:init():1229] interrupted
+Traceback (most recent call last):
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/wandb/sdk/wandb_init.py", line 1225, in init
+    return wi.init()
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/wandb/sdk/wandb_init.py", line 844, in init
+    run._set_run_obj(run_result.run)
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/wandb/sdk/wandb_run.py", line 1596, in _set_run_obj
+    self._settings._apply_run_start(message_to_dict(self._run_obj))
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/wandb/sdk/lib/proto_util.py", line 88, in message_to_dict
+    from google.protobuf.json_format import MessageToDict
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/google/protobuf/json_format.py", line 54, in <module>
+    from google.protobuf.internal import type_checkers
+  File "<frozen importlib._bootstrap>", line 988, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 148, in __enter__
+  File "<frozen importlib._bootstrap>", line 163, in _get_module_lock
+KeyboardInterrupt

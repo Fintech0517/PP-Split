@@ -70,9 +70,13 @@ client_net,decoder_net = model_msg['client_net'], model_msg['decoder_net']
 decoder_route = model_msg['decoder_route']
 image_deprocess = model_msg['image_deprocess']
 
+
 results_dir = model_msg['results_dir']
 inverse_dir = results_dir + 'layer'+str(args['split_layer'])+'/'
-data_type = 1 if args['dataset'] in ['CIFAR10','MNIST'] else 0
+
+data_msg = get_dataloader(args)
+data_type = data_msg['data_type']
+# data_type = 1 if args['dataset'] in ['CIFAR10','MNIST'] else 0
 
 print('results_dir:',results_dir)
 print('inverse_dir:',inverse_dir)

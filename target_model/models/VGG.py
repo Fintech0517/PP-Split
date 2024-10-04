@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-08-27 20:58:31
-LastEditTime: 2024-10-01 06:57:22
+LastEditTime: 2024-10-04 04:02:37
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/models/VGG.py
 Description: 
@@ -55,15 +55,21 @@ model_cfg = {
 		('D',4096,4096,1,4096,16777216),  # 12
 		('D',4096,10,1,10,40960), # 13
 	],
+	# 500x576 and 3136x128
 	'VGG5_MNIST' : [ # 最后一列可能是错的
     ('C', 1, 32, 3, 32*28*28, 32*28*28*3*3*3), # 0 32*32*32=32768
     ('M', 32, 32, 2, 32*14*14, 0),  # 1 32*16*16=8192
 	('C', 32, 64, 3, 64*14*14, 64*14*14*3*3*32), #2 64*16*16=16384
     ('M', 64, 64, 2, 64*7*7, 0), # 3 64*8*8=4096
 	('C', 64, 64, 3, 64*7*7, 64*7*7*3*3*64), # 4 64*8*8=4096
+
+	# normal
 	('D', 7*7*64, 128, 1, 64, 128*7*7*64), # 5 128*8*8=8192
 	('D', 128, 10, 1, 10, 128*10)], # 6 10
-
+	
+	# avgpool
+	# ('D', 576, 128, 1, 64, 128*7*7*64), # 5 128*8*8=8192
+	# ('D', 128, 10, 1, 10, 128*10)], # 6 10
 
 	'VGG9_MNIST':[ # 最后一列可能是错的
 	('C',1,64,3,64*28*28,1769472), # 0
@@ -257,7 +263,7 @@ class VGG5Decoder(nn.Module): # 这个cfg参数指的是model_cfg[vgg5]
                 denses += [nn.Linear(in_channels,out_channels),]
 						#    nn.Tanh()]
             if x[0] == 'C':
-                if m == 1:
+                if m == 1: # 如果是28，到这里变成7，变3，但是从3到7，这个操作得到的是6，所以op 要=2
                     features += [nn.ConvTranspose2d(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride = 2,padding=1,output_padding=m),
                                 nn.BatchNorm2d(out_channels),
                                 # nn.ReLU(inplace=True)]

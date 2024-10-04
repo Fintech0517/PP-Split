@@ -1,0 +1,19 @@
+2024-10-04 02:07:19,018 INFO    StreamThr :2873997 [internal.py:wandb_internal():85] W&B internal server running at pid: 2873997, started at: 2024-10-04 02:07:19.017003
+2024-10-04 02:07:19,022 DEBUG   HandlerThread:2873997 [handler.py:handle_request():158] handle_request: status
+2024-10-04 02:07:19,026 INFO    WriterThread:2873997 [datastore.py:open_for_write():87] open: /home/dengruijun/data/FinTech/PP-Split/target_model/training/wandb/run-20241004_020719-vav6t7ww/run-vav6t7ww.wandb
+2024-10-04 02:07:19,030 DEBUG   SenderThread:2873997 [sender.py:send():391] send: header
+2024-10-04 02:07:19,057 DEBUG   SenderThread:2873997 [sender.py:send():391] send: run
+2024-10-04 02:07:19,852 INFO    SenderThread:2873997 [dir_watcher.py:__init__():211] watching files in: /home/dengruijun/data/FinTech/PP-Split/target_model/training/wandb/run-20241004_020719-vav6t7ww/files
+2024-10-04 02:07:19,852 INFO    SenderThread:2873997 [sender.py:_start_run_threads():1200] run started: vav6t7ww with start time 1728032839.016544
+2024-10-04 02:07:19,874 DEBUG   HandlerThread:2873997 [handler.py:handle_request():158] handle_request: shutdown
+2024-10-04 02:07:19,874 INFO    HandlerThread:2873997 [handler.py:finish():880] shutting down handler
+2024-10-04 02:07:20,057 INFO    WriterThread:2873997 [datastore.py:close():296] close: /home/dengruijun/data/FinTech/PP-Split/target_model/training/wandb/run-20241004_020719-vav6t7ww/run-vav6t7ww.wandb
+2024-10-04 02:07:20,853 INFO    SenderThread:2873997 [sender.py:finish():1631] shutting down sender
+2024-10-04 02:07:20,853 INFO    SenderThread:2873997 [dir_watcher.py:finish():358] shutting down directory watcher
+2024-10-04 02:07:21,853 INFO    SenderThread:2873997 [dir_watcher.py:finish():388] scan: /home/dengruijun/data/FinTech/PP-Split/target_model/training/wandb/run-20241004_020719-vav6t7ww/files
+2024-10-04 02:07:21,854 INFO    SenderThread:2873997 [dir_watcher.py:finish():402] scan save: /home/dengruijun/data/FinTech/PP-Split/target_model/training/wandb/run-20241004_020719-vav6t7ww/files/config.yaml config.yaml
+2024-10-04 02:07:21,854 INFO    SenderThread:2873997 [file_pusher.py:finish():169] shutting down file pusher
+2024-10-04 02:07:21,855 INFO    SenderThread:2873997 [file_pusher.py:join():175] waiting for file pusher
+2024-10-04 02:07:22,937 INFO    wandb-upload_0:2873997 [upload_job.py:push():130] Uploaded file /home/dengruijun/data/FinTech/PP-Split/target_model/training/wandb/run-20241004_020719-vav6t7ww/files/config.yaml
+2024-10-04 02:07:23,363 INFO    SenderThread:2873997 [file_stream.py:finish():601] file stream finish called
+2024-10-04 02:07:23,930 INFO    SenderThread:2873997 [file_stream.py:finish():605] file stream finish is done

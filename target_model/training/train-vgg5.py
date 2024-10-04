@@ -24,6 +24,7 @@ from target_model.data_preprocessing.preprocess_cifar10 import get_cifar10_norma
 from target_model.data_preprocessing.preprocess_mnist import get_mnist_normalize
 from utils import evalTest 
 
+import wandb
 
 def train(args):
     device = args['device']
@@ -32,14 +33,18 @@ def train(args):
     NEpochs = args['epochs']
     learningRate = args['learning_rate']
     model_dir = args['model_dir']
-    model_name = args['model_name']
+    # model_name = args['model_name']
     dataset = args['dataset']
     NDecreaseLR = args['decrease_LR']
     network = args['network']
-    
+    model_name = f"{network}-{dataset}-{NEpochs}epoch.pth"
+
     # print('NDecreaseLR:',NDecreaseLR)
     # print(args)
 
+    # 可视化
+    wandb.init(project='VGG',name=f'{network}-{dataset}')
+    wandb.config.update(args)
 
     # 储存训练模型文件夹：“checkpoints/CIFAR10”
     if not os.path.exists(model_dir):
@@ -68,6 +73,14 @@ def train(args):
     cudnn.benchmark = True
 
     NBatch = len(trainloader)
+
+    # 最初的模型精度
+    acc_test = evalTest(testloader, net, device)  # 测试一下模型精度
+    print("Test accuracy: ", acc_test)
+    wandb.log({'Test Accuracy': acc_test})
+    torch.save(net.state_dict(), model_dir + model_name)
+    print(f"Model saved for epoch {0}")
+
     # 迭代训练
     for epoch in range(NEpochs):
         lossTrain = 0.0
@@ -100,13 +113,13 @@ def train(args):
             # setLearningRate(optimizer, learningRate)
 
         print("Epoch: ", epoch, "Loss: ", lossTrain, "Train accuracy: ", accTrain)
-
         acc_test = evalTest(testloader, net, device)  # 测试一下模型精度
         print("Test accuracy: ", acc_test)
+        wandb.log({'Train Loss': lossTrain, 'Train Accuracy': accTrain, 'Test Accuracy': acc_test})
 
-    # 储存模型
-    torch.save(net.state_dict(), model_dir + model_name)
-    print(f"Model saved for epoch {epoch}")
+        # 储存模型
+        torch.save(net.state_dict(), model_dir + model_name + f"-{epoch+1}.pth")
+        print(f"Model saved for epoch {epoch}")
 
     # 读取（load）模型
     newNet = torch.load(model_dir + model_name)
@@ -125,15 +138,19 @@ if __name__ == '__main__':
 
     # 参数解析
     parser = argparse.ArgumentParser()
-    parser.add_argument('--network', type = str, default = 'VGG9_MNIST') # VGG5, VGG9, VGG5_MNIST, VGG9_MNIST
+    parser.add_argument('--network', type = str, default = 'VGG9') # VGG5, VGG9, VGG5_MNIST, VGG9_MNIST
     parser.add_argument('--epochs', type = int, default = 20)
     parser.add_argument('--batch_size', type = int, default = 32)
     parser.add_argument('--learning_rate', type = float, default = 1e-3)
     parser.add_argument('--decrease_LR', type = int, default = 20)
-    parser.add_argument('--device',type=str,default="cuda:0")
-    parser.add_argument('--model_dir',type=str,default="../../results/trained_models/VGG9/MNIST/")
-    parser.add_argument('--model_name',type=str,default="VGG9-MNIST-20ep.pth")
-    parser.add_argument('--dataset',type=str,default="MNIST") 
+    parser.add_argument('--device',type=str,default="cuda:1")
+    # parser.add_argument('--model_dir',type=str,default="../../results/trained_models/VGG9/MNIST/")
+    parser.add_argument('--model_dir',type=str,default="../../results/trained_models/VGG9/CIFAR10/")
+    # parser.add_argument('--model_dir',type=str,default="../../results/trained_models/VGG5/CIFAR10/")
+    # parser.add_argument('--model_dir',type=str,default="../../results/trained_models/VGG5/MNIST/")
+    # parser.add_argument('--model_name',type=str,default="VGG5") # VGG9-MNIST-20ep.pth
+    # parser.add_argument('--dataset',type=str,default="MNIST") # MNIST CIFAR10
+    parser.add_argument('--dataset',type=str,default="CIFAR10") # MNIST CIFAR10
 
     args_parsed = parser.parse_args()
     args = vars(args_parsed)

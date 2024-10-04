@@ -1,0 +1,57 @@
+wandb_version: 1
+
+_wandb:
+  desc: null
+  value:
+    python_version: 3.8.13
+    cli_version: 0.17.7
+    framework: torch
+    is_jupyter_run: false
+    is_kaggle_kernel: true
+    start_time: 1728032859
+    t:
+      1:
+      - 1
+      - 5
+      - 41
+      - 53
+      - 55
+      2:
+      - 1
+      - 5
+      - 41
+      - 53
+      - 55
+      3:
+      - 13
+      - 23
+      4: 3.8.13
+      5: 0.17.7
+      8:
+      - 2
+      - 5
+      13: linux-x86_64
+network:
+  desc: null
+  value: VGG9
+epochs:
+  desc: null
+  value: 20
+batch_size:
+  desc: null
+  value: 32
+learning_rate:
+  desc: null
+  value: 0.001
+decrease_LR:
+  desc: null
+  value: 20
+device:
+  desc: null
+  value: cuda:1
+model_dir:
+  desc: null
+  value: ../../results/trained_models/VGG9/MNIST/
+dataset:
+  desc: null
+  value: MNIST

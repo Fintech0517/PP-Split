@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2024-08-16 20:50:40
-LastEditTime: 2024-10-02 00:51:33
+LastEditTime: 2024-10-04 06:12:23
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/training/train-resnet18.py
 Description: 
@@ -51,9 +51,19 @@ class CIFAR10Module(pl.LightningModule):
         self.criterion = torch.nn.CrossEntropyLoss()
         self.accuracy = Accuracy(task="multiclass", num_classes=10)
         
-        self.model = resnet18(pretrained=False, split_layer=13, bottleneck_dim=-1, num_classes=10, activation='relu', pooling='max')
-        # self.model = resnet18(pretrained=False, split_layer=13, bottleneck_dim=-1, num_classes=10, activation='gelu', pooling='avg')
 
+        # self.model = resnet18(pretrained=False, split_layer=13, bottleneck_dim=-1, num_classes=10, activation='relu', pooling='max')
+        # self.model = resnet18(pretrained=False, split_layer=13, bottleneck_dim=-1, num_classes=10, activation='gelu', pooling='avg')
+        if 'resnet18' in args.classifier:
+            self.model = resnet18(pretrained=False, split_layer=-1, bottleneck_dim=-1, num_classes=10, activation='gelu', pooling='avg')
+        elif 'resnet34' in args.classifier:
+            self.model = resnet34(pretrained=False, split_layer=-1, bottleneck_dim=-1, num_classes=10, activation='gelu', pooling='avg')
+        elif 'resnet50' in args.classifier:
+            self.model = resnet50(pretrained=False, split_layer=-1, bottleneck_dim=-1, num_classes=10, activation='gelu', pooling='avg')
+        else:
+            print('nononononono')
+            raise ValueError("Invalid classifier")
+        
         self.total_steps = total_steps
 
     def forward(self, batch):
@@ -135,7 +145,7 @@ class CIFAR10Data(pl.LightningDataModule):
                 T.Normalize(self.mean, self.std),
             ]
         )
-        dataset = CIFAR100(root=self.hparams.data_dir, train=False, transform=transform)
+        dataset = CIFAR10(root=self.hparams.data_dir, train=False, transform=transform)
         dataloader = DataLoader(
             dataset,
             batch_size=self.hparams.batch_size,
@@ -203,13 +213,14 @@ class CIFAR100Module(pl.LightningModule):
         self.criterion = torch.nn.CrossEntropyLoss()
         self.accuracy = Accuracy(task="multiclass", num_classes=100)
         
-        if args.classifier == 'resnet18':
+        if 'resnet18' in args.classifier:
             self.model = resnet18(pretrained=False, split_layer=13, bottleneck_dim=-1, num_classes=100, activation='gelu', pooling='avg')
-        elif args.classifier == 'resnet34':
+        elif 'resnet34' in args.classifier:
             self.model = resnet34(pretrained=False, split_layer=-1, bottleneck_dim=-1, num_classes=100, activation='gelu', pooling='avg')
-        elif args.classifier == 'resnet50':
+        elif 'resnet50' in args.classifier:
             self.model = resnet50(pretrained=False, split_layer=-1, bottleneck_dim=-1, num_classes=100, activation='gelu', pooling='avg')
-
+        else:
+            raise ValueError("Invalid classifier")
         # self.model = resnet18(pretrained=False, split_layer=13, bottleneck_dim=-1, num_classes=100, activation='relu', pooling='max')
 
         self.total_steps = total_steps
@@ -259,8 +270,6 @@ class CIFAR100Module(pl.LightningModule):
     # def configure_optimizers(self):
     #     optimizer = torch.optim.Adam(self.model.parameters())
     #     return [optimizer]
-
-
 
 
 class WarmupCosineLR(_LRScheduler):
@@ -405,23 +414,28 @@ class WarmupCosineLR(_LRScheduler):
 
 def main(args):
     seed_everything(0)
-    os.environ["CUDA_VISIBLE_DEVICES"] = '0'
+    # os.environ["CUDA_VISIBLE_DEVICES"] = '0'
     unit_net_route = f'/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ResNet/{args.classifier}/{args.dataset}/{args.classifier}-drj.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
     unit_net_dir = f'/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ResNet/{args.classifier}/{args.dataset}/' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
 
     if args.logger == "wandb":
         # wandb.init(project="cifar10", name=args.classifier)
-        logger = WandbLogger(name=args.classifier, project="cifar10")
+        logger = WandbLogger(name=f'{args.classifier}-{args.dataset}', project="ResNet")
     elif args.logger == "tensorboard":
         logger = TensorBoardLogger("cifar10", name=args.classifier)
 
-    checkpoint = ModelCheckpoint(monitor="acc/val", mode="max", dirpath=unit_net_dir,filename=f'{args.classifier}-drj.pth')
+    checkpoint = ModelCheckpoint(monitor="acc/val", 
+                                 mode="max", 
+                                 dirpath=unit_net_dir,
+                                 filename='{epoch}'+ f'{args.classifier}-drj.pth', 
+                                 save_top_k=1 #保存每个检查点
+                                 ) 
 
     trainer = Trainer(
         fast_dev_run=bool(args.dev),
         # logger=logger if not bool(args.dev + args.test_phase) else None,
         logger=logger,
-        # gpus=-1,
+        devices=args.device,
         deterministic=True,
         # weights_summary=None,
         log_every_n_steps=1,
@@ -464,13 +478,18 @@ if __name__ == "__main__":
     parser = ArgumentParser()
 
     # PROGRAM level args
-    parser.add_argument("--data_dir", type=str, default="/home/dengruijun/data/FinTech/DATASET/image-dataset/cifar100/")
+    # parser.add_argument("--data_dir", type=str, default="/home/dengruijun/data/FinTech/DATASET/image-dataset/cifar100/")
+    parser.add_argument("--data_dir", type=str, default="/home/dengruijun/data/FinTech/DATASET/image-dataset/cifar10/")
     parser.add_argument("--test_phase", type=int, default=0, choices=[0, 1])
     parser.add_argument("--dev", type=int, default=0, choices=[0, 1])
     parser.add_argument("--logger", type=str, default="wandb", choices=["tensorboard", "wandb"])
 
     # TRAINER args
-    parser.add_argument("--classifier", type=str, default="resnet50")
+    # parser.add_argument("--classifier", type=str, default="resnet50")
+    # parser.add_argument("--classifier", type=str, default="resnet34")
+    parser.add_argument("--classifier", type=str, default="resnet18")
+    # parser.add_argument("--classifier", type=str, default="resnet18_wide")
+    # parser.add_argument("--classifier", type=str, default="resnet18_narrow")
     parser.add_argument("--pretrained", type=int, default=0, choices=[0, 1]) # 加载与训练的
 
     parser.add_argument("--precision", type=int, default=32, choices=[16, 32])
@@ -482,8 +501,10 @@ if __name__ == "__main__":
     parser.add_argument("--learning_rate", type=float, default=1e-2)
     parser.add_argument("--weight_decay", type=float, default=1e-2)
 
-    parser.add_argument("--dataset", type=str, default='CIFAR100') # CIFAR10
+    # parser.add_argument("--dataset", type=str, default='CIFAR100') # CIFAR10
+    parser.add_argument("--dataset", type=str, default='CIFAR10') # CIFAR10
+    parser.add_argument('--device', type=int, default=1)
     args = parser.parse_args()
     main(args)
 
-# nohup python -u train-resnet18.py > resnet18.log 2>&1 & [1] 31009
+# nohup python -u train-resnet18.py > resnet18.log 2>&1 & [1] 2928410

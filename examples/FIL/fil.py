@@ -139,7 +139,7 @@ for j, data in enumerate(tqdm.tqdm(testloader)):
     print(str(j)+": "+str(eta.item()))
     eta_same_layer_list.append(eta)
 eta_diff_layer_list.append(eta_same_layer_list)
-print(f"Layer {args['split_layer']} MI: {sum(eta_same_layer_list)/len(eta_same_layer_list)}")
+print(f"Layer {args['split_layer']} 1/dFIL: {sum(eta_same_layer_list)/len(eta_same_layer_list)}")
 
 # 结果储存到csv中
 # matrix = np.array(eta_diff_layer_list) # 有点大

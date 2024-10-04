@@ -271,12 +271,14 @@ class ResNet(nn.Module):
         width_per_group=64,
         replace_stride_with_dilation=None,
         norm_layer=None,
-        out_channels=[64, 128, 256, 512],
+        out_channels=[64, 128, 256, 512], # original
+        # out_channels=[64, 64, 256, 512],  # narrow
+        # out_channels=[64, 256, 256, 512],  # wide
         in_channel = 3,
-        split_layer=-1,
-        bottleneck_dim=-1, # 是否要使用压缩层宽的方式来进行
-        activation='relu',
-        pooling='max',
+        split_layer= -1,
+        bottleneck_dim= -1, # 是否要使用压缩层宽的方式来进行
+        activation= 'relu',
+        pooling= 'max',
     ):
         super(ResNet, self).__init__()
 

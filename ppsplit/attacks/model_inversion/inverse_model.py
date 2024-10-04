@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-12-12 12:42:45
-LastEditTime: 2024-09-29 05:47:14
+LastEditTime: 2024-10-02 04:46:41
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/ppsplit/attacks/model_inversion/inverse_model.py
 Description: 
@@ -199,6 +199,10 @@ class InverseModelAttack():
             smashed_data = client_net(raw_input)  # edge 推理
             start = time.time()
             inverted_input = decoder_net(smashed_data)  # inverse
+
+            # print('raw_input:',raw_input.shape)
+            # print('inverted_input:',inverted_input.shape)
+            
             deprocessImg_raw = deprocess(raw_input.clone()) # x_n
             deprocessImg_inversed = deprocess(inverted_input.clone()) # s_n
 

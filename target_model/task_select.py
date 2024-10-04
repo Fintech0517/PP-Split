@@ -8,7 +8,7 @@ from target_model.models.BankNet import BankNet1,BankNetDecoder1,bank_cfg
 from target_model.models.CreditNet import CreditNet1,CreditNetDecoder1,credit_cfg
 from target_model.models.PurchaseNet import PurchaseClassifier1,PurchaseDecoder1,purchase_cfg
 from target_model.models.IrisNet import IrisNet,IrisNetDecoder,Iris_cfg
-from target_model.models.ResNet import resnet18,resnet_model_cfg,InversionNet
+from target_model.models.ResNet import resnet18,resnet34,resnet50,resnet_model_cfg,InversionNet
 
 # 数据预处理方法
 from .data_preprocessing.preprocess_cifar10 import get_cifar10_normalize,deprocess,get_cifar10_fisher_normalize
@@ -17,6 +17,7 @@ from .data_preprocessing.preprocess_credit import preprocess_credit,tabinfo_cred
 from .data_preprocessing.preprocess_purchase import preprocess_purchase,tabinfo_purchase
 from .data_preprocessing.preprocess_Iris import preprocess_Iris, tabinfo_Iris
 from .data_preprocessing.preprocess_mnist import get_mnist_normalize
+from .data_preprocessing.preprocess_cifar100 import get_cifar100_normalize
 from .data_preprocessing.dataset import get_one_data
 
 # utils
@@ -36,6 +37,10 @@ def get_infotopo_para(args):
         nb_of_values=36 # nb_of_values-1=bins?
         conv = True
         pool_size = 4
+    elif dataset=='CIFAR100': # 和cifar10一样的
+        nb_of_values=36 # nb_of_values-1=bins?
+        conv = True
+        pool_size = 4
     elif dataset=='credit':
         pass
     elif dataset=='bank':
@@ -51,7 +56,7 @@ def get_infotopo_para(args):
         conv = True
         pool_size = 2
     else:
-        exit(-1)
+        raise ValueError('dataset error')
     
     
     
@@ -64,8 +69,6 @@ def get_infotopo_para(args):
     msg['pool_size']=pool_size
 
     return msg
-
-
 
 def get_dataloader(args):
     # 提取参数
@@ -81,7 +84,17 @@ def get_dataloader(args):
         # 数据集加载
         trainloader,testloader = get_cifar10_normalize(batch_size = train_bs, test_bs=test_bs)
         data_interval = (-1.0,1.0) # [-1,1]
+        data_type=1
+    
+    elif dataset=='CIFAR100':
+        # 超参数
+        testset_len = 10000
+        tab_info = None
 
+        # 数据集加载
+        trainloader,testloader = get_cifar100_normalize(batch_size = train_bs, test_bs=test_bs)
+        data_interval = (-1.0,1.0) # [-1,1]
+        data_type=1
     elif dataset=='credit':
         # 超参数
         testset_len = 61503 # for the mutual information
@@ -89,7 +102,7 @@ def get_dataloader(args):
         # 数据集加载
         trainloader,testloader = preprocess_credit(batch_size = train_bs, test_bs=test_bs)
         tab_info=tabinfo_credit
-
+        data_type=0
     elif dataset=='bank':
         # 超参数
         testset_len=8238
@@ -97,7 +110,7 @@ def get_dataloader(args):
         # 数据集加载
         trainloader,testloader = preprocess_bank(batch_size = train_bs, test_bs=test_bs)
         tab_info=tabinfo_bank
-
+        data_type=0
     elif dataset=='Iris':
         # 超参数
         testset_len=30
@@ -105,7 +118,7 @@ def get_dataloader(args):
         # 数据集加载
         trainloader,testloader = preprocess_Iris(batch_size = train_bs, test_bs=test_bs) # 只针对train data，testbs = 1
         tab_info=tabinfo_Iris
-
+        data_type=1
     elif dataset=='purchase':
         # 超参数
         testset_len = 39465 # test len
@@ -115,7 +128,7 @@ def get_dataloader(args):
         tab_info=tabinfo_purchase
 
         data_interval = (0.0,1.0) # [0,1]
-
+        data_type=1
     elif dataset=='MNIST':
         # 超参数
         testset_len = 10000
@@ -124,9 +137,10 @@ def get_dataloader(args):
         # 数据集加载
         trainloader,testloader = get_mnist_normalize(batch_size = train_bs, test_bs=test_bs)
         data_interval = (-1.0,1.0)
+        data_type=1
     else:
         print('get_dataloader error')
-        exit(-1)
+        raise ValueError('dataset error')
     
     # one loader
     one_bs_testloader = DataLoader(testloader.dataset, batch_size=1, shuffle=False, num_workers=4)
@@ -140,6 +154,7 @@ def get_dataloader(args):
     msg['testloader'] = testloader
     msg['one_data_loader'] = one_data_loader
     msg['data_interval'] = data_interval
+    msg['data_type'] = data_type
     return msg
 
 def get_models(args):
@@ -165,8 +180,10 @@ def get_models(args):
             split_layer = 2 if split_layer==-1 else split_layer # 定成3吧？
 
             # 关键路径
-            unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/VGG5/BN+Tanh/VGG5-params-20ep.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
-            results_dir  = f"../../results/{result_ws}/VGG5/{test_num}/"
+            # unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/VGG5/BN+Tanh/VGG5-params-20ep.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+            unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/VGG5/CIFAR10/VGG5-CIFAR10-0epoch.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+
+            results_dir  = f"../../results/{result_ws}/VGG5/{test_num}/0ep/"
             decoder_route = results_dir + f"/Decoder-layer{split_layer}.pth"
 
             # 切割成client model
@@ -221,8 +238,15 @@ def get_models(args):
 
             # 关键路径
             # xs，原来根本没有加载参数
-            # unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/CIFAR10-models/ResNet18/32bs-ep20-relu-max-adam/resnet18-drj.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
-            unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/CIFAR10-models/ResNet18/32bs-ep20-relu-max-adam/resnet18-drj-small.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+            # 100ep
+            # unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/CIFAR10-models/ResNet18/32bs-ep20-relu-max-adam/resnet18-drj-small.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+            # 20 ep
+            unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ResNet/resnet18/CIFAR10/resnet18-drj-align.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+            # 20 ep narrow
+            # unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ResNet/resnet18_narrow/CIFAR10/resnet18-drj-align.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+            # 20 ep wide
+            # unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ResNet/resnet18_wide/CIFAR10/resnet18-drj-align.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+
             results_dir  = f"../../results/{result_ws}/Resnet18/{test_num}/"
             decoder_route = results_dir + f"/Decoder-layer{split_layer}.pth"
 
@@ -245,7 +269,105 @@ def get_models(args):
                 decoder_net = InversionNet(split_layer=split_layer)
 
         else:
-            exit(-1)
+            raise ValueError('model error')
+
+    elif dataset=='CIFAR100':
+        image_deprocess = deprocess
+
+        if model == 'ResNet18':
+            split_layer_list=[2,3,5,7,9,11]
+
+            # 超参数
+            # split_layer_list = list(range(len(model_cfg['VGG5'])))
+            split_layer = 7 if split_layer==-1 else split_layer # 定成3吧？
+
+            # 关键路径
+            # xs，原来根本没有加载参数
+            unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ResNet/resnet18/CIFAR100/resnet18-drj-align.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+            results_dir  = f"../../results/{result_ws}/Resnet18_CIFAR100/{test_num}/"
+            decoder_route = results_dir + f"/Decoder-layer{split_layer}.pth"
+
+            # 切割成client model
+            client_net = resnet18(pretrained=False, split_layer=split_layer, bottleneck_dim=-1, num_classes=100, activation='gelu', pooling='avg')
+            # client_net = VGG('Client','VGG5',split_layer,model_cfg,noise_scale=noise_scale)
+            pweights = torch.load(unit_net_route)
+            
+            # 不需要划分模型参数？
+            if split_layer < len(resnet_model_cfg['resnet18']):
+                pweights = split_weights_client(pweights,client_net.state_dict())
+            client_net.load_state_dict(pweights,strict=False) 
+
+            # decoder net  # 先用cifar10的吧，但估计是错的。
+            if os.path.isfile(decoder_route): # 如果已经训练好了
+                print("=> loading decoder model '{}'".format(decoder_route))
+                decoder_net = torch.load(decoder_route)
+            else: # 如果没有,加载一个
+                print("train decoder model...")
+                decoder_net = InversionNet(split_layer=split_layer)
+
+        elif model == 'ResNet34':
+            split_layer_list=[2,3,5,7,9,11]
+
+            # 超参数
+            # split_layer_list = list(range(len(model_cfg['VGG5'])))
+            split_layer = 7 if split_layer==-1 else split_layer # 定成3吧？
+
+            # 关键路径
+            # xs，原来根本没有加载参数
+            unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ResNet/resnet34/CIFAR100/resnet34-drj-align.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+            results_dir  = f"../../results/{result_ws}/Resnet34_CIFAR100/{test_num}/"
+            decoder_route = results_dir + f"/Decoder-layer{split_layer}.pth"
+
+            # 切割成client model
+            client_net = resnet34(pretrained=False, split_layer=split_layer, bottleneck_dim=-1, num_classes=100, activation='gelu', pooling='avg')
+            # client_net = VGG('Client','VGG5',split_layer,model_cfg,noise_scale=noise_scale)
+            pweights = torch.load(unit_net_route)
+            
+            # 不需要划分模型参数？
+            if split_layer < len(22):
+                pweights = split_weights_client(pweights,client_net.state_dict())
+            client_net.load_state_dict(pweights,strict=False) 
+
+            # decoder net  # 先用cifar10的吧，但估计是错的。
+            if os.path.isfile(decoder_route): # 如果已经训练好了
+                print("=> loading decoder model '{}'".format(decoder_route))
+                decoder_net = torch.load(decoder_route)
+            else: # 如果没有,加载一个
+                print("train decoder model...")
+                decoder_net = InversionNet(split_layer=split_layer)
+        
+        elif model == 'ResNet50':
+            split_layer_list=[2,3,5,7,9,11]
+
+            # 超参数
+            # split_layer_list = list(range(len(model_cfg['VGG5'])))
+            split_layer = 7 if split_layer==-1 else split_layer # 定成3吧？
+
+            # 关键路径
+            # xs，原来根本没有加载参数
+            unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ResNet/resnet50/CIFAR100/resnet18-drj-align.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+            results_dir  = f"../../results/{result_ws}/Resnet50_CIFAR100/{test_num}/"
+            decoder_route = results_dir + f"/Decoder-layer{split_layer}.pth"
+
+            # 切割成client model
+            client_net = resnet50(pretrained=False, split_layer=split_layer, bottleneck_dim=-1, num_classes=100, activation='gelu', pooling='avg')
+            # client_net = VGG('Client','VGG5',split_layer,model_cfg,noise_scale=noise_scale)
+            pweights = torch.load(unit_net_route)
+            
+            # 不需要划分模型参数？
+            if split_layer < len(22):
+                pweights = split_weights_client(pweights,client_net.state_dict())
+            client_net.load_state_dict(pweights,strict=False) 
+
+            # decoder net  # 先用cifar10的吧，但估计是错的。
+            if os.path.isfile(decoder_route): # 如果已经训练好了
+                print("=> loading decoder model '{}'".format(decoder_route))
+                decoder_net = torch.load(decoder_route)
+            else: # 如果没有,加载一个
+                print("train decoder model...")
+                decoder_net = InversionNet(split_layer=split_layer)        
+        else:
+            raise ValueError('model error')
 
     elif dataset =='MNIST':
         image_deprocess = deprocess
@@ -300,7 +422,7 @@ def get_models(args):
                 decoder_net = torch.load(decoder_route)
             else: # 如果没有,加载一个
                 print("train decoder model...")
-                decoder_net = VGG5Decoder(split_layer=split_layer,network='VGG9')
+                decoder_net = VGG5Decoder(split_layer=split_layer,network='VGG9_MNIST')
 
 
     elif dataset=='credit':
@@ -414,7 +536,7 @@ def get_models(args):
 
     else:
         print("get_models error")
-        exit(-1)
+        raise ValueError('model error')
 
     client_net.to(device)
     create_dir(results_dir)
