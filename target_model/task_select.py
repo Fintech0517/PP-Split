@@ -169,6 +169,7 @@ def get_models(args):
     image_deprocess = None
     test_num = args['test_num']
     no_dense = args['no_dense'] # 默认为False
+    ep = args['ep']
 
     # 加载模型和数据集，并从unit模型中切割出client_model
     if dataset=='CIFAR10':
@@ -180,10 +181,15 @@ def get_models(args):
             split_layer = 2 if split_layer==-1 else split_layer # 定成3吧？
 
             # 关键路径
-            # unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/VGG5/BN+Tanh/VGG5-params-20ep.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
-            unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/VGG5/CIFAR10/VGG5-CIFAR10-0epoch.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+            if ep==-1:
+                # vgg5 (20ep)
+                unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/VGG5/BN+Tanh/VGG5-params-20ep.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+                results_dir  = f"../../results/{result_ws}/VGG5/{test_num}/"
+            else:
+                # 0ep
+                unit_net_route = f'/home/dengruijun/data/FinTech/PP-Split/results/trained_models/VGG5/CIFAR10/VGG5-CIFAR10-{ep}epoch.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+                results_dir  = f"../../results/{result_ws}/VGG5/VGG5_{ep}ep/{test_num}/"
 
-            results_dir  = f"../../results/{result_ws}/VGG5/{test_num}/0ep/"
             decoder_route = results_dir + f"/Decoder-layer{split_layer}.pth"
 
             # 切割成client model
@@ -208,10 +214,16 @@ def get_models(args):
             split_layer = 4 if split_layer==-1 else split_layer # 定成3吧？
 
             # 关键路径
-            unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/VGG9/CIFAR10/VGG9-CIFAR10-20ep.pth' # VGG9-BN+Tanh # 存储的是模型参数，不包括模型结构
-            results_dir  = f"../../results/{result_ws}/VGG9/{test_num}/"
-            decoder_route = results_dir + f"/Decoder-layer{split_layer}.pth"
+            if ep==-1:
+                # vgg9 (20ep)
+                unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/VGG9/CIFAR10/VGG9-CIFAR10-20ep.pth' # VGG9-BN+Tanh # 存储的是模型参数，不包括模型结构
+                results_dir  = f"../../results/{result_ws}/VGG9/{test_num}/"
+            else:
+                # 0ep
+                unit_net_route = f'/home/dengruijun/data/FinTech/PP-Split/results/trained_models/VGG9/CIFAR10/VGG9-CIFAR10-20epoch.pth-{ep}.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+                results_dir  = f"../../results/{result_ws}/VGG9/VGG9_{ep}ep/{test_num}/"
 
+            decoder_route = results_dir + f"/Decoder-layer{split_layer}.pth"
             # 切割成client model
             # vgg5_unit.load_state_dict(torch.load(unit_net_route,map_location=torch.device('cpu'))) # 完整的模型
             client_net = VGG('Client','VGG9',split_layer,model_cfg,noise_scale=noise_scale)
@@ -241,13 +253,19 @@ def get_models(args):
             # 100ep
             # unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/CIFAR10-models/ResNet18/32bs-ep20-relu-max-adam/resnet18-drj-small.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
             # 20 ep
-            unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ResNet/resnet18/CIFAR10/resnet18-drj-align.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+            # unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ResNet/resnet18/CIFAR10/resnet18-drj-align.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
             # 20 ep narrow
             # unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ResNet/resnet18_narrow/CIFAR10/resnet18-drj-align.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
             # 20 ep wide
             # unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ResNet/resnet18_wide/CIFAR10/resnet18-drj-align.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+            # 20 ep 2narrow
+            unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ResNet/resnet18_2narrow/CIFAR10/resnet18-drj-align.pth'
 
-            results_dir  = f"../../results/{result_ws}/Resnet18/{test_num}/"
+            # results_dir  = f"../../results/{result_ws}/Resnet18/{test_num}/"
+            # results_dir  = f"../../results/{result_ws}/Resnet18/Resnet18_20ep_org/{test_num}/"
+            # results_dir  = f"../../results/{result_ws}/Resnet18/Resnet18_20ep_narrow/{test_num}/"
+            # results_dir  = f"../../results/{result_ws}/Resnet18/Resnet18_20ep_wide/{test_num}/"
+            results_dir  = f"../../results/{result_ws}/Resnet18/Resnet18_20ep_2narrow/{test_num}/"
             decoder_route = results_dir + f"/Decoder-layer{split_layer}.pth"
 
             # 切割成client model
@@ -268,6 +286,36 @@ def get_models(args):
                 print("train decoder model...")
                 decoder_net = InversionNet(split_layer=split_layer)
 
+        elif model == 'ResNet34':
+
+            # 超参数
+            # split_layer_list = list(range(len(model_cfg['VGG5'])))
+            split_layer = 10 if split_layer==-1 else split_layer # 定成3吧？
+
+            unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ResNet/resnet34/CIFAR10/resnet34-drj-align.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+
+            results_dir  = f"../../results/{result_ws}/Resnet34/{test_num}/"
+            decoder_route = results_dir + f"/Decoder-layer{split_layer}.pth"
+
+            # 切割成client model
+            client_net = resnet34(pretrained=False, split_layer=split_layer, bottleneck_dim=-1, num_classes=10, activation='gelu', pooling='avg')
+            # client_net = VGG('Client','VGG5',split_layer,model_cfg,noise_scale=noise_scale)
+            pweights = torch.load(unit_net_route)
+            
+            # 不需要划分模型参数？
+            if split_layer < 22:
+                pweights = split_weights_client(pweights,client_net.state_dict())
+            client_net.load_state_dict(pweights,strict=False) 
+
+            # decoder net
+            if os.path.isfile(decoder_route): # 如果已经训练好了
+                print("=> loading decoder model '{}'".format(decoder_route))
+                decoder_net = torch.load(decoder_route)
+            else: # 如果没有,加载一个
+                print("train decoder model...")
+                decoder_net = InversionNet(split_layer=7) # 手动设定，之后要改的 7 for split point  =10
+            # decoder_net = None
+           
         else:
             raise ValueError('model error')
 
@@ -324,7 +372,7 @@ def get_models(args):
             pweights = torch.load(unit_net_route)
             
             # 不需要划分模型参数？
-            if split_layer < len(22):
+            if split_layer < 22:
                 pweights = split_weights_client(pweights,client_net.state_dict())
             client_net.load_state_dict(pweights,strict=False) 
 
@@ -355,7 +403,7 @@ def get_models(args):
             pweights = torch.load(unit_net_route)
             
             # 不需要划分模型参数？
-            if split_layer < len(22):
+            if split_layer < 22:
                 pweights = split_weights_client(pweights,client_net.state_dict())
             client_net.load_state_dict(pweights,strict=False) 
 
@@ -377,8 +425,17 @@ def get_models(args):
             split_layer = 2 if split_layer==-1 else split_layer # 定成3吧？
 
             # 关键路径
-            unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/VGG5/MNIST/VGG5-MNIST-20ep.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
-            results_dir  = f"../../results/{result_ws}/VGG5_MNIST/{test_num}/"
+            if ep==-1:
+                # vgg5 20ep
+                unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/VGG5/MNIST/VGG5-MNIST-20ep.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+                results_dir  = f"../../results/{result_ws}/VGG5_MNIST/{test_num}/"
+            else:
+                # 0ep
+                unit_net_route = f'/home/dengruijun/data/FinTech/PP-Split/results/trained_models/VGG5/MNIST/VGG5_MNIST-MNIST-{ep}epoch.pth-0.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+                results_dir  = f"../../results/{result_ws}/VGG5_MNIST/VGG5_{ep}ep/{test_num}/"
+
+
+
             decoder_route = results_dir + f"/Decoder-layer{split_layer}.pth"
 
             # 切割成client model
@@ -404,8 +461,18 @@ def get_models(args):
             split_layer = 4 if split_layer==-1 else split_layer # 定成3吧？
 
             # 关键路径
-            unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/VGG9/MNIST/VGG9-MNIST-20ep.pth' # VGG9-BN+Tanh # 存储的是模型参数，不包括模型结构
-            results_dir  = f"../../results/{result_ws}/VGG9_MNIST/{test_num}/"
+
+            if ep==-1:
+                # vgg9 20ep
+                unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/VGG9/MNIST/VGG9-MNIST-20ep.pth' # VGG9-BN+Tanh # 存储的是模型参数，不包括模型结构
+                results_dir  = f"../../results/{result_ws}/VGG9_MNIST/{test_num}/"
+            else:
+                # 0ep
+                unit_net_route = f'/home/dengruijun/data/FinTech/PP-Split/results/trained_models/VGG9/MNIST/VGG9_MNIST-MNIST-{ep}epoch.pth-1.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+                results_dir  = f"../../results/{result_ws}/VGG9_MNIST/VGG9_{ep}ep/{test_num}/"
+
+
+
             decoder_route = results_dir + f"/Decoder-layer{split_layer}.pth"
 
             # 切割成client model
@@ -549,6 +616,8 @@ def get_models(args):
     msg['results_dir'] = results_dir
     msg['decoder_net'] = decoder_net
     msg['decoder_route'] = decoder_route
+
+    print('unit_net_route:',unit_net_route)
 
     return msg
 

@@ -5,7 +5,7 @@
 '''
 Author: Ruijun Deng
 Date: 2024-08-14 16:59:47
-LastEditTime: 2024-10-02 08:14:49
+LastEditTime: 2024-10-05 04:26:03
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/examples/effectInfo/effectInfo1.10.py
 Description: 
@@ -53,7 +53,7 @@ parser.add_argument('--noise_scale', type=int, default=0, help='noise_scale')
 parser.add_argument('--split_layer', type=int, default=2, help='split_layer')
 parser.add_argument('--test_num', type=str, default='effectiveInfo1.10', help='test_num')
 parser.add_argument('--no_dense', action='store_true', help='no_dense')
-
+parser.add_argument('--ep', type=int, help='epochs', default=-1)
 
 args_python = parser.parse_args()
 args = vars(args_python)

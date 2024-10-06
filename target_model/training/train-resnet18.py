@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2024-08-16 20:50:40
-LastEditTime: 2024-10-04 06:12:23
+LastEditTime: 2024-10-06 03:53:50
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/training/train-resnet18.py
 Description: 
@@ -487,7 +487,8 @@ if __name__ == "__main__":
     # TRAINER args
     # parser.add_argument("--classifier", type=str, default="resnet50")
     # parser.add_argument("--classifier", type=str, default="resnet34")
-    parser.add_argument("--classifier", type=str, default="resnet18")
+    # parser.add_argument("--classifier", type=str, default="resnet18")
+    parser.add_argument("--classifier", type=str, default="resnet18_2narrow")
     # parser.add_argument("--classifier", type=str, default="resnet18_wide")
     # parser.add_argument("--classifier", type=str, default="resnet18_narrow")
     parser.add_argument("--pretrained", type=int, default=0, choices=[0, 1]) # 加载与训练的

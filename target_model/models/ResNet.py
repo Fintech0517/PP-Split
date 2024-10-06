@@ -271,9 +271,10 @@ class ResNet(nn.Module):
         width_per_group=64,
         replace_stride_with_dilation=None,
         norm_layer=None,
-        out_channels=[64, 128, 256, 512], # original
+        # out_channels=[64, 128, 256, 512], # original
         # out_channels=[64, 64, 256, 512],  # narrow
         # out_channels=[64, 256, 256, 512],  # wide
+        out_channels=[64, 32, 256, 512],  # 2narrow
         in_channel = 3,
         split_layer= -1,
         bottleneck_dim= -1, # 是否要使用压缩层宽的方式来进行
@@ -619,40 +620,46 @@ def resnet50(pretrained=False, device='cpu', **kwargs):
 #         inet = InversionNet(in_c=256, upconv_channels=[(256, 'up'), (256, 'up'), (3, 'up')], last_activation=last_activation)
 
 resnet_decoder_model_cfg = {
+    'resnet18':{
     2: [(128, 'same'), (3, 'same')], # <=2
     3: [(128, 'up'), (3, 'same')],
     5: [(128, 'up'), (3, 'same')],
-    7: [(128, 'up'), (3, 'up')],
+    # 7: [(128, 'up'), (3, 'up')], # org
+    # 7: [(64, 'up'), (3, 'up')], # narrow
+    7: [(32, 'up'), (3, 'up')], # 2narrow
+    # 7: [ (256,'up'), (3, 'up')], # wide
+    # 7: [(256, 'up'), (128,'same'), (3, 'up')], # wide
+    # 7: [(256, 'same'), (128,'up'), (3, 'up')], # wide
+    # 7: [(256, 'same'), (256,'up'), (3, 'up')], # wide
+    # 7: [(256, 'up'), (128,'up'), (3, 'same')], # wide
+    # 7: [(256, 'up'), (64,'same'), (3, 'up')], # wide
+    # 7: [(128, 'up'), (128,'same'), (3, 'up')], # org # resnet34 -10
     9: [(256, 'up'), (256, 'up'), (3, 'up')],
-    # 11: [(512, 'up'), (512, 'up'), (256, 'up'), (3, 'up')], # drj
-    11: [(512, 'up'), (256, 'up'), (256, 'up'), (3, 'up')], # drj
-    # 11: [(512, 'same'), (512, 'up'), (256,'up'), (128, 'up'), (3, 'up')], # drj
+    # 11: [(512, 'up'), (512, 'up'), (256, 'up'), (3, 'up')], # drj first
+    11: [(512, 'up'), (256, 'up'), (256, 'up'), (3, 'up')], # drj # best
+    # 11: [(512, 'same'), (512, 'up'), (256,'up'), (128, 'up'), (3, 'up')], # drj second
     12: [], # adaptive avgpooling这个怎么恢复，我还真不会。
     13: [],
+    },
+    # 'resnet34':{
+    # 7: [(128, 'up'),  (128,'same'), (3, 'up')], # org
+    # }
 }
 
 in_c_dict = {
     2: 64,
     3: 64,
     5: 64,
-    7: 128,
+    # 7: 128, # org
+    # 7: 64, # narrow
+    7: 32, # 2narrow
+    # 7: 256, # wide
     9: 256,
     11: 512,
     12: 512,
     13: 512,
 }
-# resnet_model_cfg = {
-#     'resnet18': [
-#         ("conv1", 2)
-#         ("pooling", 3)
-#         ("layer11", 5)
-#         ("layer21", 7)
-#         ("layer31", 9)
-#         ("layer41", 11)
-#         ("avgpool", 12)
-#         ("fc", 13)
-#     ]
-# }
+
 
 
 class InversionNet(nn.Module):
@@ -664,11 +671,15 @@ class InversionNet(nn.Module):
         # last_activation='sigmoid'
         last_activation=None,
         split_layer = 7,
+        model='resnet18',
     ):
         super(InversionNet, self).__init__()
         
+        if model == 'resnet18':
+            cfg = resnet_decoder_model_cfg['resnet18']
+
         # 根据split layer 取参数
-        upconv_channels = resnet_decoder_model_cfg[split_layer]
+        upconv_channels = cfg[split_layer]
         in_c = in_c_dict[split_layer]
 
         layers = []

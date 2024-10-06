@@ -28,6 +28,7 @@ parser.add_argument('--noise_scale', type=int, default=0.1, help='noise_scale')
 parser.add_argument('--split_layer', type=int, default=2, help='split_layer')
 parser.add_argument('--test_num', type=str, default='InverseModelAttack-defense0.1', help='test_num')
 parser.add_argument('--no_dense', action='store_true', help='no_dense')
+parser.add_argument('--ep', type=int, help='epochs', default=-1)
 
 args_python = parser.parse_args()
 args = vars(args_python)
