@@ -271,10 +271,10 @@ class ResNet(nn.Module):
         width_per_group=64,
         replace_stride_with_dilation=None,
         norm_layer=None,
-        # out_channels=[64, 128, 256, 512], # original
+        out_channels=[64, 128, 256, 512], # original
         # out_channels=[64, 64, 256, 512],  # narrow
         # out_channels=[64, 256, 256, 512],  # wide
-        out_channels=[64, 32, 256, 512],  # 2narrow
+        # out_channels=[64, 32, 256, 512],  # 2narrow
         in_channel = 3,
         split_layer= -1,
         bottleneck_dim= -1, # 是否要使用压缩层宽的方式来进行
@@ -624,9 +624,9 @@ resnet_decoder_model_cfg = {
     2: [(128, 'same'), (3, 'same')], # <=2
     3: [(128, 'up'), (3, 'same')],
     5: [(128, 'up'), (3, 'same')],
-    # 7: [(128, 'up'), (3, 'up')], # org
+    7: [(128, 'up'), (3, 'up')], # org
     # 7: [(64, 'up'), (3, 'up')], # narrow
-    7: [(32, 'up'), (3, 'up')], # 2narrow
+    # 7: [(32, 'up'), (3, 'up')], # 2narrow
     # 7: [ (256,'up'), (3, 'up')], # wide
     # 7: [(256, 'up'), (128,'same'), (3, 'up')], # wide
     # 7: [(256, 'same'), (128,'up'), (3, 'up')], # wide
@@ -650,9 +650,9 @@ in_c_dict = {
     2: 64,
     3: 64,
     5: 64,
-    # 7: 128, # org
+    7: 128, # org
     # 7: 64, # narrow
-    7: 32, # 2narrow
+    # 7: 32, # 2narrow
     # 7: 256, # wide
     9: 256,
     11: 512,

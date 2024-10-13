@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-12-12 20:28:05
-LastEditTime: 2024-09-05 03:37:14
+LastEditTime: 2024-10-08 02:22:39
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/models/splitnn_utils.py
 Description: 
@@ -35,3 +35,5 @@ def split_weights_client(weights,cweights,no_dense=False):
         else:
             cweights[key] = weights[key]
     return cweights
+
+

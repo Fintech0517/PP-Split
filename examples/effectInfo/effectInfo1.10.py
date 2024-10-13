@@ -5,7 +5,7 @@
 '''
 Author: Ruijun Deng
 Date: 2024-08-14 16:59:47
-LastEditTime: 2024-10-05 04:26:03
+LastEditTime: 2024-10-12 04:40:24
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/examples/effectInfo/effectInfo1.10.py
 Description: 
@@ -95,6 +95,7 @@ msg = {**model_msg,**data_msg,**infotopo_msg}
 # 数据集
 one_data_loader,trainloader,testloader = data_msg['one_data_loader'],data_msg['trainloader'], data_msg['testloader']
 data_interval = data_msg['data_interval']
+data_type = msg['data_type']
 
 # effectEntropy Infotopo参数
 nb_of_values = msg['nb_of_values']
@@ -112,7 +113,7 @@ image_deprocess = model_msg['image_deprocess']
 # 路径
 results_dir = model_msg['results_dir']
 inverse_dir = results_dir + 'layer' + str(args['split_layer'])+'/'
-data_type = 1 if args['dataset'] == 'CIFAR10' else 0
+# data_type = 1 if args['dataset'] == 'CIFAR10' else 0
 split_layer = args['split_layer']
 
 print('results_dir:', results_dir)

@@ -431,7 +431,7 @@ def get_models(args):
                 results_dir  = f"../../results/{result_ws}/VGG5_MNIST/{test_num}/"
             else:
                 # 0ep
-                unit_net_route = f'/home/dengruijun/data/FinTech/PP-Split/results/trained_models/VGG5/MNIST/VGG5_MNIST-MNIST-{ep}epoch.pth-0.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+                unit_net_route = f'/home/dengruijun/data/FinTech/PP-Split/results/trained_models/VGG5/MNIST/VGG5_MNIST-MNIST-20epoch.pth-{ep}.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
                 results_dir  = f"../../results/{result_ws}/VGG5_MNIST/VGG5_{ep}ep/{test_num}/"
 
 
@@ -468,7 +468,7 @@ def get_models(args):
                 results_dir  = f"../../results/{result_ws}/VGG9_MNIST/{test_num}/"
             else:
                 # 0ep
-                unit_net_route = f'/home/dengruijun/data/FinTech/PP-Split/results/trained_models/VGG9/MNIST/VGG9_MNIST-MNIST-{ep}epoch.pth-1.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+                unit_net_route = f'/home/dengruijun/data/FinTech/PP-Split/results/trained_models/VGG9/MNIST/VGG9_MNIST-MNIST-20epoch.pth-{ep}.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
                 results_dir  = f"../../results/{result_ws}/VGG9_MNIST/VGG9_{ep}ep/{test_num}/"
 
 
