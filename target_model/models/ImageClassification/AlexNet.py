@@ -1,10 +1,10 @@
 '''
 Author: Ruijun Deng
 Date: 2024-09-28 04:13:35
-LastEditTime: 2024-09-29 22:54:25
+LastEditTime: 2024-10-25 00:53:58
 LastEditors: Ruijun Deng
-FilePath: /PP-Split/target_model/models/AlexNet.py
-Description: 
+FilePath: /PP-Split/target_model/models/ImageClassification/AlexNet.py
+Description: https://github.com/tortorish/Pytorch_AlexNet_Mnist/blob/main/pytorch_mnist.ipynb
 '''
 from functools import partial
 from typing import Any, Optional
@@ -17,7 +17,6 @@ __all__ = ["AlexNet", "AlexNet_Weights", "alexnet"]
 
 
 class AlexNet(nn.Module):
-    # https://github.com/tortorish/Pytorch_AlexNet_Mnist/blob/main/pytorch_mnist.ipynb
     def __init__(self, num_classes: int = 1000, dropout: float = 0.5) -> None:
         super().__init__()
         self.features = nn.Sequential(

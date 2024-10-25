@@ -1,8 +1,32 @@
+<!--
+ * @Author: Ruijun Deng
+ * @Date: 2024-08-24 00:41:29
+ * @LastEditTime: 2024-10-25 01:22:59
+ * @LastEditors: Ruijun Deng
+ * @FilePath: /PP-Split/target_model/models/PyTorch_CIFAR10/README.md
+ * @Description: 
+-->
 # PyTorch models trained on CIFAR-10 dataset
 - I modified [TorchVision](https://pytorch.org/docs/stable/torchvision/models.html) official implementation of popular CNN models, and trained those on CIFAR-10 dataset.
 - I changed *number of class, filter size, stride, and padding* in the the original code so that it works with CIFAR-10.
 - I also share the **weights** of these models, so you can just load the weights and use them.
 - The code is highly re-producible and readable by using PyTorch-Lightning.
+
+但是这一圈的模型的data 对应的normalize：
+```python
+self.mean = (0.4914, 0.4822, 0.4465)
+self.std = (0.2471, 0.2435, 0.2616)
+
+# 
+transform = T.Compose(
+    [
+        T.RandomCrop(32, padding=4),
+        T.RandomHorizontalFlip(),
+        T.ToTensor(),
+        T.Normalize(self.mean, self.std),
+    ]
+)
+```
 
 ## Statistics of supported models
 | No. |     Model    | Val. Acc. | No. Params |   Size |
