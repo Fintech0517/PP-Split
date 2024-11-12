@@ -1,9 +1,9 @@
 '''
 Author: Ruijun Deng
 Date: 2024-08-15 15:49:22
-LastEditTime: 2024-08-15 15:53:14
+LastEditTime: 2024-10-27 01:52:14
 LastEditors: Ruijun Deng
-FilePath: /PP-Split/target_model/models/PyTorch_CIFAR10/data.py
+FilePath: /PP-Split/target_model/models/ImageClassification/Maeng_FIL_nips23/data.py
 Description: 
 '''
 import os
@@ -63,6 +63,8 @@ class CIFAR10Data(pl.LightningDataModule):
                 T.RandomHorizontalFlip(),
                 T.ToTensor(),
                 T.Normalize(self.mean, self.std),
+                # self.mean = (0.4914, 0.4822, 0.4465)
+                # self.std = (0.2471, 0.2435, 0.2616)
             ]
         )
         dataset = CIFAR10(root=self.hparams.data_dir, train=True, transform=transform)

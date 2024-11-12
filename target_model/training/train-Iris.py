@@ -19,7 +19,7 @@ from torch.utils.data import Dataset
 
 import sys
 sys.path.append('/home/dengruijun/data/FinTech/PP-Split/')
-from target_model.models.IrisNet import IrisNet,Iris_cfg
+from target_model.models.TableClassification.IrisNet import IrisNet,Iris_cfg
 from target_model.data_preprocessing.preprocess_Iris import preprocess_Iris
 
 from torch.utils.tensorboard import SummaryWriter

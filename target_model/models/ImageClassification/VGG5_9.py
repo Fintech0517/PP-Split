@@ -1,10 +1,10 @@
 '''
 Author: Ruijun Deng
 Date: 2023-08-27 20:58:31
-LastEditTime: 2024-10-25 00:51:36
+LastEditTime: 2024-10-25 01:31:21
 LastEditors: Ruijun Deng
-FilePath: /PP-Split/target_model/models/VGG.py
-Description: 
+FilePath: /PP-Split/target_model/models/ImageClassification/VGG5_9.py
+Description: FedAdapt? 还是啥，很久之前做模型分割的那些文章。
 '''
 
 import time

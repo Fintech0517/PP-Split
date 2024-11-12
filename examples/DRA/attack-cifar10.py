@@ -26,7 +26,7 @@ import os
 # 导包和超参数设置
 from target_model.data_preprocessing.preprocess_cifar10 import get_cifar10_normalize,get_one_data,deprocess
 
-from target_model.models.VGG import VGG,VGG5Decoder,model_cfg
+from target_model.models.ImageClassification.VGG5_9 import VGG,VGG5Decoder,model_cfg
 from target_model.models.splitnn_utils import split_weights_client
 
 test_num = 9 # 测试编号（对应结果文件夹名称）

@@ -21,7 +21,7 @@ import sys
 sys.path.append('/home/dengruijun/data/FinTech/PP-Split/')
 
 
-from target_model.models.AlexNet import AlexNet,AlexNet_MNIST
+from target_model.models.ImageClassification.AlexNet import AlexNet,AlexNet_MNIST
 from target_model.data_preprocessing.preprocess_mnist import get_mnist_normalize
 from utils import evalTest 
 

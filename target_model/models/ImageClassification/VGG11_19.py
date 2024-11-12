@@ -1,3 +1,19 @@
+'''
+Author: Ruijun Deng
+Date: 2023-08-27 20:58:31
+LastEditTime: 2024-10-25 00:51:36
+LastEditors: Ruijun Deng
+FilePath: /PP-Split/target_model/models/VGG.py
+Description: 
+@inproceedings{maeng2023bounding,
+  author={Maeng, Kiwan and Guo, Chuan and Kariyappa, Sanjay and Suh, G. Edward},
+  title={Bounding the Invertibility of Privacy-Preserving Instance Encoding Using Fisher Information},
+  booktitle={Advances in Neural Information Processing Systems (NeurIPS)},
+  year={2023},
+}
+'''
+
+
 import os
 
 import torch
@@ -12,9 +28,9 @@ __all__ = [
 ]
 
 
-class VGG(nn.Module):
+class VGG_BIG(nn.Module):
     def __init__(self, features, num_classes=10, init_weights=True):
-        super(VGG, self).__init__()
+        super(VGG_BIG, self).__init__()
         self.features = features
         # CIFAR 10 (7, 7) to (1, 1)
         # self.avgpool = nn.AdaptiveAvgPool2d((7, 7))
@@ -111,7 +127,7 @@ cfgs = {
 def _vgg(arch, cfg, batch_norm, pretrained, progress, device, **kwargs):
     if pretrained:
         kwargs["init_weights"] = False
-    model = VGG(make_layers(cfgs[cfg], batch_norm=batch_norm), **kwargs)
+    model = VGG_BIG(make_layers(cfgs[cfg], batch_norm=batch_norm), **kwargs)
     if pretrained:
         script_dir = os.path.dirname(__file__)
         state_dict = torch.load(

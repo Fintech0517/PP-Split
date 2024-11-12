@@ -11,7 +11,7 @@ import time
 
 import sys
 sys.path.append('/home/dengruijun/data/FinTech/PP-Split/')
-from target_model.models.PurchaseNet import PurchaseClassifier1,PurchaseDecoder1,purchase_cfg
+from target_model.models.TableClassification.PurchaseNet import PurchaseClassifier1,PurchaseDecoder1,purchase_cfg
 from target_model.data_preprocessing.preprocess_purchase import preprocess_purchase
 from target_model.training.utils import accuracy_purchase
 

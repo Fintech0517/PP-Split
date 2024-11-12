@@ -1,5 +1,18 @@
 '''
-来源于 nips23 fisher的团队 改进的resnet
+Author: Ruijun Deng
+Date: 2023-08-27 20:58:31
+LastEditTime: 2024-10-27 02:25:02
+LastEditors: Ruijun Deng
+FilePath: /PP-Split/target_model/models/ImageClassification/ResNet.py
+Description: 
+@inproceedings{maeng2023bounding,
+  author={Maeng, Kiwan and Guo, Chuan and Kariyappa, Sanjay and Suh, G. Edward},
+  title={Bounding the Invertibility of Privacy-Preserving Instance Encoding Using Fisher Information},
+  booktitle={Advances in Neural Information Processing Systems (NeurIPS)},
+  year={2023},
+}
+面向数据集 训练了 0.5，0.5的模型，
+也有原来maeng训练好的 那个
 '''
 
 import torch
@@ -261,6 +274,7 @@ class Bottleneck(nn.Module):
 # split layer [2,3,5,7,9,11,12,13]
                     
 class ResNet(nn.Module):
+    # (pretrained=False, split_layer=-1, bottleneck_dim=-1, num_classes=10, activation='gelu', pooling='avg'
     def __init__(
         self,
         block, # 输入
@@ -280,6 +294,8 @@ class ResNet(nn.Module):
         bottleneck_dim= -1, # 是否要使用压缩层宽的方式来进行
         activation= 'relu',
         pooling= 'max',
+        # activation= 'gelu',
+        # pooling= 'avg',
     ):
         super(ResNet, self).__init__()
 
@@ -584,6 +600,7 @@ def resnet18(pretrained=False, device='cpu', **kwargs):
         pretrained (bool): If True, returns a model pre-trained on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
     """
+    
     return _resnet(
         "resnet18", BasicBlock, [2, 2, 2, 2], **kwargs
     )

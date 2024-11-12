@@ -16,10 +16,10 @@ from target_model.data_preprocessing.dataset import pair_data
 # 导入各个baseline模型及其数据集预处理方法
 # 模型
 from target_model.models.splitnn_utils import split_weights_client
-from target_model.models.VGG import VGG,VGG5Decoder,model_cfg
-from target_model.models.BankNet import BankNet1,bank_cfg
-from target_model.models.CreditNet import CreditNet1,credit_cfg
-from target_model.models.PurchaseNet import PurchaseClassifier1,purchase_cfg
+from target_model.models.ImageClassification.VGG5_9 import VGG,VGG5Decoder,model_cfg
+from target_model.models.TableClassification.BankNet import BankNet1,bank_cfg
+from target_model.models.TableClassification.CreditNet import CreditNet1,credit_cfg
+from target_model.models.TableClassification.PurchaseNet import PurchaseClassifier1,purchase_cfg
 
 # 数据预处理方法
 from target_model.data_preprocessing.preprocess_cifar10 import get_cifar10_normalize,deprocess,get_indexed_loader

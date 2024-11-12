@@ -1,0 +1,9 @@
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0,1]
+/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/pytorch_lightning/trainer/connectors/data_connector.py:441: The 'test_dataloader' does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` to `num_workers=47` in the `DataLoader` to improve performance.
+
+Testing DataLoader 0: 100%|██████████████████████████████████████████████████████████| 78/78 [00:04<00:00, 16.64it/s]
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃[1m        Test metric        [22m┃[1m       DataLoader 0        [22m┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│[36m         acc/test          [39m│[35m     85.30648803710938     [39m│
+└───────────────────────────┴───────────────────────────┘

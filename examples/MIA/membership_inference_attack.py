@@ -18,10 +18,10 @@ from ppsplit.attacks.membership_inference.ML_Leaks_attack import MLLeaksAttack #
 
 # 模型
 from target_model.models.splitnn_utils import split_weights_client
-from target_model.models.VGG import VGG,VGG5Decoder,model_cfg
-from target_model.models.BankNet import BankNet1,bank_cfg
-from target_model.models.CreditNet import CreditNet1,credit_cfg
-from target_model.models.PurchaseNet import PurchaseClassifier1,purchase_cfg
+from target_model.models.ImageClassification.VGG5_9 import VGG,VGG5Decoder,model_cfg
+from target_model.models.TableClassification.BankNet import BankNet1,bank_cfg
+from target_model.models.TableClassification.CreditNet import CreditNet1,credit_cfg
+from target_model.models.TableClassification.PurchaseNet import PurchaseClassifier1,purchase_cfg
 # 数据预处理方法
 from target_model.data_preprocessing.preprocess_cifar10 import get_cifar10_normalize,get_one_data,deprocess
 from target_model.data_preprocessing.preprocess_bank import bank_dataset,preprocess_bank
@@ -90,7 +90,7 @@ elif args['dataset']=='purchase':
     unit_net_route = '/home/dengruijun/data/FinTech/VFL/MIAs/membership_inference_evaluation/adv_reg/training_code/models/purchase_undefended/model_best.pth.tar' # 待检测模型
     split_layer = 8 # 切隔层
     # purchase 数据集 和 模型 导入
-    from target_model.models.PurchaseNet import PurchaseClassifier1, purchase_cfg
+    from target_model.models.TableClassification.PurchaseNet import PurchaseClassifier1, purchase_cfg
         
     class PurchaseClassifier(nn.Module):
         def __init__(self,num_classes=100):

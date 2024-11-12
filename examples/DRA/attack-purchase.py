@@ -25,7 +25,7 @@ import os
 # 导包和超参数设置
 from target_model.data_preprocessing.preprocess_purchase import preprocess_purchase
 
-from target_model.models.PurchaseNet import PurchaseClassifier1,PurchaseDecoder1,purchase_cfg
+from target_model.models.TableClassification.PurchaseNet import PurchaseClassifier1,PurchaseDecoder1,purchase_cfg
 from target_model.models.splitnn_utils import split_weights_client
 
 test_num = 6 # 测试编号（对应结果文件夹名称）

@@ -1,0 +1,30 @@
+2024-10-27 01:59:40,235 INFO    MainThread:119201 [wandb_setup.py:_flush():76] Current SDK version is 0.17.7
+2024-10-27 01:59:40,235 INFO    MainThread:119201 [wandb_setup.py:_flush():76] Configure stats pid to 119201
+2024-10-27 01:59:40,235 INFO    MainThread:119201 [wandb_setup.py:_flush():76] Loading settings from /home/dengruijun/.config/wandb/settings
+2024-10-27 01:59:40,235 INFO    MainThread:119201 [wandb_setup.py:_flush():76] Loading settings from /home/dengruijun/data/FinTech/PP-Split/target_model/training/wandb/settings
+2024-10-27 01:59:40,235 INFO    MainThread:119201 [wandb_setup.py:_flush():76] Loading settings from environment variables: {}
+2024-10-27 01:59:40,235 INFO    MainThread:119201 [wandb_setup.py:_flush():76] Applying setup settings: {'_disable_service': False}
+2024-10-27 01:59:40,235 INFO    MainThread:119201 [wandb_setup.py:_flush():76] Inferring run settings from compute environment: {'program_relpath': 'target_model/training/train-cifar10net.py', 'program_abspath': '/home/dengruijun/data/FinTech/PP-Split/target_model/training/train-cifar10net.py', 'program': 'train-cifar10net.py'}
+2024-10-27 01:59:40,235 INFO    MainThread:119201 [wandb_setup.py:_flush():76] Applying login settings: {}
+2024-10-27 01:59:40,236 INFO    MainThread:119201 [wandb_init.py:_log_setup():524] Logging user logs to ./wandb/run-20241027_015940-jobixjok/logs/debug.log
+2024-10-27 01:59:40,236 INFO    MainThread:119201 [wandb_init.py:_log_setup():525] Logging internal logs to ./wandb/run-20241027_015940-jobixjok/logs/debug-internal.log
+2024-10-27 01:59:40,236 INFO    MainThread:119201 [wandb_init.py:init():607] calling init triggers
+2024-10-27 01:59:40,236 INFO    MainThread:119201 [wandb_init.py:init():614] wandb.init called with sweep_config: {}
+config: {}
+2024-10-27 01:59:40,236 INFO    MainThread:119201 [wandb_init.py:init():657] starting backend
+2024-10-27 01:59:40,236 INFO    MainThread:119201 [wandb_init.py:init():661] setting up manager
+2024-10-27 01:59:40,239 INFO    MainThread:119201 [backend.py:_multiprocessing_setup():105] multiprocessing start_methods=fork,spawn,forkserver, using: spawn
+2024-10-27 01:59:40,241 INFO    MainThread:119201 [wandb_init.py:init():669] backend started and connected
+2024-10-27 01:59:40,250 INFO    MainThread:119201 [wandb_init.py:init():764] updated telemetry
+2024-10-27 01:59:40,286 INFO    MainThread:119201 [wandb_init.py:init():797] communicating run to backend with 90.0 second timeout
+2024-10-27 01:59:41,535 INFO    MainThread:119201 [wandb_run.py:_on_init():2479] communicating current version
+2024-10-27 01:59:41,906 INFO    MainThread:119201 [wandb_run.py:_on_init():2488] got version response upgrade_message: "wandb version 0.18.5 is available!  To upgrade, please run:\n $ pip install wandb --upgrade"
+
+2024-10-27 01:59:41,907 INFO    MainThread:119201 [wandb_init.py:init():848] starting run threads in backend
+2024-10-27 01:59:45,861 INFO    MainThread:119201 [wandb_run.py:_console_start():2457] atexit reg
+2024-10-27 01:59:45,862 INFO    MainThread:119201 [wandb_run.py:_redirect():2303] redirect: wrap_raw
+2024-10-27 01:59:45,862 INFO    MainThread:119201 [wandb_run.py:_redirect():2368] Wrapping output streams.
+2024-10-27 01:59:45,862 INFO    MainThread:119201 [wandb_run.py:_redirect():2393] Redirects installed.
+2024-10-27 01:59:45,864 INFO    MainThread:119201 [wandb_init.py:init():891] run started, returning control to user process
+2024-10-27 01:59:47,368 INFO    MainThread:119201 [wandb_run.py:_config_callback():1386] config_cb None None {'data_dir': '/home/dengruijun/data/FinTech/DATASET/image-dataset/cifar10/', 'test_phase': 1, 'dev': 0, 'logger': 'wandb', 'classifier': 'vgg16_bn', 'pretrained': 1, 'precision': 32, 'batch_size': 128, 'max_epochs': 20, 'num_workers': 0, 'learning_rate': 0.01, 'weight_decay': 0.01, 'dataset': 'CIFAR10', 'device': 1}
+2024-10-27 01:59:58,336 WARNING MsgRouterThr:119201 [router.py:message_loop():77] message_loop has been closed

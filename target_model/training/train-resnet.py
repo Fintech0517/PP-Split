@@ -1,9 +1,9 @@
 '''
 Author: Ruijun Deng
 Date: 2024-08-16 20:50:40
-LastEditTime: 2024-10-06 03:53:50
+LastEditTime: 2024-10-27 01:19:24
 LastEditors: Ruijun Deng
-FilePath: /PP-Split/target_model/training/train-resnet18.py
+FilePath: /PP-Split/target_model/training/train-resnet.py
 Description: 
 '''
 import os
@@ -40,8 +40,7 @@ from torch.optim.lr_scheduler import _LRScheduler
 
 import sys
 sys.path.append('/home/dengruijun/data/FinTech/PP-Split/')
-from target_model.models.ResNet import resnet18,resnet34,resnet50
-
+from target_model.models.ImageClassification.ResNet import resnet18,resnet34,resnet50
 
 class CIFAR10Module(pl.LightningModule):
     def __init__(self, hparams, total_steps):
@@ -415,6 +414,7 @@ class WarmupCosineLR(_LRScheduler):
 def main(args):
     seed_everything(0)
     # os.environ["CUDA_VISIBLE_DEVICES"] = '0'
+    # 硬写的
     unit_net_route = f'/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ResNet/{args.classifier}/{args.dataset}/{args.classifier}-drj.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
     unit_net_dir = f'/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ResNet/{args.classifier}/{args.dataset}/' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
 
@@ -428,7 +428,8 @@ def main(args):
                                  mode="max", 
                                  dirpath=unit_net_dir,
                                  filename='{epoch}'+ f'{args.classifier}-drj.pth', 
-                                 save_top_k=1 #保存每个检查点
+                                 save_top_k=1  # save top k个检查点
+                                #  every_n_epochs=1, # 每n个epoch保存一次
                                  ) 
 
     trainer = Trainer(
@@ -457,7 +458,7 @@ def main(args):
     if bool(args.pretrained): # 训练好了
         print("trained models loading ... ")
         # state_dict = os.path.join(
-        #     "cifar10_models", "state_dicts", args.classifier + ".pt"
+        #     "target_model.models.ImageClassification.Maeng_FIL_nips23", "state_dicts", args.classifier + ".pt"
         # )
         state_dict = unit_net_route
         model.model.load_state_dict(torch.load(state_dict))
@@ -488,9 +489,9 @@ if __name__ == "__main__":
     # parser.add_argument("--classifier", type=str, default="resnet50")
     # parser.add_argument("--classifier", type=str, default="resnet34")
     # parser.add_argument("--classifier", type=str, default="resnet18")
-    parser.add_argument("--classifier", type=str, default="resnet18_2narrow")
+    # parser.add_argument("--classifier", type=str, default="resnet18_2narrow")
     # parser.add_argument("--classifier", type=str, default="resnet18_wide")
-    # parser.add_argument("--classifier", type=str, default="resnet18_narrow")
+    parser.add_argument("--classifier", type=str, default="resnet18_narrow")
     parser.add_argument("--pretrained", type=int, default=0, choices=[0, 1]) # 加载与训练的
 
     parser.add_argument("--precision", type=int, default=32, choices=[16, 32])
@@ -505,7 +506,25 @@ if __name__ == "__main__":
     # parser.add_argument("--dataset", type=str, default='CIFAR100') # CIFAR10
     parser.add_argument("--dataset", type=str, default='CIFAR10') # CIFAR10
     parser.add_argument('--device', type=int, default=1)
+
+    # test only
     args = parser.parse_args()
     main(args)
 
-# nohup python -u train-resnet18.py > resnet18.log 2>&1 & [1] 2928410
+# nohup python -u train-resnet.py > resnet18.log 2>&1 & [1] 2928410
+
+# "vgg11_bn"
+# "vgg13_bn"
+# "vgg16_bn"
+# "vgg19_bn"
+# "resnet18"
+# "resnet34"
+# "resnet50"
+# "densenet121"
+# "densenet161"
+# "densenet169"
+# "mobilenet_v2"
+# "googlenet"
+# "inception_v3"
+
+

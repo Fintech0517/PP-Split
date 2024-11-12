@@ -19,7 +19,7 @@ from torch.utils.data import Dataset
 
 import sys
 sys.path.append('/home/dengruijun/data/FinTech/PP-Split/')
-from target_model.models.BankNet import BankNet1,bank_cfg
+from target_model.models.TableClassification.BankNet import BankNet1,bank_cfg
 from target_model.data_preprocessing.preprocess_bank import bank_dataset,preprocess_bank
 from utils import evalTest,evalTest_tab_acc
 from ppsplit.utils.similarity_metrics import SimilarityMetrics

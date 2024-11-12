@@ -19,7 +19,7 @@ import torch.backends.cudnn as cudnn
 
 import sys
 sys.path.append('/home/dengruijun/data/FinTech/PP-Split/')
-from target_model.models.VGG import VGG,model_cfg
+from target_model.models.ImageClassification.VGG5_9 import VGG,model_cfg
 from target_model.data_preprocessing.preprocess_cifar10 import get_cifar10_normalize,deprocess,get_cifar10_normalize_two_train
 from target_model.data_preprocessing.preprocess_mnist import get_mnist_normalize
 from utils import evalTest 

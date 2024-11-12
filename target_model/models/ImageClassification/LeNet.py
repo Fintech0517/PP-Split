@@ -1,10 +1,10 @@
 '''
 Author: Ruijun Deng
 Date: 2024-03-07 14:19:17
-LastEditTime: 2024-09-28 04:01:00
+LastEditTime: 2024-10-25 01:32:56
 LastEditors: Ruijun Deng
-FilePath: /PP-Split/target_model/models/LeNet.py
-Description: DLG那篇文章的源码
+FilePath: /PP-Split/target_model/models/ImageClassification/LeNet.py
+Description: nips19-DLG那篇文章的源码
 '''
 import torch
 import torch.nn as nn

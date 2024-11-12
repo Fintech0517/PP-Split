@@ -3,12 +3,12 @@
 # 导入各个baseline模型及其数据集预处理方法
 # 模型
 from target_model.models.splitnn_utils import split_weights_client
-from target_model.models.VGG import VGG,VGG5Decoder,model_cfg
-from target_model.models.BankNet import BankNet1,BankNetDecoder1,bank_cfg
-from target_model.models.CreditNet import CreditNet1,CreditNetDecoder1,credit_cfg
-from target_model.models.PurchaseNet import PurchaseClassifier1,PurchaseDecoder1,purchase_cfg
-from target_model.models.IrisNet import IrisNet,IrisNetDecoder,Iris_cfg
-from target_model.models.ResNet import resnet18,resnet34,resnet50,resnet_model_cfg,InversionNet
+from target_model.models.ImageClassification.VGG5_9 import VGG,VGG5Decoder,model_cfg
+from target_model.models.TableClassification.BankNet import BankNet1,BankNetDecoder1,bank_cfg
+from target_model.models.TableClassification.CreditNet import CreditNet1,CreditNetDecoder1,credit_cfg
+from target_model.models.TableClassification.PurchaseNet import PurchaseClassifier1,PurchaseDecoder1,purchase_cfg
+from target_model.models.TableClassification.IrisNet import IrisNet,IrisNetDecoder,Iris_cfg
+from target_model.models.ImageClassification.ResNet import resnet18,resnet34,resnet50,resnet_model_cfg,InversionNet
 
 # 数据预处理方法
 from .data_preprocessing.preprocess_cifar10 import get_cifar10_normalize,deprocess,get_cifar10_fisher_normalize

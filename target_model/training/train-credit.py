@@ -19,7 +19,7 @@ from torch.utils.data import Dataset
 
 import sys
 sys.path.append('/home/dengruijun/data/FinTech/PP-Split/')
-from target_model.models.CreditNet import CreditNet1,CreditNetDecoder1,credit_cfg
+from target_model.models.TableClassification.CreditNet import CreditNet1,CreditNetDecoder1,credit_cfg
 from target_model.data_preprocessing.dataset import bank_dataset
 from target_model.data_preprocessing.preprocess_credit import preprocess_credit
 from utils import evalTest,evalTest_tab_acc
