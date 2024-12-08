@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-08-27 20:58:31
-LastEditTime: 2024-10-25 01:31:21
+LastEditTime: 2024-12-05 00:30:00
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/models/ImageClassification/VGG5_9.py
 Description: FedAdapt? 还是啥，很久之前做模型分割的那些文章。
@@ -44,7 +44,7 @@ model_cfg = {
 		('M',64,64,2,16384,0), # 1
 		('C',64,64,3,16384,9437184), 
 		('C',64,128,3,32768,18874368), 
-		('M',128,128,2,8192,0),# 4
+		('M',128,128,2,8192,0), # 4
 		('C',128,128,3,8192,9437184),
 		('C',128,256,3,16384,18874368),
 		('M',256,256,2,4096,0), #7

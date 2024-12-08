@@ -1,0 +1,34 @@
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0,1]
+/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/pytorch_lightning/trainer/connectors/data_connector.py:441: The 'test_dataloader' does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` to `num_workers=47` in the `DataLoader` to improve performance.
+Testing: |                                                                                                                             | 0/? [00:00<?, ?it/s]
+Traceback (most recent call last):
+  File "train-vit.py", line 271, in <module>
+    main(args)
+  File "train-vit.py", line 238, in main
+    trainer.test(model, data.test_dataloader())
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/pytorch_lightning/trainer/trainer.py", line 754, in test
+    return call._call_and_handle_interrupt(
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/pytorch_lightning/trainer/call.py", line 44, in _call_and_handle_interrupt
+    return trainer_fn(*args, **kwargs)
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/pytorch_lightning/trainer/trainer.py", line 794, in _test_impl
+    results = self._run(model, ckpt_path=ckpt_path)
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/pytorch_lightning/trainer/trainer.py", line 989, in _run
+    results = self._run_stage()
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/pytorch_lightning/trainer/trainer.py", line 1028, in _run_stage
+    return self._evaluation_loop.run()
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/pytorch_lightning/loops/utilities.py", line 182, in _decorator
+    return loop_run(self, *args, **kwargs)
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/pytorch_lightning/loops/evaluation_loop.py", line 134, in run
+    self._evaluation_step(batch, batch_idx, dataloader_idx, dataloader_iter)
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/pytorch_lightning/loops/evaluation_loop.py", line 391, in _evaluation_step
+    output = call._call_strategy_hook(trainer, hook_name, *step_args)
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/pytorch_lightning/trainer/call.py", line 309, in _call_strategy_hook
+    output = fn(*args, **kwargs)
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/pytorch_lightning/strategies/strategy.py", line 416, in test_step
+    return self.lightning_module.test_step(*args, **kwargs)
+  File "train-vit.py", line 86, in test_step
+    self._calculate_loss(batch, mode="test")
+  File "/home/dengruijun/miniconda3/envs/drj-pytorch/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1207, in __getattr__
+    raise AttributeError("'{}' object has no attribute '{}'".format(
+
+Testing DataLoader 0:   0%|                                                                                                          | 0/390 [00:00<?, ?it/s]

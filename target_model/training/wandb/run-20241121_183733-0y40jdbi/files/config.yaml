@@ -1,0 +1,67 @@
+wandb_version: 1
+
+_wandb:
+  desc: null
+  value:
+    python_version: 3.8.13
+    cli_version: 0.17.7
+    framework: huggingface
+    huggingface_version: 4.39.1
+    is_jupyter_run: false
+    is_kaggle_kernel: true
+    start_time: 1732243053
+    t:
+      1:
+      - 1
+      - 9
+      - 11
+      - 12
+      - 41
+      - 49
+      - 55
+      - 103
+      2:
+      - 1
+      - 9
+      - 11
+      - 12
+      - 41
+      - 49
+      - 55
+      - 103
+      3:
+      - 7
+      - 13
+      - 23
+      - 66
+      4: 3.8.13
+      5: 0.17.7
+      6: 4.39.1
+      8:
+      - 2
+      - 5
+      13: linux-x86_64
+    m:
+    - 1: trainer/global_step
+      6:
+      - 3
+    - 1: test/_loss
+      5: 1
+      6:
+      - 1
+    - 1: test/_acc
+      5: 1
+      6:
+      - 1
+    - 1: epoch
+      5: 1
+      6:
+      - 1
+model_kwargs:
+  desc: null
+  value: Namespace(batch_size=128, classifier='vitb_16', data_dir='/home/dengruijun/data/project/data/imageNet1k/ok/',
+    dataset='ImageNet1k', dev=0, device=1, learning_rate=0.01, logger='wandb', max_epochs=20,
+    num_workers=0, precision=32, pretrained=1, test_phase=1, weight_decay=0.01)
+logger:
+  desc: null
+  value: <pytorch_lightning.loggers.wandb.WandbLogger object at 0x7f8677b9ffa0>
