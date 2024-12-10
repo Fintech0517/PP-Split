@@ -24,7 +24,7 @@ parser.add_argument('--result_dir', type=str, default="inverse-model-results-202
 parser.add_argument('--oneData_bs', type=int, default=1, help='oneData_bs')
 parser.add_argument('--test_bs', type=int, default=1, help='test_bs')
 parser.add_argument('--train_bs', type=int, default=32, help='train_bs')
-parser.add_argument('--noise_scale', type=int, default=0.1, help='noise_scale')
+parser.add_argument('--noise_scale', type=float, default=0, help='noise_scale')
 parser.add_argument('--split_layer', type=int, default=2, help='split_layer')
 parser.add_argument('--test_num', type=str, default='InverseModelAttack-defense0.1', help='test_num')
 parser.add_argument('--no_dense', action='store_true', help='no_dense')

@@ -65,6 +65,7 @@ class MLPBlock(MLP):
     ):
         version = local_metadata.get("version", None)
 
+        # 这是干啥？能不能删除？
         if version is None or version < 2:
             # Replacing legacy MLPBlock with MLP. See https://github.com/pytorch/vision/pull/6053
             for i in range(2):
@@ -135,7 +136,9 @@ class Encoder(nn.Module):
         dropout: float,
         attention_dropout: float,
         norm_layer: Callable[..., torch.nn.Module] = partial(nn.LayerNorm, eps=1e-6),
-    ):
+    ):  
+        self.split_layer = split_layer
+        self.num_layers = num_layers
         super().__init__()
         # Note that batch_size is on the first dim because
         # we have batch_first=True in nn.MultiAttention() by default
@@ -154,13 +157,16 @@ class Encoder(nn.Module):
                 norm_layer,
             )
         self.layers = nn.Sequential(layers)
-        if split_layer == num_layers: # 最后一层才有这个
+        if split_layer >= num_layers: # 最后一层才有这个
             self.ln = norm_layer(hidden_dim)
 
     def forward(self, input: torch.Tensor):
         torch._assert(input.dim() == 3, f"Expected (batch_size, seq_length, hidden_dim) got {input.shape}")
         input = input + self.pos_embedding
-        return self.ln(self.layers(self.dropout(input)))
+        if self.split_layer >= self.num_layers: # 最后一层才有这个
+            return self.ln(self.layers(self.dropout(input)))
+        else:
+            return self.layers(self.dropout(input))
 
 
 class VisionTransformer(nn.Module):
@@ -197,7 +203,7 @@ class VisionTransformer(nn.Module):
         self.representation_size = representation_size
         self.norm_layer = norm_layer
         self.split_layer = split_layer if (split_layer is not None and split_layer <= num_layers) else num_layers+1
-
+        self.num_layers = num_layers
         # 第一层，conv投影
         if conv_stem_configs is not None:
             # As per https://arxiv.org/abs/2106.14881
@@ -259,6 +265,16 @@ class VisionTransformer(nn.Module):
 
             self.heads = nn.Sequential(heads_layers)
 
+            # 模型初始化 head模块
+            if hasattr(self.heads, "pre_logits") and isinstance(self.heads.pre_logits, nn.Linear):
+                fan_in = self.heads.pre_logits.in_features
+                nn.init.trunc_normal_(self.heads.pre_logits.weight, std=math.sqrt(1 / fan_in))
+                nn.init.zeros_(self.heads.pre_logits.bias)
+
+            if isinstance(self.heads.head, nn.Linear):
+                nn.init.zeros_(self.heads.head.weight)
+                nn.init.zeros_(self.heads.head.bias)
+
         # 模型参数初始化
         if isinstance(self.conv_proj, nn.Conv2d):
             # Init the patchify stem
@@ -274,14 +290,7 @@ class VisionTransformer(nn.Module):
             if self.conv_proj.conv_last.bias is not None:
                 nn.init.zeros_(self.conv_proj.conv_last.bias)
 
-        if hasattr(self.heads, "pre_logits") and isinstance(self.heads.pre_logits, nn.Linear):
-            fan_in = self.heads.pre_logits.in_features
-            nn.init.trunc_normal_(self.heads.pre_logits.weight, std=math.sqrt(1 / fan_in))
-            nn.init.zeros_(self.heads.pre_logits.bias)
 
-        if isinstance(self.heads.head, nn.Linear):
-            nn.init.zeros_(self.heads.head.weight)
-            nn.init.zeros_(self.heads.head.bias)
 
     # 这个就做了conv层的投影了
     def _process_input(self, x: torch.Tensor) -> torch.Tensor:
@@ -307,19 +316,25 @@ class VisionTransformer(nn.Module):
 
     def forward(self, x: torch.Tensor):
         # Reshape and permute the input tensor
+        # conv_proj
         x = self._process_input(x)
-        n = x.shape[0]
+        
+        if self.split_layer > 0:
+            # encoder
+            n = x.shape[0]
 
-        # Expand the class token to the full batch
-        batch_class_token = self.class_token.expand(n, -1, -1)
-        x = torch.cat([batch_class_token, x], dim=1)
+            # Expand the class token to the full batch
+            batch_class_token = self.class_token.expand(n, -1, -1)
+            x = torch.cat([batch_class_token, x], dim=1)
 
-        x = self.encoder(x)
+            x = self.encoder(x)
 
-        # Classifier "token" as used by standard language architectures
-        x = x[:, 0]
+        if self.split_layer > self.num_layers:
+            # heads 
+            # Classifier "token" as used by standard language architectures
+            x = x[:, 0]
 
-        x = self.heads(x)
+            x = self.heads(x)
 
         return x
 
@@ -338,7 +353,9 @@ def _vision_transformer(
     #     _ovewrite_named_param(kwargs, "num_classes", len(weights.meta["categories"]))
     #     assert weights.meta["min_size"][0] == weights.meta["min_size"][1]
     #     _ovewrite_named_param(kwargs, "image_size", weights.meta["min_size"][0])
-    image_size = kwargs.pop("image_size", 224) # imagenet的size
+    # image_size = kwargs.pop("image_size", 224) # imagenet的size
+    # image_size = kwargs.pop("image_size", 32) # imagenet的size
+    image_size = kwargs.pop("image_size", 8) # imagenet的size
 
     model = VisionTransformer(
         image_size=image_size,
@@ -377,7 +394,7 @@ def vit_b_16(*, weights= None, **kwargs: Any) -> VisionTransformer:
     # weights = ViT_B_16_Weights.verify(weights)
 
     return _vision_transformer(
-        patch_size=16,
+        patch_size=8, # 16 -> 8 
         num_layers=12,
         num_heads=12,
         hidden_dim=768,

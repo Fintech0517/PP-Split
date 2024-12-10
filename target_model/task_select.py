@@ -2,13 +2,14 @@
 
 # 导入各个baseline模型及其数据集预处理方法
 # 模型
-from target_model.models.splitnn_utils import split_weights_client
-from target_model.models.ImageClassification.VGG5_9 import VGG,VGG5Decoder,model_cfg
-from target_model.models.TableClassification.BankNet import BankNet1,BankNetDecoder1,bank_cfg
-from target_model.models.TableClassification.CreditNet import CreditNet1,CreditNetDecoder1,credit_cfg
-from target_model.models.TableClassification.PurchaseNet import PurchaseClassifier1,PurchaseDecoder1,purchase_cfg
-from target_model.models.TableClassification.IrisNet import IrisNet,IrisNetDecoder,Iris_cfg
-from target_model.models.ImageClassification.ResNet import resnet18,resnet34,resnet50,resnet_model_cfg,InversionNet
+from .models.splitnn_utils import split_weights_client
+from .models.ImageClassification.VGG5_9 import VGG,VGG5Decoder,model_cfg
+from .models.TableClassification.BankNet import BankNet1,BankNetDecoder1,bank_cfg
+from .models.TableClassification.CreditNet import CreditNet1,CreditNetDecoder1,credit_cfg
+from .models.TableClassification.PurchaseNet import PurchaseClassifier1,PurchaseDecoder1,purchase_cfg
+from .models.TableClassification.IrisNet import IrisNet,IrisNetDecoder,Iris_cfg
+from .models.ImageClassification.ResNet import resnet18,resnet34,resnet50,resnet_model_cfg,InversionNet
+from .models.ImageClassification.ViT import vit_b_16 as ViTb_16
 
 # 数据预处理方法
 from .data_preprocessing.preprocess_cifar10 import get_cifar10_normalize,deprocess,get_cifar10_fisher_normalize
@@ -18,7 +19,10 @@ from .data_preprocessing.preprocess_purchase import preprocess_purchase,tabinfo_
 from .data_preprocessing.preprocess_Iris import preprocess_Iris, tabinfo_Iris
 from .data_preprocessing.preprocess_mnist import get_mnist_normalize
 from .data_preprocessing.preprocess_cifar100 import get_cifar100_normalize
+from .data_preprocessing.preprocess_ImageNet1k import get_ImageNet1k_valLoader
 from .data_preprocessing.dataset import get_one_data
+
+
 
 # utils
 from .utils import create_dir
@@ -36,10 +40,12 @@ def get_infotopo_para(args):
     if dataset=='CIFAR10':
         nb_of_values=36 # nb_of_values-1=bins?
         conv = True
+        # conv = False
         pool_size = 4
     elif dataset=='CIFAR100': # 和cifar10一样的
         nb_of_values=36 # nb_of_values-1=bins?
-        conv = True
+        # conv = True
+        conv = False
         pool_size = 4
     elif dataset=='credit':
         pass
@@ -52,6 +58,10 @@ def get_infotopo_para(args):
         nb_of_values =2
         conv = False
     elif dataset=='MNIST':
+        nb_of_values = 2
+        conv = True
+        pool_size = 2
+    elif dataset=='ImageNet1k': # TODO: the smae to MNIST now
         nb_of_values = 2
         conv = True
         pool_size = 2
@@ -95,6 +105,18 @@ def get_dataloader(args):
         trainloader,testloader = get_cifar100_normalize(batch_size = train_bs, test_bs=test_bs)
         data_interval = (-1.0,1.0) # [-1,1]
         data_type=1
+    
+    elif dataset=='ImageNet1k':
+        # 超参数
+        testset_len = 50000
+        tab_info = None
+
+        # 数据集加载
+        trainloader,testloader = get_ImageNet1k_valLoader(batch_size = train_bs, test_bs=test_bs)
+        # data_interval = (-1.0,1.0) # [-1,1] # 暂时还没有
+        data_interval = None
+        data_type=1
+
     elif dataset=='credit':
         # 超参数
         testset_len = 61503 # for the mutual information
@@ -173,7 +195,6 @@ def get_models(args):
 
     # 加载模型和数据集，并从unit模型中切割出client_model
     if dataset=='CIFAR10':
-
         image_deprocess = deprocess
         if model == 'VGG5':
             # 超参数
@@ -183,7 +204,7 @@ def get_models(args):
             # 关键路径
             if ep==-1:
                 # vgg5 (20ep)
-                unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/VGG5/BN+Tanh/VGG5-params-20ep.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+                unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ImageClassification/VGG5/BN+Tanh/VGG5-params-20ep.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
                 results_dir  = f"../../results/{result_ws}/VGG5/{test_num}/"
             else:
                 # 0ep
@@ -315,7 +336,32 @@ def get_models(args):
                 print("train decoder model...")
                 decoder_net = InversionNet(split_layer=7) # 手动设定，之后要改的 7 for split point  =10
             # decoder_net = None
-           
+
+        elif model == 'ViTb_16':
+            # 超参数
+            split_layer = 3 if split_layer==-1 else split_layer # 定成3吧？
+
+            # 关键路径
+            # pretrained model ViT_B_16_Weights.IMAGENET1K_V1
+            unit_net_route = f'/home/dengruijun/data/project/data/torch_models/hub/checkpoints/vit_b_16-c867db91-drj.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+            results_dir  = f"../../results/{result_ws}/ViTb_16_CIFAR10/{split_layer}/{test_num}/"
+
+            decoder_route = results_dir + f"/Decoder-layer{split_layer}.pth"
+
+            # 切割成client model
+            client_net = ViTb_16(split_layer=split_layer)
+            pweights = torch.load(unit_net_route)
+            if split_layer < 13:
+                pweights = split_weights_client(pweights, client_net.state_dict())
+            # client_net.load_state_dict(pweights) # 干脆就不 load 模型参数了
+
+            # decoder net
+            if os.path.isfile(decoder_route): # 如果已经训练好了
+                print("=> loading decoder model '{}'".format(decoder_route))
+                decoder_net = torch.load(decoder_route)
+            else: # 如果没有,加载一个
+                print("train decoder model...")
+                decoder_net = None # TODO:       
         else:
             raise ValueError('model error')
 
@@ -414,6 +460,34 @@ def get_models(args):
             else: # 如果没有,加载一个
                 print("train decoder model...")
                 decoder_net = InversionNet(split_layer=split_layer)        
+
+        elif model == 'ViTb_16':
+            # 超参数
+            split_layer = 3 if split_layer==-1 else split_layer # 定成3吧？
+
+            # 关键路径
+            # pretrained model ViT_B_16_Weights.IMAGENET1K_V1
+            unit_net_route = f'/home/dengruijun/data/project/data/torch_models/hub/checkpoints/vit_b_16-c867db91-drj.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+            results_dir  = f"../../results/{result_ws}/ViTb_16/{test_num}/"
+
+            decoder_route = results_dir + f"/Decoder-layer{split_layer}.pth"
+
+            # 切割成client model
+            client_net = ViTb_16(split_layer=split_layer)
+            pweights = torch.load(unit_net_route)
+            if split_layer < 13:
+                pweights = split_weights_client(pweights, client_net.state_dict())
+            # client_net.load_state_dict(pweights) # 干脆就不 load 模型参数了
+
+            # decoder net
+            if os.path.isfile(decoder_route): # 如果已经训练好了
+                print("=> loading decoder model '{}'".format(decoder_route))
+                decoder_net = torch.load(decoder_route)
+            else: # 如果没有,加载一个
+                print("train decoder model...")
+                decoder_net = None # TODO:
+
+
         else:
             raise ValueError('model error')
 
@@ -491,6 +565,33 @@ def get_models(args):
                 print("train decoder model...")
                 decoder_net = VGG5Decoder(split_layer=split_layer,network='VGG9_MNIST')
 
+    elif dataset=='ImageNet1k':
+        image_deprocess = deprocess # TODO:
+        if model == 'ViTb_16':
+            # 超参数
+            split_layer = 3 if split_layer==-1 else split_layer # 定成3吧？
+
+            # 关键路径
+            # pretrained model ViT_B_16_Weights.IMAGENET1K_V1
+            unit_net_route = f'/home/dengruijun/data/project/data/torch_models/hub/checkpoints/vit_b_16-c867db91-drj.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+            results_dir  = f"../../results/{result_ws}/ViTb_16/{test_num}/"
+
+            decoder_route = results_dir + f"/Decoder-layer{split_layer}.pth"
+
+            # 切割成client model
+            client_net = ViTb_16(split_layer=split_layer)
+            pweights = torch.load(unit_net_route)
+            if split_layer < 13:
+                pweights = split_weights_client(pweights, client_net.state_dict())
+            client_net.load_state_dict(pweights)
+
+            # decoder net
+            if os.path.isfile(decoder_route): # 如果已经训练好了
+                print("=> loading decoder model '{}'".format(decoder_route))
+                decoder_net = torch.load(decoder_route)
+            else: # 如果没有,加载一个
+                print("train decoder model...")
+                decoder_net = None # TODO:
 
     elif dataset=='credit':
         # 超参数
@@ -646,3 +747,6 @@ def get_dataloader_and_model(args):
     # msg['decoder_route'] = decoder_route
 
     return msg
+
+
+

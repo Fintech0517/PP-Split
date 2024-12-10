@@ -151,7 +151,7 @@ class VGG(nn.Module):
 			out = out.view(out.size(0), -1)
 			out = self.denses(out)
 
-		if self.noise_scale!=0: # 需要加laplace noise
+		if self.noise_scale!=0: # 需要加 gaussian noise
 			# self._noise = torch.distributions.Laplace(0.0, self.noise_scale)
 			# return out+self._noise.sample(out.size()).to(out.device)
 			self._noise= torch.randn_like(out) * self.noise_scale

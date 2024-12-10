@@ -5,9 +5,9 @@
 '''
 Author: Ruijun Deng
 Date: 2024-08-14 16:59:47
-LastEditTime: 2024-12-08 06:41:07
+LastEditTime: 2024-12-08 06:31:49
 LastEditors: Ruijun Deng
-FilePath: /PP-Split/examples/effectInfo/effectInfo1.10.py
+FilePath: /PP-Split/examples/effectInfo/effectInfo1.10.1.py
 Description: 
 '''
 # 导包
@@ -44,13 +44,13 @@ from ppsplit.utils.utils import create_dir
 parser = argparse.ArgumentParser(description='PP-Split')
 parser.add_argument('--device', type=str, default="cuda:0", help='device')
 parser.add_argument('--dataset', type=str, default="CIFAR10", help='dataset') # 'bank', 'credit', 'purchase', 'Iris',
-parser.add_argument('--model', type=str, default="ResNet18", help='model')  # 'ResNet18'
+parser.add_argument('--model', type=str, default="ViTb_16", help='model')  # 'ResNet18'
 parser.add_argument('--result_dir', type=str, default="20240702-effectiveInfo/", help='result_dir')
 parser.add_argument('--oneData_bs', type=int, default=5, help='oneData_bs')
 parser.add_argument('--test_bs', type=int, default=500, help='test_bs')
-parser.add_argument('--train_bs', type=int, default=1, help='train_bs')
-parser.add_argument('--noise_scale', type=float, default=0, help='noise_scale')
-parser.add_argument('--split_layer', type=int, default=2, help='split_layer')
+parser.add_argument('--train_bs', type=int, default=500, help='train_bs')
+parser.add_argument('--noise_scale', type=int, default=0, help='noise_scale')
+parser.add_argument('--split_layer', type=int, default=1, help='split_layer')
 parser.add_argument('--test_num', type=str, default='effectiveInfo1.10', help='test_num')
 parser.add_argument('--no_dense', action='store_true', help='no_dense')
 parser.add_argument('--ep', type=int, help='epochs', default=-1)
@@ -58,31 +58,6 @@ parser.add_argument('--ep', type=int, help='epochs', default=-1)
 args_python = parser.parse_args()
 args = vars(args_python)
 
-
-
-# args = {
-#         'device':torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
-#         # 'device':torch.device("cpu"),
-#         'dataset':'CIFAR10',
-#         # 'dataset':'bank',
-#         # 'dataset':'credit',
-#         # 'dataset':'purchase',
-#         # 'dataset':'Iris',
-#         # 'model': 'ResNet18',
-#         'model': 'VGG5',
-#         # 'result_dir': '20240702-FIL/',
-#         'result_dir': '20240702-effectiveInfo/',
-#         'oneData_bs': 1,
-#         'test_bs': 500,
-#         'train_bs': 1,
-#         'noise_scale': 0, # 防护措施
-#         'split_layer': 2,
-#         # 'test_num': 'invdFIL', # MI, invdFIL, distCor, ULoss,  # split layer [2,3,5,7,9,11] for ResNet18
-#         'test_num': 'effectiveInfo1.8.1',
-#         'no_dense':True,
-#         }
-# print(args['device'])
-# print(args)
 
 
 

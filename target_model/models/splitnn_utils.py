@@ -1,7 +1,7 @@
 '''
 Author: Ruijun Deng
 Date: 2023-12-12 20:28:05
-LastEditTime: 2024-10-08 02:22:39
+LastEditTime: 2024-12-08 03:26:33
 LastEditors: Ruijun Deng
 FilePath: /PP-Split/target_model/models/splitnn_utils.py
 Description: 
@@ -22,7 +22,7 @@ from sklearn.metrics import roc_auc_score
 import tqdm
 
 
-
+# unit_net, client_net
 def split_weights_client(weights,cweights,no_dense=False):
     # print('client_net weights: ', weights.keys())
     # print('client_net cweights: ', cweights.keys())
