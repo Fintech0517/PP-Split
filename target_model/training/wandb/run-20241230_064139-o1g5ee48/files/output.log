@@ -1,0 +1,11 @@
+
+100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 313/313 [00:02<00:00, 114.18it/s]
+Traceback (most recent call last):
+  File "train-vgg5.py", line 164, in <module>
+    train(args)
+  File "train-vgg5.py", line 126, in train
+    newNet.eval()
+AttributeError: 'collections.OrderedDict' object has no attribute 'eval'
+Test loss:  2.3006778685048745
+Test accuracy:  0.11002396166134186
+Model saved for epoch 0

@@ -106,7 +106,7 @@ class CIFAR10Module(pl.LightningModule):
     #         "name": "learning_rate",
     #     }
     #     return [optimizer], [scheduler]
-    
+
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.model.parameters())
         return [optimizer]

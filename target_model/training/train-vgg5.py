@@ -33,11 +33,11 @@ def train(args):
     NEpochs = args['epochs']
     learningRate = args['learning_rate']
     model_dir = args['model_dir']
-    # model_name = args['model_name']
     dataset = args['dataset']
     NDecreaseLR = args['decrease_LR']
     network = args['network']
-    model_name = f"{network}-{dataset}-{NEpochs}epoch.pth"
+    model_name = args['model_name']
+    # model_name = f"{network}-{dataset}-{NEpochs}epoch.pth"
 
     # print('NDecreaseLR:',NDecreaseLR)
     # print(args)
@@ -73,6 +73,9 @@ def train(args):
     cudnn.benchmark = True
 
     NBatch = len(trainloader)
+
+    # 加载模型参数
+    # net.load_state_dict(torch.load(model_dir + model_name))
 
     # 最初的模型精度
     acc_test = evalTest(testloader, net, device)  # 测试一下模型精度
@@ -138,16 +141,19 @@ if __name__ == '__main__':
 
     # 参数解析
     parser = argparse.ArgumentParser()
-    parser.add_argument('--network', type = str, default = 'VGG9') # VGG5, VGG9, VGG5_MNIST, VGG9_MNIST
-    parser.add_argument('--epochs', type = int, default = 20)
-    parser.add_argument('--batch_size', type = int, default = 32)
+    parser.add_argument('--network', type = str, default = 'VGG5') # VGG5, VGG9, VGG5_MNIST, VGG9_MNIST
+    parser.add_argument('--epochs', type = int, default = -1)
+    parser.add_argument('--batch_size', type = int, default = 64)
     parser.add_argument('--learning_rate', type = float, default = 1e-3)
     parser.add_argument('--decrease_LR', type = int, default = 20)
     parser.add_argument('--device',type=str,default="cuda:1")
     # parser.add_argument('--model_dir',type=str,default="../../results/trained_models/VGG9/MNIST/")
-    parser.add_argument('--model_dir',type=str,default="../../results/trained_models/VGG9/CIFAR10/")
+    # parser.add_argument('--model_dir',type=str,default="../../results/trained_models/VGG9/CIFAR10/")
     # parser.add_argument('--model_dir',type=str,default="../../results/trained_models/VGG5/CIFAR10/")
     # parser.add_argument('--model_dir',type=str,default="../../results/trained_models/VGG5/MNIST/")
+    parser.add_argument('--model_dir',type=str,default="/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ImageClassification/VGG5/BN+Tanh/")
+
+    parser.add_argument('--model_name',type=str,default="VGG5-params-20ep.pth") # VGG9-MNIST-20ep.pth
     # parser.add_argument('--model_name',type=str,default="VGG5") # VGG9-MNIST-20ep.pth
     # parser.add_argument('--dataset',type=str,default="MNIST") # MNIST CIFAR10
     parser.add_argument('--dataset',type=str,default="CIFAR10") # MNIST CIFAR10

@@ -24,7 +24,7 @@ import tqdm
 import sys
 sys.path.append('/home/dengruijun/data/FinTech/PP-Split/')
 # from ...ppsplit.utils.similarity_metrics import SimilarityMetrics
-from ppsplit.utils.similarity_metrics import SimilarityMetrics
+from ppsplit.metrics.similarity_metrics import SimilarityMetrics
 
 
 # 评估edge模型测试精度，多分类任务，还是单纯针对多分类吧，用softmax
@@ -37,8 +37,11 @@ def evalTest(testloader, net, device):
         groundTruth = true_label.cpu().detach().numpy()
         return np.mean(pred == groundTruth)
 
+    loss_fn = nn.CrossEntropyLoss()
+    
     testIter = iter(testloader)
     acc_test = 0.0
+    loss_test = 0.0
     NBatch = 0
     softmax = nn.Softmax(dim=1)  # 分类层 这里sigmoid都是写在外面的吗
     for i, data in enumerate(tqdm.tqdm(testIter, 0)):
@@ -46,11 +49,17 @@ def evalTest(testloader, net, device):
         batchX, batchY = data
         batchX = batchX.to(device)
         batchY = batchY.to(device)
+
         logits = net.forward(batchX) 
         prob = softmax(logits)
         # 没有用 softmax？,用了argmax（hardmax）？
         acc_test+=acc(prob, batchY) # 计算batch 的accuracy
 
+        loss = loss_fn(logits, batchY)
+        loss_test += loss.cpu().detach().numpy() # 计算batch 的loss
+
+    loss_test = loss_test / NBatch
+    print("Test loss: ", loss_test)
     acc_test = acc_test / NBatch
     return acc_test
 
