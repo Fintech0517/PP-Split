@@ -1,6 +1,6 @@
-from algos.simba_algo import SimbaDefence
-from models.image_decoder import Decoder
-from utils.metrics import MetricLoader
+from .simba_algo import SimbaDefence
+# from models.image_decoder import Decoder
+# from utils.metrics import MetricLoader
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -35,9 +35,14 @@ class NoisyActivation(nn.Module):
 
 
 class Cloak(SimbaDefence):
-    def __init__(self, config, utils) -> None:
-        super(Cloak, self).__init__(utils)
+    def __init__(self, config, client_model, run) -> None:
+        super(Cloak, self).__init__()
+
+        # self.client_model = client_model
+        self.wandb = run
+        self.device = config["device"]
         self.initialize(config)
+    
 
     def initialize(self, config):
         img_size = config["proxy_adversary"]["img_size"] # here there is no proxy adv, but this is used to get the image size -> change in the config file
@@ -59,12 +64,11 @@ class Cloak(SimbaDefence):
 
         self.client_model = NoisyActivation(mus, scale, min_scale, max_scale)
         self.put_on_gpus()
-        self.utils.register_model("client_model", self.client_model)
+        # self.utils.register_model("client_model", self.client_model)
         self.optim = self.init_optim(config, self.client_model)
 
 #         config["img_size"] = img_size
 
-        
 #         self.loss = MetricLoader().ssim
 #         self.adv_tag = "adv"
 #         self.utils.logger.register_tag("train/" + self.adv_tag)
@@ -73,29 +77,26 @@ class Cloak(SimbaDefence):
 
 # In case you are not running on a parrallel infra remove the "module" from the below 2 lines -> this is used to access objects when it is in DataParallel form
                 
-        self.client_model.module.rhos.requires_grad = True
-        self.client_model.module.locs.requires_grad = True
+        self.client_model.rhos.requires_grad = True
+        self.client_model.locs.requires_grad = True
 
 
-
-    def forward(self, items):
-        self.z = self.client_model(items["x"])
+    def forward(self, x):
+        self.z = self.client_model(x)
+        # self.z = self.client_model(items["x"])
         z = self.z
         if self.detached:
             z = z.detach()
             z.requires_grad = True
         return z 
 
-    def backward(self, items):
-        server_grads = items["server_grads"]
-        noise_loss = (-1)*self.coeff*torch.log(torch.mean((self.client_model.module.scales()))) + 10
+    def backward(self, grads):
+        # server_grads = items["server_grads"]
+        server_grads = grads
+        noise_loss = (-1)*self.coeff*torch.log(torch.mean((self.client_model.scales()))) + 10
         noise_loss.backward(retain_graph = True)
 
         self.optim.zero_grad()
         self.z.backward(server_grads)
         self.optim.step()
-
-
-
-
 

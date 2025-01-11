@@ -1,8 +1,8 @@
 import torch
-from algos.simba_algo import SimbaAttack
-from models.image_decoder import Decoder
-from models.model_zoo import get_resnet18
-from utils.metrics import MetricLoader
+from .simba_algo import SimbaAttack
+# from models.image_decoder import Decoder
+# from models.model_zoo import get_resnet18
+# from utils.metrics import MetricLoader
 
 
 class DiscriminatorAttack(SimbaAttack):

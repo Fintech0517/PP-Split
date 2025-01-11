@@ -1,4 +1,4 @@
-from algos.simba_algo import SimbaDefence
+from .simba_algo import SimbaDefence
 import torch
 from torch.distributions.laplace import Laplace
 
@@ -23,14 +23,18 @@ class AddLaplaceNoise(object):
 
 
 class UniformNoise(SimbaDefence):
-    def __init__(self, config, utils) -> None:
-        super(UniformNoise, self).__init__(utils)
+    def __init__(self, config, client_model, run) -> None:
+        super(UniformNoise, self).__init__()
+
+        self.client_model = client_model
+        self.wandb = run
+
         self.initialize(config)
 
     def initialize(self, config):
-        self.client_model = self.init_client_model(config)
-        self.put_on_gpus()
-        self.utils.register_model("client_model", self.client_model)
+        # self.client_model = self.init_client_model(config)
+        # self.put_on_gpus()
+        # self.utils.register_model("client_model", self.client_model)
         self.optim = self.init_optim(config, self.client_model)
         self.set_noise_params(config)
 
@@ -40,8 +44,8 @@ class UniformNoise(SimbaDefence):
         elif config["distribution"] == "laplace":
             self.NoiseModel = AddLaplaceNoise(mean=config["mean"], sigma=config["sigma"])
 
-    def forward(self, items):
-        x = items["x"]
+    def forward(self, x):
+        # x = items["x"]
         _z = self.client_model(x)
         self.z = self.NoiseModel(_z)
         # z will be detached to prevent any grad flow from the client
@@ -49,8 +53,8 @@ class UniformNoise(SimbaDefence):
         z.requires_grad = True
         return z
 
-    def backward(self, items):
-        server_grads = items["server_grads"]
+    def backward(self, grads):
+        server_grads = grads
         self.optim.zero_grad()
         self.z.backward(server_grads)
         self.optim.step()

@@ -1,9 +1,9 @@
-from algos.simba_algo import SimbaDefence
+from .simba_algo import SimbaDefence
 import torch.nn.functional as F
 import torch
 import torch.nn as nn
 import numpy as np
-from models.complex_models import Discriminator, RealToComplex, ComplexToReal, ResNetEncoderComplex, ResNetDecoderComplex
+# from models.complex_models import Discriminator, RealToComplex, ComplexToReal, ResNetEncoderComplex, ResNetDecoderComplex
 
 def get_encoder_output_size(encoder, dims):
     x = torch.randn((1,)+dims)

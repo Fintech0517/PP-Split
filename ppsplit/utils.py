@@ -1,18 +1,68 @@
 '''
 Author: Ruijun Deng
-Date: 2024-05-21 15:20:26
-LastEditTime: 2024-06-01 21:23:50
+Date: 2023-12-12 20:28:05
+LastEditTime: 2024-12-08 03:26:33
 LastEditors: Ruijun Deng
-FilePath: /PP-Split/ppsplit/utils/utils.py
+FilePath: /PP-Split/target_model/models/splitnn_utils.py
 Description: 
 '''
-
+import time
+import math
 import os
+import numpy as np
 
+import torch
+import torchvision
+import torchvision.transforms as transforms
+import torch.nn as nn
+import torch.optim as optim
+import torch.backends.cudnn as cudnn
+from torch.utils.data import Dataset, DataLoader
+from sklearn.metrics import roc_auc_score
+import tqdm
+
+import json
+
+import collections
+
+# unit_net, client_net
+def split_weights_client(weights,cweights,no_dense=False):
+    # print('client_net weights: ', weights.keys())
+    # print('client_net cweights: ', cweights.keys())
+    # print('len client_net weights: ', len(weights.keys()))
+    # print('len client_net cweights: ', len(cweights.keys()))
+    for key in cweights:
+        print(key)
+        if no_dense and 'dense' in key:
+            continue
+        else:
+            cweights[key] = weights[key]
+    return cweights
+
+
+# 拼合模型
+def concat_weights(weights,cweights,sweights):
+	concat_dict = collections.OrderedDict()
+
+	ckeys = list(cweights)
+	skeys = list(sweights)
+	keys = list(weights)
+
+	for i in range(len(ckeys)):
+		concat_dict[keys[i]] = cweights[ckeys[i]]
+
+	for i in range(len(skeys)):
+		concat_dict[keys[i + len(ckeys)]] = sweights[skeys[i]]
+
+	return concat_dict
+
+
+# 路径
 def create_dir(dir_route):
     if not os.path.exists(dir_route):
         os.makedirs(dir_route)
     return
+    
 
 class AverageMeter(object):
     """Computes and stores the average and current value"""
@@ -101,3 +151,17 @@ def plot_index_value(smashed_data):
     plt.tight_layout()  # 自动调整子图布局
     plt.show()
     # plt.savefig(f'smashed_data_distribution{time.time()}.png')
+
+# json文件的读取
+def load_json(file_path):
+    """读取已保存的爬取结果"""
+    # filename = f'./dblp-results/{author_name}_publications.json'
+    if os.path.exists(file_path):
+        with open(file_path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return None
+
+def save_json(data_dict,file_path):
+    """保存爬取结果到JSON文件"""
+    with open(file_path, 'w', encoding='utf-8') as f:
+        json.dump(data_dict, f, ensure_ascii=False, indent=2)

@@ -1,4 +1,4 @@
-from algos.simba_algo import SimbaDefence
+from .simba_algo import SimbaDefence
 import torch
 
 

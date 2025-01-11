@@ -1,9 +1,9 @@
 import torch
 import torch.nn as nn
-from algos.simba_algo import SimbaDefence
-from models.image_decoder import Decoder
-from utils.metrics import MetricLoader
-from models.Xception import Xception
+from .simba_algo import SimbaDefence
+# # from models.image_decoder import Decoder
+# # from utils.metrics import MetricLoader
+# from models.Xception import Xception
 
 
 class AIOI(SimbaDefence):

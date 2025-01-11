@@ -1,6 +1,6 @@
-from algos.simba_algo import SimbaAttack
-from models.image_decoder import Decoder
-from utils.metrics import MetricLoader
+from .simba_algo import SimbaAttack
+# from models.image_decoder import Decoder
+# from utils.metrics import MetricLoader
 
 
 class SupervisedDecoder(SimbaAttack):

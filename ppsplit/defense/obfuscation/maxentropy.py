@@ -1,5 +1,5 @@
-from algos.deepobfuscator import DeepObfuscator
-from utils.metrics import MetricLoader
+from .deepobfuscator import DeepObfuscator
+# from utils.metrics import MetricLoader
 
 class EntropyLoss(_Loss):
     def __init__(self, size_average=None, reduce=None, reduction='mean'):

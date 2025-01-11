@@ -78,7 +78,7 @@ Here is a typical example of an experiment config with various parameters that c
  `exp_keys`: []. 
 
 ### Writing your own algorithm
-Most of the code in the algos is modular enough for a user to only focus on writing the important part of the mechanism and rest all functions automatically. Implementor of a mechanism just needs to inherit the `SimbaDefense` class from `algos.simba_algo`. A user can also build upon existing mechanisms by inheriting them and overriding a particular function of the algorithm.
+Most of the code in the algos is modular enough for a user to only focus on writing the important part of the mechanism and rest all functions automatically. Implementor of a mechanism just needs to inherit the `SimbaDefense` class from `.simba_algo`. A user can also build upon existing mechanisms by inheriting them and overriding a particular function of the algorithm.
 ## Evaluation
 Evaluation involves two category of metrics. One category of metric is specific to the algorithm and the other category of metric is generic for all of the algorithms and used for benchmarking.
 ## Scheduler

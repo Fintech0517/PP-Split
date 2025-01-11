@@ -297,9 +297,11 @@ class ResNet(nn.Module):
         pooling= 'max',
         # activation= 'gelu',
         # pooling= 'avg',
+        location = 'Client',
     ):
         super(ResNet, self).__init__()
 
+        self.location = location
         # normalization layer
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
@@ -337,7 +339,6 @@ class ResNet(nn.Module):
         else:
             raise AssertionError('Unknown activation')
 
-        # 
         bn1 = norm_layer(self.inplanes)
         relu = self.act()
 
@@ -372,10 +373,16 @@ class ResNet(nn.Module):
 
         self.layer_len = len(layers)
         # self.layers = nn.ModuleList(self.layers)
-        if split_layer == -1:
+        if self.location == 'Unit':
             self.selected_layers = nn.ModuleList(layers)
-        else:
+        elif self.location == 'Client':
             self.selected_layers = nn.ModuleList(layers[:split_layer + 1])
+        elif self.location == 'Server':
+            self.selected_layers = nn.ModuleList(layers[split_layer + 1:])
+        # if split_layer == -1:
+            # self.selected_layers = nn.ModuleList(layers)
+        # else:
+            # self.selected_layers = nn.ModuleList(layers[:split_layer + 1])
 
         print(f"Num unit layers: {len(layers)}") # Num layers: 14
         print('Split layer:', self.split_layer)
@@ -478,8 +485,11 @@ class ResNet(nn.Module):
     def forward(self, x):
         for i, layer in enumerate(self.selected_layers):
             # print(i,': ',x.shape)
-            if i == self.layer_len-1: # 13 is the last layer FC layer # 为啥要这个？输入fc前拉平
-                x = x.reshape(x.size(0), -1)
+            # print("x.shape: ",x.shape)
+            if i == self.layer_len-1 or self.location=='Server' and i==len(self.selected_layers)-1 : # 13 is the last layer FC layer # 为啥要这个？输入fc前拉平
+                # x = x.reshape(x.size(0), -1)
+                x = x.view(x.size(0), -1)
+                # print("reshaped x: ",x.shape)
             x = layer(x)
             # if i == self.split_layer:
             #     if self.compress is not None:
@@ -677,7 +687,6 @@ in_c_dict = {
     12: 512,
     13: 512,
 }
-
 
 
 class InversionNet(nn.Module):

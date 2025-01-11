@@ -1,0 +1,41 @@
+{
+    "defense":{
+        "method": "uniform_noise",
+        "client": {"model_name": "resnet18", "split_layer": 6,
+                   "pretrained": false, "optimizer": "adam", "lr": 3e-4,
+                   "distribution": "gaussian", "mean": 0, "sigma": 1},
+        "server": {"model_name": "resnet18", "split_layer":6, "logits": 2, "pretrained": false,
+                   "lr": 3e-4, "optimizer": "adam"},
+        "learning_rate": 0.01,
+        "total_epochs": 150,
+        "training_batch_size": 128,
+        "dataset": "fairface",
+        "protected_attribute": "data",
+        "prediction_attribute": "gender",
+        "img_size": 128,
+        "split": false,
+        "test_batch_size": 64,
+        "exp_id": "1",
+        "exp_keys": ["client.distribution", "client.mean", "client.sigma"],
+        "device":"cuda:0"
+    },
+    "general":{
+        "result_dir":"20241228-defense/",
+        "test_num":"uniform_noise",
+        "device":"cuda:0",
+
+        "dataset":"CIFAR10",
+        "oneData_bs": 1,
+        "train_bs": 128,
+        "test_bs": 64,
+        
+        "model":"VGG5",
+        "split_layer": 2,
+        "ep":-1,
+        "no_dense": 0,
+        
+        "noise_scale": 0
+    }
+}
+
+

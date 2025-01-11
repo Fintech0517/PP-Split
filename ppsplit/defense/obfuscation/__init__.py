@@ -1,1 +1,1 @@
-from algos.simba_algo import SimbaDefence, SimbaAttack
+from .simba_algo import SimbaDefence, SimbaAttack

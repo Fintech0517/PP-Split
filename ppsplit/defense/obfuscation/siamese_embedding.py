@@ -1,5 +1,5 @@
 import torch
-from algos.simba_algo import SimbaDefence
+from .simba_algo import SimbaDefence
 from torch.nn.modules.loss import _Loss
 
 

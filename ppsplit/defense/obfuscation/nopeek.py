@@ -1,4 +1,4 @@
-from algos.simba_algo import SimbaDefence
+from .simba_algo import SimbaDefence
 import torch
 from torch.nn.modules.loss import _Loss
 from torch.nn.utils import clip_grad_norm_
@@ -35,61 +35,57 @@ class DistCorrelation(_Loss):
 
 
 class NoPeek(SimbaDefence):
-    def __init__(self, config, utils) -> None:
-        super(NoPeek, self).__init__(utils)
+    def __init__(self, config, client_model, run) -> None:
+        super(NoPeek, self).__init__()
+
+        self.client_model = client_model
+        self.wandb = run
+
         self.initialize(config)
+        
 
     def initialize(self, config): # 初始化的时候，是把这个 client模型，放到防御方法里面来了。
         clip_value = 1.0
-        self.client_model = config["client_model"]
-
+        
         # self.client_model = self.init_client_model(config)
         clip_grad_norm_(self.client_model.parameters(), clip_value)
-        self.put_on_gpus()
-        self.utils.register_model("client_model", self.client_model)
+
+        # print("client_model.device: ", next(self.client_model.parameters()).device)
+        # self.device = torch.device(config["device"])
+        # self.client_model = self.client_model.to(self.device)
+
+        # 处理模型？
+        # self.put_on_gpus()
+        # self.utils.register_model("client_model", self.client_model)
         self.optim = self.init_optim(config, self.client_model)
         self.loss = DistCorrelation()
 
         self.alpha = config["alpha"]
         self.dcor_tag = "dcor"
-        self.utils.logger.register_tag("train/" + self.dcor_tag)
-        self.utils.logger.register_tag("val/" + self.dcor_tag)
+        
 
-    # def forward(self, items):
-        # x = items["x"]
-        # self.z = self.client_model(x)
-        # self.x = x
-        # z = self.z
-        # if self.detached:
-        #     z = z.detach()
-        #     z.requires_grad = True
-        # self.dcor_loss = self.loss(self.x, self.z)
-        # if self.logs_enabled:
-        #     self.utils.logger.add_entry(self.mode + "/" + self.dcor_tag,
-        #                                 self.dcor_loss.item())
-        # return z
 
-    def forward(self, items):
+
+    def forward(self, x):
         '''
         输入的就是一个tensor，然后返回的也是一个tensor（扰动后的tensor）
         '''
-        # x = items["x"]
-        # self.z = self.client_model(x)
-        
-        self.z = items['z']
-        self.x = items['x']
+
+        self.x = x
+        self.z = self.client_model(x)
+
         z = self.z
         if self.detached:
             z = z.detach()
             z.requires_grad = True
         self.dcor_loss = self.loss(self.x, self.z) # 计算dcor loss
-        if self.logs_enabled:
-            self.utils.logger.add_entry(self.mode + "/" + self.dcor_tag,
-                                        self.dcor_loss.item())
+
+        # print("dcor_loss: ", self.dcor_loss.item())
+        self.wandb.log({"dcor_loss": self.dcor_loss.item()})
         return z
 
-    def backward(self, items): 
-        server_grads = items["server_grads"]
+    def backward(self, grads): 
+        server_grads = grads
         self.optim.zero_grad()
         # Higher the alpha, higher the weight for dcor loss would be
         self.z.backward((1 - self.alpha) * server_grads, retain_graph=True)

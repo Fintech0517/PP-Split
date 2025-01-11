@@ -1,4 +1,4 @@
-from algos.simba_algo import SimbaDefence
+from .simba_algo import SimbaDefence
 from torch.nn.modules.loss import _Loss
 from audtorch.metrics.functional import pearsonr
 import torch.nn as nn
@@ -17,12 +17,16 @@ class PearsonCorrelation(_Loss):
 
 
 class LinearCorrelation(SimbaDefence):
-    def __init__(self, config, utils) -> None:
-        super(LinearCorrelation, self).__init__(utils)
+    def __init__(self, config, client_model, run) -> None:
+        super(LinearCorrelation, self).__init__()
+
+        self.client_model = client_model
+        self.wandb = run
+
         self.initialize(config)
 
     def initialize(self, config):
-        self.client_model = self.init_client_model(config)
+        # self.client_model = self.init_client_model(config)
         # hardcoded to match the size of activation and input with respect to
         # split layer 6. TODO: Remove this hardcoding.
         channel_up_layer = nn.Conv2d(128, 192, 1).to(self.utils.device)

@@ -1,11 +1,11 @@
 import json
-from utils.config_utils import process_config
-from algos.uniform_noise import UniformNoise
-from algos.nopeek import NoPeek
-from algos.simba_algo import SimbaAttack
-from utils.metrics import MetricLoader
+# from utils.config_utils import process_config
+from .uniform_noise import UniformNoise
+from .nopeek import NoPeek
+from .simba_algo import SimbaAttack
+# from utils.metrics import MetricLoader
 import torch
-from models.skip import skip
+# from models.skip import skip
 import os
 
 

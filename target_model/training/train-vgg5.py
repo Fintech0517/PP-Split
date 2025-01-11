@@ -43,7 +43,7 @@ def train(args):
     # print(args)
 
     # 可视化
-    wandb.init(project='VGG',name=f'{network}-{dataset}')
+    wandb.init(project='VGG',name=f'{network}-{dataset}', dir='../../results/trained_models/')
     wandb.config.update(args)
 
     # 储存训练模型文件夹：“checkpoints/CIFAR10”

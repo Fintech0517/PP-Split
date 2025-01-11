@@ -140,7 +140,7 @@ class VGG(nn.Module):
 		self.features, self.denses = self._make_layers(cfg[vgg_name])
 		self._initialize_weights()
 		
-		self.noise_scarle = noise_scale
+		self.noise_scale = noise_scale
 
 	def forward(self, x):
 		if len(self.features) > 0:

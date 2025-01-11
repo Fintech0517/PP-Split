@@ -1,0 +1,39 @@
+{
+    "defense":{
+        "method": "nopeek",
+        "client": {"optimizer": "adam", "lr": 3e-4,
+                   "alpha": 0.5},
+        "server": {"lr": 3e-4, "optimizer": "adam"},
+        "learning_rate": 0.01,
+        "total_epochs": 150,
+        "training_batch_size": 256,
+        "dataset": "fairface",
+        "protected_attribute": "data",
+        "prediction_attribute": "gender",
+        "img_size": 128,
+        "split": false,
+        "test_batch_size": 64,
+        "exp_id": "1",
+        "exp_keys": ["client.alpha"],
+        "device": "cuda:0"
+    },
+    "general":{
+        "result_dir":"20241228-defense/",
+        "test_num":"nopeek",
+        "device":"cuda:0",
+
+        "dataset":"CIFAR10",
+        "oneData_bs": 1,
+        "train_bs": 32,
+        "test_bs": 64,
+        
+        "model":"VGG5",
+        "split_layer": 0,
+        "ep":-1,
+        "no_dense": 0,
+        
+        "noise_scale": 0
+    }
+}
+
+
