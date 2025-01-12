@@ -7,13 +7,13 @@
  # @Description: 
 ### 
 
-# Resnet18  
-# nohup python -u effectInfo1.10.py  --device cuda:1 --dataset CIFAR10 --model ResNet18 --split_layer 2 > ../../results/20240702-effectiveInfo/Resnet18/effectiveInfo1.10/pool4-layer2-gpu.log 2>&1 &
-# nohup python -u effectInfo1.10.py  --device cuda:1 --dataset CIFAR10 --model ResNet18 --split_layer 3 > ../../results/20240702-effectiveInfo/Resnet18/effectiveInfo1.10/pool4-layer3-gpu.log 2>&1 &
-# nohup python -u effectInfo1.10.py  --device cuda:1 --dataset CIFAR10 --model ResNet18 --split_layer 5 > ../../results/20240702-effectiveInfo/Resnet18/effectiveInfo1.10/pool4-layer5-gpu.log 2>&1 &
-# nohup python -u effectInfo1.10.py  --device cuda:1 --dataset CIFAR10 --model ResNet18 --split_layer 7 > ../../results/20240702-effectiveInfo/Resnet18/effectiveInfo1.10/pool4-layer7-gpu.log 2>&1 &
-# nohup python -u effectInfo1.10.py  --device cuda:1 --dataset CIFAR10 --model ResNet18 --split_layer 9 > ../../results/20240702-effectiveInfo/Resnet18/effectiveInfo1.10/pool4-layer9-gpu.log 2>&1 &
-# nohup python -u effectInfo1.10.py  --device cuda:1 --dataset CIFAR10 --model ResNet18 --split_layer 11 > ../../results/20240702-effectiveInfo/Resnet18/effectiveInfo1.10/pool4-layer11-gpu.log 2>&1 &
+# ResNet18  
+# nohup python -u effectInfo1.10.py  --device cuda:1 --dataset CIFAR10 --model ResNet18 --split_layer 2 > ../../results/20240702-effectiveInfo/ResNet18/effectiveInfo1.10/pool4-layer2-gpu.log 2>&1 &
+# nohup python -u effectInfo1.10.py  --device cuda:1 --dataset CIFAR10 --model ResNet18 --split_layer 3 > ../../results/20240702-effectiveInfo/ResNet18/effectiveInfo1.10/pool4-layer3-gpu.log 2>&1 &
+# nohup python -u effectInfo1.10.py  --device cuda:1 --dataset CIFAR10 --model ResNet18 --split_layer 5 > ../../results/20240702-effectiveInfo/ResNet18/effectiveInfo1.10/pool4-layer5-gpu.log 2>&1 &
+# nohup python -u effectInfo1.10.py  --device cuda:1 --dataset CIFAR10 --model ResNet18 --split_layer 7 > ../../results/20240702-effectiveInfo/ResNet18/effectiveInfo1.10/pool4-layer7-gpu.log 2>&1 &
+# nohup python -u effectInfo1.10.py  --device cuda:1 --dataset CIFAR10 --model ResNet18 --split_layer 9 > ../../results/20240702-effectiveInfo/ResNet18/effectiveInfo1.10/pool4-layer9-gpu.log 2>&1 &
+# nohup python -u effectInfo1.10.py  --device cuda:1 --dataset CIFAR10 --model ResNet18 --split_layer 11 > ../../results/20240702-effectiveInfo/ResNet18/effectiveInfo1.10/pool4-layer11-gpu.log 2>&1 &
 
 
 # VGG5 CIFAR10 
@@ -71,24 +71,24 @@
 
 
 # ResNet18 CIFAR100
-# nohup python -u effectInfo1.10.py  --device cuda:0 --dataset CIFAR100 --model ResNet18 --split_layer 2 > ../../results/20240702-effectiveInfo/Resnet18_CIFAR100/effectiveInfo1.10/pool4-layer2-gpu.log 2>&1 &
-# nohup python -u effectInfo1.10.py  --device cuda:0 --dataset CIFAR100 --model ResNet18 --split_layer 3 > ../../results/20240702-effectiveInfo/Resnet18_CIFAR100/effectiveInfo1.10/pool4-layer3-gpu.log 2>&1 &
-# nohup python -u effectInfo1.10.py  --device cuda:0 --dataset CIFAR100 --model ResNet18 --split_layer 5 > ../../results/20240702-effectiveInfo/Resnet18_CIFAR100/effectiveInfo1.10/pool4-layer5-gpu.log 2>&1 &
-# nohup python -u effectInfo1.10.py  --device cuda:0 --dataset CIFAR100 --model ResNet18 --split_layer 7 > ../../results/20240702-effectiveInfo/Resnet18_CIFAR100/effectiveInfo1.10/pool4-layer7-gpu.log 2>&1 &
-# nohup python -u effectInfo1.10.py  --device cuda:0 --dataset CIFAR100 --model ResNet18 --split_layer 9 > ../../results/20240702-effectiveInfo/Resnet18_CIFAR100/effectiveInfo1.10/pool4-layer9-gpu.log 2>&1 &
-# nohup python -u effectInfo1.10.py  --device cuda:0 --dataset CIFAR100 --model ResNet18 --split_layer 11 > ../../results/20240702-effectiveInfo/Resnet18_CIFAR100/effectiveInfo1.10/pool4-layer11-gpu.log 2>&1 &
+# nohup python -u effectInfo1.10.py  --device cuda:0 --dataset CIFAR100 --model ResNet18 --split_layer 2 > ../../results/20240702-effectiveInfo/ResNet18_CIFAR100/effectiveInfo1.10/pool4-layer2-gpu.log 2>&1 &
+# nohup python -u effectInfo1.10.py  --device cuda:0 --dataset CIFAR100 --model ResNet18 --split_layer 3 > ../../results/20240702-effectiveInfo/ResNet18_CIFAR100/effectiveInfo1.10/pool4-layer3-gpu.log 2>&1 &
+# nohup python -u effectInfo1.10.py  --device cuda:0 --dataset CIFAR100 --model ResNet18 --split_layer 5 > ../../results/20240702-effectiveInfo/ResNet18_CIFAR100/effectiveInfo1.10/pool4-layer5-gpu.log 2>&1 &
+# nohup python -u effectInfo1.10.py  --device cuda:0 --dataset CIFAR100 --model ResNet18 --split_layer 7 > ../../results/20240702-effectiveInfo/ResNet18_CIFAR100/effectiveInfo1.10/pool4-layer7-gpu.log 2>&1 &
+# nohup python -u effectInfo1.10.py  --device cuda:0 --dataset CIFAR100 --model ResNet18 --split_layer 9 > ../../results/20240702-effectiveInfo/ResNet18_CIFAR100/effectiveInfo1.10/pool4-layer9-gpu.log 2>&1 &
+# nohup python -u effectInfo1.10.py  --device cuda:0 --dataset CIFAR100 --model ResNet18 --split_layer 11 > ../../results/20240702-effectiveInfo/ResNet18_CIFAR100/effectiveInfo1.10/pool4-layer11-gpu.log 2>&1 &
 
 
 # Different width ResNet18 CIFAR10
-# nohup python -u effectInfo1.10.py  --device cuda:1 --dataset CIFAR10 --model ResNet18 --split_layer 7 > ../../results/20240702-effectiveInfo/Resnet18/Resnet18_20ep_org/effectiveInfo1.10/pool4-layer7-gpu.log 2>&1 &
-# nohup python -u effectInfo1.10.py  --device cuda:1 --dataset CIFAR10 --model ResNet18 --split_layer 7 > ../../results/20240702-effectiveInfo/Resnet18/Resnet18_20ep_narrow/effectiveInfo1.10/pool4-layer7-gpu.log 2>&1 &
-# nohup python -u effectInfo1.10.py  --device cuda:0 --dataset CIFAR10 --model ResNet18 --split_layer 7 > ../../results/20240702-effectiveInfo/Resnet18/Resnet18_20ep_wide/effectiveInfo1.10/pool4-layer7-gpu.log 2>&1 &
-# nohup python -u effectInfo1.10.py  --device cuda:0 --dataset CIFAR10 --model ResNet18 --split_layer 7 > ../../results/20240702-effectiveInfo/Resnet18/Resnet18_20ep_2narrow/effectiveInfo1.10/pool4-layer7-gpu.log 2>&1 &
+# nohup python -u effectInfo1.10.py  --device cuda:1 --dataset CIFAR10 --model ResNet18 --split_layer 7 > ../../results/20240702-effectiveInfo/ResNet18/ResNet18_20ep_org/effectiveInfo1.10/pool4-layer7-gpu.log 2>&1 &
+# nohup python -u effectInfo1.10.py  --device cuda:1 --dataset CIFAR10 --model ResNet18 --split_layer 7 > ../../results/20240702-effectiveInfo/ResNet18/ResNet18_20ep_narrow/effectiveInfo1.10/pool4-layer7-gpu.log 2>&1 &
+# nohup python -u effectInfo1.10.py  --device cuda:0 --dataset CIFAR10 --model ResNet18 --split_layer 7 > ../../results/20240702-effectiveInfo/ResNet18/ResNet18_20ep_wide/effectiveInfo1.10/pool4-layer7-gpu.log 2>&1 &
+# nohup python -u effectInfo1.10.py  --device cuda:0 --dataset CIFAR10 --model ResNet18 --split_layer 7 > ../../results/20240702-effectiveInfo/ResNet18/ResNet18_20ep_2narrow/effectiveInfo1.10/pool4-layer7-gpu.log 2>&1 &
 
 
 # Different deepth ResNet18 CIFAR10
-# nohup python -u effectInfo1.10.py  --device cuda:1 --dataset CIFAR10 --model ResNet18 --split_layer 7 > ../../results/20240702-effectiveInfo/Resnet18/Resnet18_20ep_org/effectiveInfo1.10/pool4-layer7-gpu.log 2>&1 &
-# nohup python -u effectInfo1.10.py  --device cuda:0 --dataset CIFAR10 --model ResNet34 --split_layer 10 > ../../results/20240702-effectiveInfo/Resnet34/effectiveInfo1.10/pool4-layer10-gpu.log 2>&1 &
+# nohup python -u effectInfo1.10.py  --device cuda:1 --dataset CIFAR10 --model ResNet18 --split_layer 7 > ../../results/20240702-effectiveInfo/ResNet18/ResNet18_20ep_org/effectiveInfo1.10/pool4-layer7-gpu.log 2>&1 &
+# nohup python -u effectInfo1.10.py  --device cuda:0 --dataset CIFAR10 --model ResNet34 --split_layer 10 > ../../results/20240702-effectiveInfo/ResNet34/effectiveInfo1.10/pool4-layer10-gpu.log 2>&1 &
 
 
 # different epochs
@@ -207,6 +207,8 @@
 # nohup python -u effectInfo1.10.py --device cuda:0 --dataset CIFAR10 --model ViTb_16 --split_layer 12 --no_dense > ../../results/20240702-effectiveInfo/ViTb_16_CIFAR10/effectiveInfo1.10/pool4-layer12-gpu.log 2>&1 &
 
 
+# 开防御：
+
 # VGG5+defense gaussian
 # nohup python -u effectInfo1.10.py --device cuda:0 --dataset CIFAR10 --model VGG5 --split_layer 2  --noise_scale 0.1 --test_num effectiveInfo1.10/Gaussian-0.1 > ../../results/20240702-effectiveInfo/VGG5/effectiveInfo1.10/Gaussian/pool4-layer2-gpu-0.1.log 2>&1 &
 # nohup python -u effectInfo1.10.py --device cuda:0 --dataset CIFAR10 --model VGG5 --split_layer 2  --noise_scale 0.2 --test_num effectiveInfo1.10/Gaussian-0.2 > ../../results/20240702-effectiveInfo/VGG5/effectiveInfo1.10/Gaussian/pool4-layer2-gpu-0.2.log 2>&1 &
@@ -230,5 +232,51 @@
 # nohup python -u effectInfo1.10.py --device cuda:1 --dataset CIFAR10 --model VGG5 --split_layer 2  --noise_scale 50 --test_num effectiveInfo1.10/Gaussian-50  > ../../results/20240702-effectiveInfo/VGG5/effectiveInfo1.10/Gaussian/pool4-layer2-gpu-50.log 2>&1 &
 
 
+# VGG5 CIFAR10 nopeek
+# nohup python -u effectInfo1.10.py --device cuda:0 --dataset CIFAR10 --model VGG5 --split_layer 0 --ep -2 > ../../results/20240702-effectiveInfo/VGG5/effectiveInfo1.10/nopeek/pool4-layer0-gpu.log 2>&1 &
+# nohup python -u effectInfo1.10.py --device cuda:0 --dataset CIFAR10 --model VGG5 --split_layer 1 --ep -2   > ../../results/20240702-effectiveInfo/VGG5/effectiveInfo1.10/nopeek/pool4-layer1-gpu.log 2>&1 &
+# nohup python -u effectInfo1.10.py --device cuda:0 --dataset CIFAR10 --model VGG5 --split_layer 2 --ep -2   > ../../results/20240702-effectiveInfo/VGG5/effectiveInfo1.10/nopeek/pool4-layer2-gpu.log 2>&1 &
+# nohup python -u effectInfo1.10.py --device cuda:0 --dataset CIFAR10 --model VGG5 --split_layer 3 --ep -2   > ../../results/20240702-effectiveInfo/VGG5/effectiveInfo1.10/nopeek/pool4-layer3-gpu.log 2>&1 &
+# nohup python -u effectInfo1.10.py --device cuda:0 --dataset CIFAR10 --model VGG5 --split_layer 4 --ep -2   > ../../results/20240702-effectiveInfo/VGG5/effectiveInfo1.10/nopeek/pool4-layer4-gpu.log 2>&1 &
+# nohup python -u effectInfo1.10.py --device cuda:0 --dataset CIFAR10 --model VGG5 --split_layer 5 --ep -2  --no_dense > ../../results/20240702-effectiveInfo/VGG5/effectiveInfo1.10/nopeek/pool4-layer5-gpu.log 2>&1 &
+# nohup python -u effectInfo1.10.py --device cuda:0 --dataset CIFAR10 --model VGG5 --split_layer 6 --ep -2  --no_dense > ../../results/20240702-effectiveInfo/VGG5/effectiveInfo1.10/nopeek/pool4-layer6-gpu.log 2>&1 &
+# [7] 2745061
+# [8] 2751998
+# [9] 2751999
+# [10] 2752000
+# [11] 2752001
 
+
+# VGG9 cifar10 nopeek
+# nohup python -u effectInfo1.10.py --device cuda:1 --dataset CIFAR10 --model VGG9 --split_layer 1 --ep -2 > ../../results/20240702-effectiveInfo/VGG9/effectiveInfo1.10/nopeek/pool4-layer1-gpu.log 2>&1 &
+# nohup python -u effectInfo1.10.py --device cuda:1 --dataset CIFAR10 --model VGG9 --split_layer 2 --ep -2   > ../../results/20240702-effectiveInfo/VGG9/effectiveInfo1.10/nopeek/pool4-layer2-gpu.log 2>&1 &
+# nohup python -u effectInfo1.10.py --device cuda:1 --dataset CIFAR10 --model VGG9 --split_layer 3 --ep -2   > ../../results/20240702-effectiveInfo/VGG9/effectiveInfo1.10/nopeek/pool4-layer3-gpu.log 2>&1 &
+# nohup python -u effectInfo1.10.py --device cuda:1 --dataset CIFAR10 --model VGG9 --split_layer 4 --ep -2   > ../../results/20240702-effectiveInfo/VGG9/effectiveInfo1.10/nopeek/pool4-layer4-gpu.log 2>&1 &
+# nohup python -u effectInfo1.10.py --device cuda:1 --dataset CIFAR10 --model VGG9 --split_layer 5 --ep -2   > ../../results/20240702-effectiveInfo/VGG9/effectiveInfo1.10/nopeek/pool4-layer5-gpu.log 2>&1 &
+# nohup python -u effectInfo1.10.py --device cuda:1 --dataset CIFAR10 --model VGG9 --split_layer 6 --ep -2   > ../../results/20240702-effectiveInfo/VGG9/effectiveInfo1.10/nopeek/pool4-layer6-gpu.log 2>&1 &
+# nohup python -u effectInfo1.10.py --device cuda:1 --dataset CIFAR10 --model VGG9 --split_layer 7 --ep -2   > ../../results/20240702-effectiveInfo/VGG9/effectiveInfo1.10/nopeek/pool4-layer7-gpu.log 2>&1 &
+
+# [1] 2916462
+# [2] 2916463
+# [3] 2916464
+# [4] 2916465
+# [5] 2916466
+# [6] 2916467
+# [7] 2916468
+
+
+# ResNet18 cifar10 nopeek
+# nohup python -u effectInfo1.10.py --device cuda:0 --dataset CIFAR10 --model ResNet18 --split_layer 2 --ep -2 > ../../results/20240702-effectiveInfo/ResNet18/effectiveInfo1.10/nopeek/pool4-layer2-gpu.log 2>&1 &
+# nohup python -u effectInfo1.10.py --device cuda:0 --dataset CIFAR10 --model ResNet18 --split_layer 3 --ep -2   > ../../results/20240702-effectiveInfo/ResNet18/effectiveInfo1.10/nopeek/pool4-layer3-gpu.log 2>&1 &
+# nohup python -u effectInfo1.10.py --device cuda:0 --dataset CIFAR10 --model ResNet18 --split_layer 5 --ep -2   > ../../results/20240702-effectiveInfo/ResNet18/effectiveInfo1.10/nopeek/pool4-layer5-gpu.log 2>&1 &
+# nohup python -u effectInfo1.10.py --device cuda:0 --dataset CIFAR10 --model ResNet18 --split_layer 7 --ep -2   > ../../results/20240702-effectiveInfo/ResNet18/effectiveInfo1.10/nopeek/pool4-layer7-gpu.log 2>&1 &
+# nohup python -u effectInfo1.10.py --device cuda:0 --dataset CIFAR10 --model ResNet18 --split_layer 9 --ep -2   > ../../results/20240702-effectiveInfo/ResNet18/effectiveInfo1.10/nopeek/pool4-layer9-gpu.log 2>&1 &
+# nohup python -u effectInfo1.10.py --device cuda:0 --dataset CIFAR10 --model ResNet18 --split_layer 11 --ep -2   > ../../results/20240702-effectiveInfo/ResNet18/effectiveInfo1.10/nopeek/pool4-layer11-gpu.log 2>&1 &
+
+# [9] 2920232
+# [10] 2920233
+# [11] 2920234
+# [12] 2920235
+# [13] 2920236
+# [14] 2920237
 

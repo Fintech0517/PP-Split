@@ -34,7 +34,7 @@ from target_model.task_select import get_dataloader_and_model,get_dataloader_and
     get_dataloader,get_models,get_infotopo_para
 
 # utils
-from ppsplit.utils.utils import create_dir
+from ppsplit.utils import create_dir
 
 # %%
 # %%

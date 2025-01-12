@@ -1,12 +1,10 @@
 {
     "defense":{
         "method": "shredder",
-        "client": {"model_name": "resnet18", "split_layer": 6,
-                   "pretrained": false, "optimizer": "adam", "lr": 3e-4,
+        "client": {"optimizer": "adam", "lr": 3e-4,
                    "coeff":0.5, "increase": true, 
                    "proxy_adversary" : {"img_size": 32}, "device":"cuda:0"},
-        "server": {"model_name": "resnet18", "split_layer":6, "logits": 2, "pretrained": false,
-                   "lr": 3e-4, "optimizer": "adam"},
+        "server": {"lr": 3e-4, "optimizer": "adam"},
         "learning_rate": 0.01,
         "total_epochs": 150,
         "training_batch_size": 256,

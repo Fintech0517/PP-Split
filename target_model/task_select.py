@@ -201,12 +201,12 @@ def get_models(args):
             split_layer = 2 if split_layer==-1 else split_layer # 定成3吧？
 
             # 关键路径
-            if ep==-1:
-                # vgg5 (20ep)
+            if ep==-1: # vgg5 (20ep)
                 unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ImageClassification/VGG5/BN+Tanh/VGG5-params-20ep.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
-                results_dir  = f"../../results/{result_ws}/VGG5/{test_num}/"
-            else:
-                # 0ep
+            elif ep ==-2: # defensed
+                unit_net_route = f'/home/dengruijun/data/FinTech/PP-Split/results/20241228-defense/VGG5/nopeek/layer{split_layer}/unit_net_defensed.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+                results_dir  = f"../../results/{result_ws}/VGG5/{test_num}/nopeek/"
+            else: # 0ep
                 unit_net_route = f'/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ImageClassification/VGG5/CIFAR10/VGG5-CIFAR10-{ep}epoch.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
                 results_dir  = f"../../results/{result_ws}/VGG5/VGG5_{ep}ep/{test_num}/"
 
@@ -246,6 +246,9 @@ def get_models(args):
                 # vgg9 (20ep)
                 unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ImageClassification/VGG9/CIFAR10/VGG9-CIFAR10-20ep.pth' # VGG9-BN+Tanh # 存储的是模型参数，不包括模型结构
                 results_dir  = f"../../results/{result_ws}/VGG9/{test_num}/"
+            elif ep==-2:
+                unit_net_route = f'/home/dengruijun/data/FinTech/PP-Split/results/20241228-defense/VGG9/nopeek/layer{split_layer}/unit_net_defensed.pth' # VGG9-BN+Tanh # 存储的是模型参数，不包括模型结构
+                results_dir  = f"../../results/{result_ws}/VGG9/{test_num}/nopeek/"
             else:
                 # 0ep
                 unit_net_route = f'/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ImageClassification/VGG9/CIFAR10/VGG9-CIFAR10-20epoch.pth-{ep}.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
@@ -285,24 +288,30 @@ def get_models(args):
             # split_layer_list = list(range(len(model_cfg['VGG5'])))
             split_layer = 7 if split_layer==-1 else split_layer # 定成3吧？
 
-            # 关键路径
-            # xs，原来根本没有加载参数
-            # 100ep
-            unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ImageClassification/ResNet/resnet18/CIFAR10-100ep/32bs-ep20-relu-max-adam/resnet18-drj-small.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
-            # 20 ep
-            # unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ImageClassification/ResNet/resnet18/CIFAR10-20ep/resnet18-drj-align.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
-            # 20 ep narrow
-            # unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ImageClassification/ResNet/resnet18_narrow/CIFAR10/resnet18-drj-align.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
-            # 20 ep wide
-            # unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ImageClassification/ResNet/resnet18_wide/CIFAR10/resnet18-drj-align.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
-            # 20 ep 2narrow
-            # unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ImageClassification/ResNet/resnet18_2narrow/CIFAR10/resnet18-drj-align.pth'
+            if ep == -1:
+                # 关键路径
+                # xs，原来根本没有加载参数
+                # 100ep
+                unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ImageClassification/ResNet/resnet18/CIFAR10-100ep/32bs-ep20-relu-max-adam/resnet18-drj-small.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+                # 20 ep
+                # unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ImageClassification/ResNet/resnet18/CIFAR10-20ep/resnet18-drj-align.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+                # 20 ep narrow
+                # unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ImageClassification/ResNet/resnet18_narrow/CIFAR10/resnet18-drj-align.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+                # 20 ep wide
+                # unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ImageClassification/ResNet/resnet18_wide/CIFAR10/resnet18-drj-align.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+                # 20 ep 2narrow
+                # unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ImageClassification/ResNet/resnet18_2narrow/CIFAR10/resnet18-drj-align.pth'
 
-            results_dir  = f"../../results/{result_ws}/Resnet18/{test_num}/"
-            # results_dir  = f"../../results/{result_ws}/Resnet18/Resnet18_20ep_org/{test_num}/"
-            # results_dir  = f"../../results/{result_ws}/Resnet18/Resnet18_20ep_narrow/{test_num}/"
-            # results_dir  = f"../../results/{result_ws}/Resnet18/Resnet18_20ep_wide/{test_num}/"
-            # results_dir  = f"../../results/{result_ws}/Resnet18/Resnet18_20ep_2narrow/{test_num}/"
+                results_dir  = f"../../results/{result_ws}/ResNet18/{test_num}/"
+                # results_dir  = f"../../results/{result_ws}/ResNet18/ResNet18_20ep_org/{test_num}/"
+                # results_dir  = f"../../results/{result_ws}/ResNet18/ResNet18_20ep_narrow/{test_num}/"
+                # results_dir  = f"../../results/{result_ws}/ResNet18/ResNet18_20ep_wide/{test_num}/"
+                # results_dir  = f"../../results/{result_ws}/ResNet18/ResNet18_20ep_2narrow/{test_num}/"
+            elif ep == -2:
+                unit_net_route = f'/home/dengruijun/data/FinTech/PP-Split/results/20241228-defense/ResNet18/nopeek/layer{split_layer}/unit_net_defensed.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+                results_dir  = f"../../results/{result_ws}/ResNet18/{test_num}/nopeek/"
+            else: # TODO:
+                pass
 
             # unit_net
             unit_net = resnet18(location='Unit', pretrained=False, bottleneck_dim=-1, num_classes=10, activation='gelu', pooling='avg')
@@ -338,7 +347,7 @@ def get_models(args):
 
             unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ImageClassification/ResNet/resnet34/CIFAR10/resnet34-drj-align.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
 
-            results_dir  = f"../../results/{result_ws}/Resnet34/{test_num}/"
+            results_dir  = f"../../results/{result_ws}/ResNet34/{test_num}/"
             decoder_route = results_dir + f"/Decoder-layer{split_layer}.pth"
 
             # 切割成client model
@@ -401,7 +410,7 @@ def get_models(args):
             # 关键路径
             # xs，原来根本没有加载参数
             unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ImageClassification/ResNet/resnet18/CIFAR100/resnet18-drj-align.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
-            results_dir  = f"../../results/{result_ws}/Resnet18_CIFAR100/{test_num}/"
+            results_dir  = f"../../results/{result_ws}/ResNet18_CIFAR100/{test_num}/"
             decoder_route = results_dir + f"/Decoder-layer{split_layer}.pth"
 
             # 切割成client model
@@ -432,7 +441,7 @@ def get_models(args):
             # 关键路径
             # xs，原来根本没有加载参数
             unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ImageClassification/ResNet/resnet34/CIFAR100/resnet34-drj-align.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
-            results_dir  = f"../../results/{result_ws}/Resnet34_CIFAR100/{test_num}/"
+            results_dir  = f"../../results/{result_ws}/ResNet34_CIFAR100/{test_num}/"
             decoder_route = results_dir + f"/Decoder-layer{split_layer}.pth"
 
             # 切割成client model
@@ -463,7 +472,7 @@ def get_models(args):
             # 关键路径
             # xs，原来根本没有加载参数
             unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ImageClassification/ResNet/resnet50/CIFAR100/resnet18-drj-align.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
-            results_dir  = f"../../results/{result_ws}/Resnet50_CIFAR100/{test_num}/"
+            results_dir  = f"../../results/{result_ws}/ResNet50_CIFAR100/{test_num}/"
             decoder_route = results_dir + f"/Decoder-layer{split_layer}.pth"
 
             # 切割成client model

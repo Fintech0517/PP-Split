@@ -32,7 +32,7 @@ class Shredder(SimbaDefence):
         img = torch.randn(1, 3, img_size, img_size) # 图像数据的
         img = img.to(next(model.parameters()).device)
         patch = model(img)
-        assert patch.shape[2] == patch.shape[3]
+        # assert patch.shape[2] == patch.shape[3] # 只针对正方形的图片？ 
         
         return patch.shape[1:]
     

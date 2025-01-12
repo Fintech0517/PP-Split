@@ -24,13 +24,13 @@ from target_model.task_select import get_dataloader_and_model,get_dataloader_and
 # utils
 from ppsplit.utils import concat_weights, create_dir, load_json, save_json
 
-# defense:
+# defense
 from ppsplit.defense.obfuscation.scheduler import Scheduler
 
 
 # %%
-config = load_json('./config/nopeek.json')
-# config = load_json('./config/shredder.json')
+# config = load_json('./config/nopeek.json')
+config = load_json('./config/shredder.json')
 # config = load_json('./config/cloak.json')
 # config = load_json('./config/uniform_noise.json')
 
@@ -43,7 +43,7 @@ parser.add_argument('--test_num', type=str, default='nopeek', help='test_num')
 parser.add_argument('--device', type=str, default="cuda:0", help='device')
 parser.add_argument('--dataset', type=str, default="CIFAR10", help='dataset') # 'bank', 'credit', 'purchase', 'Iris',
 parser.add_argument('--oneData_bs', type=int, default=1, help='oneData_bs')
-parser.add_argument('--train_bs', type=int, default=32, help='train_bs')
+parser.add_argument('--train_bs', type=int, default=128, help='train_bs')
 parser.add_argument('--test_bs', type=int, default=64, help='test_bs')
 parser.add_argument('--model', type=str, default="ResNet18", help='model')  # 'ResNet18',' VGG5'
 parser.add_argument('--split_layer', type=int, default=2, help='split_layer')
