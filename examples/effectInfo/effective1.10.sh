@@ -240,11 +240,6 @@
 # nohup python -u effectInfo1.10.py --device cuda:0 --dataset CIFAR10 --model VGG5 --split_layer 4 --ep -2   > ../../results/20240702-effectiveInfo/VGG5/effectiveInfo1.10/nopeek/pool4-layer4-gpu.log 2>&1 &
 # nohup python -u effectInfo1.10.py --device cuda:0 --dataset CIFAR10 --model VGG5 --split_layer 5 --ep -2  --no_dense > ../../results/20240702-effectiveInfo/VGG5/effectiveInfo1.10/nopeek/pool4-layer5-gpu.log 2>&1 &
 # nohup python -u effectInfo1.10.py --device cuda:0 --dataset CIFAR10 --model VGG5 --split_layer 6 --ep -2  --no_dense > ../../results/20240702-effectiveInfo/VGG5/effectiveInfo1.10/nopeek/pool4-layer6-gpu.log 2>&1 &
-# [7] 2745061
-# [8] 2751998
-# [9] 2751999
-# [10] 2752000
-# [11] 2752001
 
 
 # VGG9 cifar10 nopeek
@@ -255,6 +250,8 @@
 # nohup python -u effectInfo1.10.py --device cuda:1 --dataset CIFAR10 --model VGG9 --split_layer 5 --ep -2   > ../../results/20240702-effectiveInfo/VGG9/effectiveInfo1.10/nopeek/pool4-layer5-gpu.log 2>&1 &
 # nohup python -u effectInfo1.10.py --device cuda:1 --dataset CIFAR10 --model VGG9 --split_layer 6 --ep -2   > ../../results/20240702-effectiveInfo/VGG9/effectiveInfo1.10/nopeek/pool4-layer6-gpu.log 2>&1 &
 # nohup python -u effectInfo1.10.py --device cuda:1 --dataset CIFAR10 --model VGG9 --split_layer 7 --ep -2   > ../../results/20240702-effectiveInfo/VGG9/effectiveInfo1.10/nopeek/pool4-layer7-gpu.log 2>&1 &
+
+
 
 # [1] 2916462
 # [2] 2916463
@@ -280,3 +277,48 @@
 # [13] 2920236
 # [14] 2920237
 
+
+
+# VGG5 CIFAR10 shredder
+nohup python -u effectInfo1.10.py --device cuda:1 --dataset CIFAR10 --model VGG5 --split_layer 0 --ep -2 > ../../results/20240702-effectiveInfo/VGG5/effectiveInfo1.10/shredder/pool4-layer0-gpu.log 2>&1 &
+nohup python -u effectInfo1.10.py --device cuda:1 --dataset CIFAR10 --model VGG5 --split_layer 1 --ep -2   > ../../results/20240702-effectiveInfo/VGG5/effectiveInfo1.10/shredder/pool4-layer1-gpu.log 2>&1 &
+nohup python -u effectInfo1.10.py --device cuda:1 --dataset CIFAR10 --model VGG5 --split_layer 2 --ep -2   > ../../results/20240702-effectiveInfo/VGG5/effectiveInfo1.10/shredder/pool4-layer2-gpu.log 2>&1 &
+nohup python -u effectInfo1.10.py --device cuda:1 --dataset CIFAR10 --model VGG5 --split_layer 3 --ep -2   > ../../results/20240702-effectiveInfo/VGG5/effectiveInfo1.10/shredder/pool4-layer3-gpu.log 2>&1 &
+nohup python -u effectInfo1.10.py --device cuda:1 --dataset CIFAR10 --model VGG5 --split_layer 4 --ep -2   > ../../results/20240702-effectiveInfo/VGG5/effectiveInfo1.10/shredder/pool4-layer4-gpu.log 2>&1 &
+# [1] 2926382
+# [2] 2926383
+# [4] 2926384
+# [5] 2926386
+# [6] 2926387
+
+
+# VGG9 cifar10 shredder
+nohup python -u effectInfo1.10.py --device cuda:1 --dataset CIFAR10 --model VGG9 --split_layer 1 --ep -2 > ../../results/20240702-effectiveInfo/VGG9/effectiveInfo1.10/shredder/pool4-layer1-gpu.log 2>&1 &
+nohup python -u effectInfo1.10.py --device cuda:1 --dataset CIFAR10 --model VGG9 --split_layer 2 --ep -2   > ../../results/20240702-effectiveInfo/VGG9/effectiveInfo1.10/shredder/pool4-layer2-gpu.log 2>&1 &
+nohup python -u effectInfo1.10.py --device cuda:1 --dataset CIFAR10 --model VGG9 --split_layer 3 --ep -2   > ../../results/20240702-effectiveInfo/VGG9/effectiveInfo1.10/shredder/pool4-layer3-gpu.log 2>&1 &
+nohup python -u effectInfo1.10.py --device cuda:1 --dataset CIFAR10 --model VGG9 --split_layer 4 --ep -2   > ../../results/20240702-effectiveInfo/VGG9/effectiveInfo1.10/shredder/pool4-layer4-gpu.log 2>&1 &
+nohup python -u effectInfo1.10.py --device cuda:1 --dataset CIFAR10 --model VGG9 --split_layer 5 --ep -2   > ../../results/20240702-effectiveInfo/VGG9/effectiveInfo1.10/shredder/pool4-layer5-gpu.log 2>&1 &
+nohup python -u effectInfo1.10.py --device cuda:1 --dataset CIFAR10 --model VGG9 --split_layer 6 --ep -2   > ../../results/20240702-effectiveInfo/VGG9/effectiveInfo1.10/shredder/pool4-layer6-gpu.log 2>&1 &
+nohup python -u effectInfo1.10.py --device cuda:1 --dataset CIFAR10 --model VGG9 --split_layer 7 --ep -2   > ../../results/20240702-effectiveInfo/VGG9/effectiveInfo1.10/shredder/pool4-layer7-gpu.log 2>&1 &
+# [1] 2935155
+# [2] 2935156
+# [3] 2935157
+# [4] 2935158
+# [5] 2935159
+# [6] 2935160
+# [7] 2935161
+
+
+# ResNet18 cifar10 shredder
+nohup python -u effectInfo1.10.py --device cuda:0 --dataset CIFAR10 --model ResNet18 --split_layer 2 --ep -2 > ../../results/20240702-effectiveInfo/ResNet18/effectiveInfo1.10/shredder/pool4-layer2-gpu.log 2>&1 &
+nohup python -u effectInfo1.10.py --device cuda:0 --dataset CIFAR10 --model ResNet18 --split_layer 3 --ep -2   > ../../results/20240702-effectiveInfo/ResNet18/effectiveInfo1.10/shredder/pool4-layer3-gpu.log 2>&1 &
+nohup python -u effectInfo1.10.py --device cuda:0 --dataset CIFAR10 --model ResNet18 --split_layer 5 --ep -2   > ../../results/20240702-effectiveInfo/ResNet18/effectiveInfo1.10/shredder/pool4-layer5-gpu.log 2>&1 &
+nohup python -u effectInfo1.10.py --device cuda:0 --dataset CIFAR10 --model ResNet18 --split_layer 7 --ep -2   > ../../results/20240702-effectiveInfo/ResNet18/effectiveInfo1.10/shredder/pool4-layer7-gpu.log 2>&1 &
+nohup python -u effectInfo1.10.py --device cuda:0 --dataset CIFAR10 --model ResNet18 --split_layer 9 --ep -2   > ../../results/20240702-effectiveInfo/ResNet18/effectiveInfo1.10/shredder/pool4-layer9-gpu.log 2>&1 &
+nohup python -u effectInfo1.10.py --device cuda:0 --dataset CIFAR10 --model ResNet18 --split_layer 11 --ep -2   > ../../results/20240702-effectiveInfo/ResNet18/effectiveInfo1.10/shredder/pool4-layer11-gpu.log 2>&1 &
+# [8] 2938836
+# [9] 2938837
+# [10] 2938838
+# [11] 2938839
+# [12] 2938840
+# [13] 2938841

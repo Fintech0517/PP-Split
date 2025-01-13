@@ -204,8 +204,14 @@ def get_models(args):
             if ep==-1: # vgg5 (20ep)
                 unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ImageClassification/VGG5/BN+Tanh/VGG5-params-20ep.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
             elif ep ==-2: # defensed
-                unit_net_route = f'/home/dengruijun/data/FinTech/PP-Split/results/20241228-defense/VGG5/nopeek/layer{split_layer}/unit_net_defensed.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
-                results_dir  = f"../../results/{result_ws}/VGG5/{test_num}/nopeek/"
+                # nopeek
+                # unit_net_route = f'/home/dengruijun/data/FinTech/PP-Split/results/20241228-defense/VGG5/nopeek/layer{split_layer}/unit_net_defensed.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+                # results_dir  = f"../../results/{result_ws}/VGG5/{test_num}/nopeek/"
+
+                # shredder
+                unit_net_route = f'/home/dengruijun/data/FinTech/PP-Split/results/20241228-defense/VGG5/shredder/layer{split_layer}/unit_net_defensed.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+                results_dir  = f"../../results/{result_ws}/VGG5/{test_num}/shredder/"
+
             else: # 0ep
                 unit_net_route = f'/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ImageClassification/VGG5/CIFAR10/VGG5-CIFAR10-{ep}epoch.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
                 results_dir  = f"../../results/{result_ws}/VGG5/VGG5_{ep}ep/{test_num}/"
@@ -247,8 +253,13 @@ def get_models(args):
                 unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ImageClassification/VGG9/CIFAR10/VGG9-CIFAR10-20ep.pth' # VGG9-BN+Tanh # 存储的是模型参数，不包括模型结构
                 results_dir  = f"../../results/{result_ws}/VGG9/{test_num}/"
             elif ep==-2:
+                # nopeek
                 unit_net_route = f'/home/dengruijun/data/FinTech/PP-Split/results/20241228-defense/VGG9/nopeek/layer{split_layer}/unit_net_defensed.pth' # VGG9-BN+Tanh # 存储的是模型参数，不包括模型结构
                 results_dir  = f"../../results/{result_ws}/VGG9/{test_num}/nopeek/"
+
+                # shredder
+                unit_net_route = f'/home/dengruijun/data/FinTech/PP-Split/results/20241228-defense/VGG9/shredder/layer{split_layer}/unit_net_defensed.pth' # VGG9-BN+Tanh # 存储的是模型参数，不包括模型结构
+                results_dir  = f"../../results/{result_ws}/VGG9/{test_num}/shredder/"
             else:
                 # 0ep
                 unit_net_route = f'/home/dengruijun/data/FinTech/PP-Split/results/trained_models/ImageClassification/VGG9/CIFAR10/VGG9-CIFAR10-20epoch.pth-{ep}.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
@@ -308,8 +319,13 @@ def get_models(args):
                 # results_dir  = f"../../results/{result_ws}/ResNet18/ResNet18_20ep_wide/{test_num}/"
                 # results_dir  = f"../../results/{result_ws}/ResNet18/ResNet18_20ep_2narrow/{test_num}/"
             elif ep == -2:
-                unit_net_route = f'/home/dengruijun/data/FinTech/PP-Split/results/20241228-defense/ResNet18/nopeek/layer{split_layer}/unit_net_defensed.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
-                results_dir  = f"../../results/{result_ws}/ResNet18/{test_num}/nopeek/"
+                # nopeek
+                # unit_net_route = f'/home/dengruijun/data/FinTech/PP-Split/results/20241228-defense/ResNet18/nopeek/layer{split_layer}/unit_net_defensed.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+                # results_dir  = f"../../results/{result_ws}/ResNet18/{test_num}/nopeek/"
+
+                # shredder
+                unit_net_route = f'/home/dengruijun/data/FinTech/PP-Split/results/20241228-defense/ResNet18/shredder/layer{split_layer}/unit_net_defensed.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
+                results_dir  = f"../../results/{result_ws}/ResNet18/{test_num}/shredder/"
             else: # TODO:
                 pass
 
