@@ -17,7 +17,7 @@ import pandas as pd
 from torch.utils.data import Dataset
 torch.multiprocessing.set_sharing_strategy('file_system')
 
-from ...utils.similarity_metrics import SimilarityMetrics
+from ...metrics.similarity_metrics import SimilarityMetrics
 import torchvision
 import time
 

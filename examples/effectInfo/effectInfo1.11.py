@@ -1,5 +1,6 @@
 # %% [markdown]
 # # 1. 基础设置
+# 这里面，只用fisher information那部分 ，ICML的条件熵定义
 
 # %%
 '''
@@ -51,7 +52,7 @@ parser.add_argument('--test_bs', type=int, default=500, help='test_bs')
 parser.add_argument('--train_bs', type=int, default=1, help='train_bs')
 parser.add_argument('--noise_scale', type=float, default=0, help='noise_scale')
 parser.add_argument('--split_layer', type=int, default=2, help='split_layer')
-parser.add_argument('--test_num', type=str, default='effectiveInfo1.10', help='test_num')
+parser.add_argument('--test_num', type=str, default='effectiveInfo1.11', help='test_num')
 parser.add_argument('--no_dense', action='store_true', help='no_dense')
 parser.add_argument('--ep', type=int, help='epochs', default=-1)
 parser.add_argument('--no_pool', action='store_true', help='no_pool', default=False)
@@ -376,8 +377,9 @@ for j, data in enumerate(tqdm.tqdm(testloader)): # 对testloader遍历
             image_dimension = images[0].numel()
 
         # ITE
-        effectEntro = Shannon_quantity(images)
-        print("effectEntro_ite: ",effectEntro)
+        # effectEntro = Shannon_quantity(images)
+        # print("effectEntro_ite: ",effectEntro)
+        effectEntro=0.0
 
         # effect fisher
             # inference
@@ -406,6 +408,7 @@ for j, data in enumerate(tqdm.tqdm(testloader)): # 对testloader遍历
         print('effectUniform_interval: ',effectUniform_interval)
         # print("inverse_dFIL: ",inverse_dFIL)
 
+# TODO:effect Fisher只是在一个batch上的
 avg_effectInfo = sum(effecInfo_same_layer_list)/len(effecInfo_same_layer_list)
 avg_d_effectInfo = avg_effectInfo/image_dimension
 print(f"Layer {args['split_layer']} effecInfo: {avg_effectInfo}") # 在多个batch上再求平均，这里有点问题。

@@ -354,8 +354,8 @@ def _vision_transformer(
     #     assert weights.meta["min_size"][0] == weights.meta["min_size"][1]
     #     _ovewrite_named_param(kwargs, "image_size", weights.meta["min_size"][0])
     # image_size = kwargs.pop("image_size", 224) # imagenet的size
-    # image_size = kwargs.pop("image_size", 32) # imagenet的size
-    image_size = kwargs.pop("image_size", 8) # imagenet的size
+    image_size = kwargs.pop("image_size", 32) # imagenet的size
+    # image_size = kwargs.pop("image_size", 8) # imagenet的size
 
     model = VisionTransformer(
         image_size=image_size,
@@ -394,7 +394,8 @@ def vit_b_16(*, weights= None, **kwargs: Any) -> VisionTransformer:
     # weights = ViT_B_16_Weights.verify(weights)
 
     return _vision_transformer(
-        patch_size=8, # 16 -> 8 
+        # patch_size=8, # 16 -> 8 
+        patch_size=16, # 16 -> 8 
         num_layers=12,
         num_heads=12,
         hidden_dim=768,

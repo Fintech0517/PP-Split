@@ -2,7 +2,7 @@
 import sys
 sys.path.append('/home/dengruijun/data/FinTech/PP-Split/')
 from ppsplit.attacks.model_inversion.inverse_model import InverseModelAttack
-from ppsplit.utils.utils import create_dir
+from ppsplit.utils import create_dir
 import torch
 import os
 

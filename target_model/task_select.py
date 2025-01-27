@@ -33,18 +33,20 @@ from torch.utils.data import DataLoader, Dataset
 def get_infotopo_para(args):
     # 提取参数
     dataset = args['dataset']
+    no_pool = args['no_pool']
+    print(f"no_pool: {no_pool}")
     # dataset,train_bs,test_bs,oneData_bs=args['dataset'],args['train_bs'],args['test_bs'],args['oneData_bs']
     # 加载模型和数据集，并从unit模型中切割出client_model
 
     if dataset=='CIFAR10':
         nb_of_values=36 # nb_of_values-1=bins?
-        conv = True
-        # conv = False
+        # conv = True
+        conv = False
         pool_size = 4
     elif dataset=='CIFAR100': # 和cifar10一样的
         nb_of_values=36 # nb_of_values-1=bins?
-        # conv = True
-        conv = False
+        conv = True
+        # conv = False
         pool_size = 4
     elif dataset=='credit':
         pass
@@ -67,7 +69,11 @@ def get_infotopo_para(args):
     else:
         raise ValueError('dataset error')
     
-    
+    # 调整avgpooling
+    if no_pool:
+        print("no pooling")
+        conv = False
+        pool_size = -1
     
     # msg
     msg = {}
@@ -510,6 +516,7 @@ def get_models(args):
                 decoder_net = InversionNet(split_layer=split_layer)        
 
         elif model == 'ViTb_16':
+            # cifar10 avgpool4d 配上的patchsize是8
             # 超参数
             split_layer = 3 if split_layer==-1 else split_layer # 定成3吧？
 
@@ -765,8 +772,14 @@ def get_models(args):
     msg['results_dir'] = results_dir
     msg['decoder_net'] = decoder_net
     msg['decoder_route'] = decoder_route
-    msg['server_net'] = server_net # TODO:还有很多模型没有这个
-    msg['unit_net'] = unit_net # TODO:还有很多模型没有这个
+    # msg['server_net'] = server_net # TODO:还有很多模型没有这个
+    # msg['unit_net'] = unit_net # TODO:还有很多模型没有这个
+    try:
+        msg['server_net'] = server_net  # 尝试访问 server_net
+        msg['unit_net'] = unit_net
+    except NameError:
+        msg['server_net'] = None  
+        msg['unit_net'] = None  # 如果 server_net 未定义，捕获异常并赋值 None
 
     print('unit_net_route:',unit_net_route)
 
