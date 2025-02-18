@@ -39,17 +39,16 @@
 # Purchase100
 nohup python -u effectInfo1.11.py --device cuda:0 --dataset purchase --split_layer 0 --no_pool  > ../../results/20240702-effectiveInfo/Purchase/effectiveInfo1.11/effectInfo1.11-layer0-gpu.log 2>&1 &
 nohup python -u effectInfo1.11.py --device cuda:0 --dataset purchase --split_layer 1 --no_pool  > ../../results/20240702-effectiveInfo/Purchase/effectiveInfo1.11/effectInfo1.11-layer1-gpu.log 2>&1 &
-nohup python -u effectInfo1.11.py --device cuda:0 --dataset purchase --split_layer 3 --no_pool  > ../../results/20240702-effectiveInfo/Purchase/effectiveInfo1.11/effectInfo1.11-layer3-gpu.log 2>&1 &
+# nohup python -u effectInfo1.11.py --device cuda:0 --dataset purchase --split_layer 3 --no_pool  > ../../results/20240702-effectiveInfo/Purchase/effectiveInfo1.11/effectInfo1.11-layer3-gpu.log 2>&1 &
 nohup python -u effectInfo1.11.py --device cuda:1 --dataset purchase --split_layer 5 --no_pool  > ../../results/20240702-effectiveInfo/Purchase/effectiveInfo1.11/effectInfo1.11-layer5-gpu.log 2>&1 &
 nohup python -u effectInfo1.11.py --device cuda:1 --dataset purchase --split_layer 7 --no_pool  > ../../results/20240702-effectiveInfo/Purchase/effectiveInfo1.11/effectInfo1.11-layer7-gpu.log 2>&1 &
 nohup python -u effectInfo1.11.py --device cuda:1 --dataset purchase --split_layer 8 --no_pool  > ../../results/20240702-effectiveInfo/Purchase/effectiveInfo1.11/effectInfo1.11-layer8-gpu.log 2>&1 &
-[1] 3425683
-[2] 3425684
-[3] 3425685
-[4] 3425686
-[5] 3425687
-[6] 3425688
 
+# [1] 3487818
+# [2] 3487819
+# [3] 3487820
+# [4] 3487821
+# [5] 3487822
 
 # Iris
 # nohup python -u effectInfo1.11.py --device cuda:0 --dataset Iris --split_layer 3  > ../../results/20240702-effectiveInfo/Purchase/effectiveInfo1.11/effectInfo1.11-layer3-gpu.log 2>&1 &

@@ -145,7 +145,7 @@ def get_dataloader(args):
         # 数据集加载
         trainloader,testloader = preprocess_Iris(batch_size = train_bs, test_bs=test_bs) # 只针对train data，testbs = 1
         tab_info=tabinfo_Iris
-        data_type=1
+        data_type=0
     elif dataset=='purchase':
         # 超参数
         testset_len = 39465 # test len
@@ -155,7 +155,7 @@ def get_dataloader(args):
         tab_info=tabinfo_purchase
 
         data_interval = (0.0,1.0) # [0,1]
-        data_type=1
+        data_type=0
     elif dataset=='MNIST':
         # 超参数
         testset_len = 10000
@@ -734,7 +734,7 @@ def get_models(args):
         # test_num = 1 # 试验序号
         testset_len = 39465 # test len
         # split_layer_list = [0,1,2,3,4,5,6,7,8]
-        split_layer = 3
+        # split_layer = 3
 
         # 关键路径
         unit_net_route = '/home/dengruijun/data/FinTech/PP-Split/results/trained_models/TableClassification/Purchase100/Purchase_bestmodel_param.pth'

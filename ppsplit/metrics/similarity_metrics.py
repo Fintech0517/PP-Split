@@ -22,8 +22,8 @@ class SimilarityMetrics():
 
         # 5种相似度计算方法
         self.cosine_similarity = torch.nn.CosineSimilarity(dim=1, eps=1e-6)
-        self.euclidean_distance = torch.nn.PairwiseDistance(p=2,eps=1e-6,keepdim=False)
-        self.mse_loss = nn.MSELoss()
+        self.euclidean_distance = torch.nn.PairwiseDistance(p=2,eps=1e-6,keepdim=False) # 输出的是一个数组，单行一个值
+        self.mse_loss = nn.MSELoss() # default reduction='mean'
         self.ssim = self.ssim_metric
         self.accuracy = self._accuracy
         self.rebuild_acc = self._tabRebuildAcc
@@ -126,7 +126,7 @@ class SimilarityMetrics():
             for item in onehot_index: # 遍历keys 是看对应的idex是否一致
                 origin = torch.argmax(originData[:, onehot_index[item]], dim=1) # 提取几列，找到 argmax的
                 rebuild = torch.argmax(rebuildData[:, onehot_index[item]], dim=1) # 提取几列
-
+ 
                 onehotsuccessnum += torch.eq(origin, rebuild).sum().item()
 
             onehot_acc = onehotsuccessnum/(len(onehot_index) * rebuildData.shape[0])
