@@ -1,0 +1,19 @@
+{
+    "arl_config":{
+        "alpha": 0.99, 
+        "dset": "utkface", 
+        "noise_reg": 1, "sigma": 0.01,
+        "siamese_reg": 1, "margin": 25, "lambda": 1.0,
+        "tag": "gender",
+        "device": "cuda:0",
+        "epoch":50
+    },
+    "eval_config" : {
+        "epsilon": 5, 
+        "delta": 0.1, 
+        "radius": 0.2,  
+        "eval_size": 100, 
+        "proposed_bound": 0.84, 
+        "max_upper_bound": 2 
+    }
+}

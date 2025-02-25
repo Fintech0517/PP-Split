@@ -4,7 +4,7 @@ import torch.nn as nn
 import copy
 import numpy as np
 import numbers
-import lipmip.utilities as utils
+from . import utilities as utils
 
 
 class Domain:

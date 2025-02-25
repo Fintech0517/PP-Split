@@ -1,8 +1,8 @@
 """ Techniques to compute preactivation bounds for piecewise linear nets"""
 
-from lipmip.relu_nets import ReLUNet
-from lipmip.hyperbox import Hyperbox
-import lipmip.utilities as utils
+from .relu_nets import ReLUNet
+from .hyperbox import Hyperbox
+from . import utilities as utils
 import torch
 import numpy as np
 import torch.nn as nn

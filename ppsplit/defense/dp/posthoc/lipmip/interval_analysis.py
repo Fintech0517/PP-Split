@@ -1,8 +1,8 @@
 """ Techniques to pass domains through the operation of a neural net """
 import numpy as np
-from lipmip.hyperbox import Hyperbox, BooleanHyperbox
-from lipmip.l1_balls import L1Ball
-import lipmip.utilities as utils 
+from .hyperbox import Hyperbox, BooleanHyperbox
+from .l1_balls import L1Ball
+from . import utilities as utils 
 import gurobipy as gb
 
 

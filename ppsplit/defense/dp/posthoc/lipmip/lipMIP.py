@@ -2,13 +2,13 @@
 
 import numpy as np
 import gurobipy as gb
-import lipmip.utilities as utils
-from lipmip.hyperbox import Hyperbox, LinfBallFactory, Domain
-from lipmip.pre_activation_bounds import PreactivationBounds
+from . import utilities as utils
+from .hyperbox import Hyperbox, LinfBallFactory, Domain
+from .pre_activation_bounds import PreactivationBounds
 import time
 import pprint
 import re
-from lipmip.interval_analysis import HBoxIA
+from .interval_analysis import HBoxIA
 import torch.nn as nn
 """
 

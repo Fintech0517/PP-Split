@@ -3,14 +3,14 @@ import time
 import numpy as np
 import torch
 import random
-from lipmip.hyperbox import Hyperbox
-from lipmip.lipMIP import LipMIP
+from .lipmip.hyperbox import Hyperbox
+from .lipmip.lipMIP import LipMIP
 # from embedding import get_dataloader
 from torch.distributions import Laplace
-from adversarial_training import ARL
+from .adversarial_training import ARL
 
 import matplotlib.pyplot as plt
-
+import os
 
 
 seed = 2
@@ -19,30 +19,60 @@ random.seed(seed)
 np.random.seed(seed)
 
 class PosthocDefense():
-    def __init__(self, config) -> None:
+    def __init__(self, config,
+                train_loader = None, 
+                test_loader = None, 
+                client_net = None, 
+                server_net = None,
+                decoder_net = None,
+                results_dir = None,
+                device = None,
+                 ) -> None:
         arl_config = config["arl_config"]
         eval_config = config["eval_config"]
 
-        self.arl_obj = ARL(arl_config, client_net, server_net, decoder_net, train_loader, test_loader)
+        self.arl_obj = ARL(arl_config, client_net, server_net, decoder_net, 
+                           train_loader, test_loader,
+                           device, results_dir)
 
-        self.evaluation = Evaluation(self.arl_obj, eval_config)
-        self.evaluation.create_logger(eval_config)
+        self.eval = Evaluation(self.arl_obj, eval_config,
+                                      train_loader, test_loader,
+                                      results_dir,
+                                      device,
+                                      )
+        self.eval.create_logger(eval_config)
 
-        eval.logger.info(arl_config)
-        eval.logger.info(eval_config)
+        self.eval.logger.info(arl_config)
+        self.eval.logger.info(eval_config)
 
-    def defense_train():
-        mean_lc, std_lc = eval.test_local_sens()
-        eval.proposed_bound = mean_lc + 3*std_lc
-        return eval.proposed_bound
+    def train_ARL(self, train_loader, test_loader):
+        if not os.path.isfile(self.arl_obj.adv_path): # 如果没有训练decoder
+            # 训练decoder
+            self.arl_obj.setup_path()
+            print("starting training ARL")
+            self.arl_obj.train()
+            
+        else:
+            print("Load decoder model from:",self.arl_obj.adv_path)
+        print(self.arl_obj.adv_model)
 
-    def defense_test():
-        eval.test_ptr()
+    def defense_train(self):
+        mean_lc, std_lc = self.eval.test_local_sens()
+        self.eval.proposed_bound = mean_lc + 3*std_lc
+        return self.eval.proposed_bound
+
+    def defense_test(self):
+        self.eval.test_ptr()
         return
 
 
 class Evaluation():
-    def __init__(self, arl_obj: ARL, config, train_loader, test_loader) -> None:
+    def __init__(self, arl_obj: ARL, config, 
+                 train_loader, test_loader,
+                 results_dir,
+                 device,
+                 ) -> None:
+
         # main函数中输入的几个参数
         self.epsilon = config["epsilon"]
         self.delta = config["delta"]
@@ -59,11 +89,9 @@ class Evaluation():
         self.out_domain = 'l1Ball1'
 
         # 数据集和模型初步操作 和 路径设置
-        self.dset = arl_obj.dset
         self.train_loader, self.test_loader = train_loader, test_loader
-        # self.setup_data()
-        self.arl_obj.on_cpu() # move the models to cpu
-        self.base_dir = "../../20241228-defense/Posthoc/experiments/"
+        
+        self.base_dir = results_dir
 
 
     def create_logger(self, arl_config): # log输出
@@ -85,17 +113,13 @@ class Evaluation():
         - 如果满足，添加噪声并进行预测
         - 计算有噪声和无噪声情况下的预测准确率
         '''
-        self.arl_obj.vae.eval()
         self.arl_obj.pred_model.eval()
         sample_size, unanswered_samples = 0, 0
         noisy_pred_correct, noiseless_pred_correct = 0, 0
 
-        for batch_idx, (data, labels, _) in enumerate(self.test_loader): # 对每个batch
+        for batch_idx, (data, labels) in enumerate(self.test_loader): # 对每个batch
             data = data.cuda()
-            # mu, log_var = self.arl_obj.vae.encode(data.view(-1, 784)) # 28*28
-            # 得到原始z
-            mu, log_var = self.arl_obj.vae.encode(data) # utkface
-            center = self.arl_obj.vae.reparametrize(mu, log_var).cpu()
+            center = data.cpu() # 用原始数据作为z # 这样就变成了 ambient space了
 
             lower_bound_s = self.radius
             upper_bound_s = self.max_upper_bound_radius
@@ -110,8 +134,8 @@ class Evaluation():
              
 
             if lip_val > self.proposed_bound: # 得到的lipschitz常数大于提议（前一个test函数算的）的上界
-                rec = self.arl_obj.vae.decode(center[0].unsqueeze(0).cuda()).cpu()
-                plt.imsave("./samples/ptr/{}.png".format(batch_idx), rec[0][0].detach())
+                # rec = self.arl_obj.vae.decode(center[0].unsqueeze(0).cuda()).cpu()
+                plt.imsave("./samples/ptr/{}.png".format(batch_idx), center[0][0].cpu().detach())
                 self.logger.info("bot before starting")
                 unanswered_samples += 1 # 这个样本 敏感度高于lip_val
             else: # 这个样本的lip_val小于提议的上界
@@ -176,17 +200,15 @@ class Evaluation():
         - 评估模型性能
         - 返回Lipschitz常数的均值和标准差
         '''
-        self.arl_obj.vae.eval()
         self.arl_obj.pred_model.eval()
         sample_size, lip_vals = 0, []
         noisy_pred_correct, noiseless_pred_correct = 0, 0
 
-        for batch_idx, (data, labels, _) in enumerate(self.train_loader): # 对每个batch
+        for batch_idx, (data, labels) in enumerate(self.train_loader): # 对每个batch
             data = data.cuda()
             # get sample embedding from the VAE
-            mu, log_var = self.arl_obj.vae.encode(data)#data.view(-1, 784))
-            center = self.arl_obj.vae.reparametrize(mu, log_var).cpu() # 原始的z
-
+            center = data.cpu() # 用原始数据作为z
+            
             # We are using the first example for Lip estimation
             # 选第一个样本计算lipschitz常数
             simple_domain = Hyperbox.build_linf_ball(center[0], self.radius) # 邻域

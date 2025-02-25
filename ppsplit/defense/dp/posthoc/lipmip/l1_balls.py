@@ -1,8 +1,8 @@
 import numpy as np
 import torch
 import torch.nn as nn
-from lipmip.hyperbox import Domain
-import lipmip.utilities as utils
+from .hyperbox import Domain
+from .import utilities as utils
 
 
 class L1BallFactory(Domain):

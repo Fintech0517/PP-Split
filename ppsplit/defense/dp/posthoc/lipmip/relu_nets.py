@@ -8,7 +8,7 @@ import torch.nn.functional as F
 import numpy as np
 from collections import OrderedDict
 import matplotlib.pyplot as plt 
-import lipmip.utilities as utils
+from . import utilities as utils
 import gurobipy as gb
 import copy
 
