@@ -60,7 +60,6 @@ args_python = parser.parse_args()
 args = vars(args_python)
 
 
-
 # args = {
 #         'device':torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
 #         # 'device':torch.device("cpu"),
@@ -84,7 +83,6 @@ args = vars(args_python)
 #         }
 # print(args['device'])
 print(args)
-
 
 
 # %%
@@ -244,8 +242,6 @@ def computing_diag_det_with_outputs(model, inputs, outputs, sigmas=1.0): # sigma
 
 # %%
 # Effect uniform
-import numpy as np
-import torch
 def calculate_effect_normalize(input_vector,interval=(-1.0,1.0)):
     interval_len = interval[1] - interval[0]
     # 确定每个维度的取值范围
@@ -287,7 +283,6 @@ def calculate_effect_normalize_hetero_batch(inputs, interval=(1.0,-1.0)):
 # %%
 # effect entropy 计算函数
 import math
-import numpy as np
 def shannon_entropy_pyent(time_series): # 这个甚至不适合连续值吧
     """Calculate Shannon Entropy of the sample data.
 
