@@ -13,6 +13,7 @@ from .linear_correlation import LinearCorrelation
 from .cloak import Cloak
 from .shredder import Shredder
 from .aioi import AIOI
+from .complex_nn import ComplexNN
 
 # 攻击算法
 from .supervised_decoder import SupervisedDecoder
@@ -112,16 +113,16 @@ class Scheduler():
             {config["general"]["model"]}_{config["general"]["split_layer"]}'
         self.wandb = wandb.init(project="defense",
                     name=wandb_name,
-                    dir = config["defense"]['results_dir'],
+                    dir = config["defense"]['results_dir'], # 存储wandb的路径
                     config=config)
 
-        config = config['defense']
-        self.config = config
-        self.config['experiment_type'] = 'defense'
-        self.config['seed'] = config.get('seed') or 1
-        self.config['logits'] = config.get('logits') or 'softmax'
-        self.config['optimizer'] = config.get('optimizer') or 'adam'
-        self.config['loss'] = config.get('loss') or 'cross_entropy'
+        # config = config['defense']
+        self.config = config['defense']
+        # self.config['experiment_type'] = 'defense'
+        self.config["seed"] = config.get("seed") or 1
+        self.config["logits"] = config.get("logits") or "softmax"
+        self.config["optimizer"] = config.get("optimizer") or "adam"
+        self.config["loss"] = config.get("loss") or "cross_entropy"
         self.device = torch.device(config["device"])
 
         # self.wandb = wandb.init(mode="disabled")
@@ -154,28 +155,28 @@ class Scheduler():
         if self.client_model:
             print("client model device:",next(self.client_model.parameters()).device)
 
-        # optimizer
+        # optimizer server端模型的优化直接在这里进行
         if self.config["optimizer"] == "adam":
             self.optimizer = torch.optim.Adam(self.server_model.parameters(), lr=self.config["server"]["lr"], weight_decay = 0.01)
             # self.optimizer = torch.optim.Adam(self.server_model.parameters())
         else:
-            raise NotImplementedError("Unknown optimizer {}".format(config["optimizer"]))
+            raise NotImplementedError("Unknown optimizer {}".format(self.config["optimizer"]))
 
         # loss function
         if self.config["loss"] == "cross_entropy":
             self.loss = torch.nn.CrossEntropyLoss()
         else:
-            raise NotImplementedError("Unknown loss function {}".format(config["loss"]))
+            raise NotImplementedError("Unknown loss function {}".format(self.config["loss"]))
 
         # 处理得到logits的函数
         if self.config["logits"] == "softmax":
             self.prob_fun = torch.nn.Softmax(dim=1)
-        elif config["logits"] == "sigmoid":
+        elif self.config["logits"] == "sigmoid":
             self.prob_fun = torch.nn.Sigmoid(dim=1)
         else:
-            raise NotImplementedError("Unknown logits function {}".format(config["logits"]))
+            raise NotImplementedError("Unknown logits function {}".format(self.config["logits"]))
 
-        # 单纯算法加载
+        # 单纯算法加载，传递给client的config
         algo_config = self.config["client"]
         algo_config["method"] = self.config["method"]
         print("algo_config",algo_config)
@@ -184,15 +185,16 @@ class Scheduler():
 
     def run_job(self):
         # self.utils.logger.log_console("Starting the job")
-        exp_type = self.config["experiment_type"]
-        if exp_type == "challenge":
-            self.run_challenge_job()
-        elif exp_type == "defense": # 应该只会调用这一个。
-            return self.run_defense_job()
-        elif exp_type == "attack":
-            self.run_attack_job()
-        else:
-            print("unknown experiment type")
+        return self.run_defense_job()
+        # exp_type = self.config["experiment_type"]
+        # if exp_type == "challenge":
+        #     self.run_challenge_job()
+        # elif exp_type == "defense": # 应该只会调用这一个。
+        #     return self.run_defense_job()
+        # elif exp_type == "attack":
+        #     self.run_attack_job()
+        # else:
+        #     print("unknown experiment type")
 
     def run_defense_job(self): #防御
         for epoch in range(self.config["total_epochs"]):

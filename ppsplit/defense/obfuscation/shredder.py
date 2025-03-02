@@ -8,7 +8,7 @@ import numbers, math
 
 
 class NoisyActivation(nn.Module):
-    def __init__(self, activation_size):
+    def __init__(self, activation_size): # 根据激活层shape，生成对应的noise
         super(NoisyActivation, self).__init__()
 
         m =torch.distributions.laplace.Laplace(loc = 0.6, scale = 1.2, validate_args=None)
@@ -28,14 +28,12 @@ class Shredder(SimbaDefence):
 
         self.initialize(config)
         
-    def activation_shape(self, model, img_size):
-        img = torch.randn(1, 3, img_size, img_size) # 图像数据的
+    def activation_shape(self, model, img_size): # 获取激活层的shape
+        img = torch.randn(1, 3, img_size, img_size) # 图像数据的，RGB,这里还需要手改
         img = img.to(next(model.parameters()).device)
         patch = model(img)
         # assert patch.shape[2] == patch.shape[3] # 只针对正方形的图片？ 
-        
         return patch.shape[1:]
-    
 
     def initialize(self, config):
         img_size = config["proxy_adversary"]["img_size"]
@@ -72,9 +70,11 @@ class Shredder(SimbaDefence):
         
         return z 
 
+
     def backward(self, grads):
         server_grads = grads
 #         noise_loss = (-1)*self.coeff*(1/(torch.std(self.client_model.module.shredder_noise.noise)))
+
         noise_loss = (-1)*self.coeff*(1/(torch.std(self.shredder_noise.noise)))
 
         noise_loss.backward(retain_graph = True)
@@ -82,9 +82,4 @@ class Shredder(SimbaDefence):
         self.optim.zero_grad()
         self.z.backward(server_grads)
         self.optim.step()
-
-
-
-
-
 

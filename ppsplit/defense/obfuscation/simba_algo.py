@@ -87,22 +87,7 @@ class SimbaDefence(SimbaBase):
 
     def init_client_model(self, client_model):
         self.client_model = client_model
-        # if config["model_name"] == "resnet18":
-        #     model = models.resnet18(pretrained=config["pretrained"])
-        #     model = nn.Sequential(*nn.ModuleList(list(model.children())[:config["split_layer"]]))
-        # else:
-        #     print("can't find client model")
-        #     exit()
 
     def put_on_gpus(self):
         # self.client_model = self.utils.model_on_gpus(self.client_model)
         self.client_model = self.client_model.to(self.device)
-
-
-class SimbaAttack(SimbaBase):
-    def __init__(self):
-        super(SimbaAttack, self).__init__()
-    def eval(self):
-        self.mode = "val"
-        self.model.eval()
-

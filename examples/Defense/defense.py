@@ -1,5 +1,4 @@
 # %% [markdown]
-# 
 
 # %%
 # 导包
@@ -18,7 +17,7 @@ import sys
 sys.path.append('/home/dengruijun/data/FinTech/PP-Split/')
 
 # task select
-from target_model.task_select import get_dataloader_and_model,get_dataloader_and_model, \
+from target_model.task_select import get_dataloader_and_model, \
     get_dataloader,get_models,get_infotopo_para
 
 # utils
@@ -29,8 +28,8 @@ from ppsplit.defense.obfuscation.scheduler import Scheduler
 
 
 # %%
-# config = load_json('./config/nopeek.json')
-config = load_json('./config/shredder.json')
+config = load_json('./config/nopeek.json')
+# config = load_json('./config/shredder.json')
 # config = load_json('./config/cloak.json')
 # config = load_json('./config/uniform_noise.json')
 
@@ -51,51 +50,35 @@ parser.add_argument('--ep', type=int, help='epochs', default=-1)
 parser.add_argument('--no_dense', action='store_true', help='no_dense')
 parser.add_argument('--noise_scale', type=float, default=0, help='noise_scale')
 
-args_python = parser.parse_args()
-args_python = vars(args_python)
+args = parser.parse_args()
+args = vars(args)
 
 # 更新config中的general
-config['general'] = args_python 
-args = config['general']
+config['general'] = args 
 config['defense']['device']=args['device']
-
 print(config)
-
 
 # %%
 data_msg = get_dataloader(args)
 model_msg = get_models(args)
-infotopo_msg = get_infotopo_para(args)
-msg = {**model_msg,**data_msg,**infotopo_msg}
+msg = {**model_msg,**data_msg}
 
 # 数据集
 one_data_loader,trainloader,testloader = data_msg['one_data_loader'],data_msg['trainloader'], data_msg['testloader']
 data_interval = data_msg['data_interval']
 data_type = msg['data_type']
 
-# effectEntropy Infotopo参数
-nb_of_values = msg['nb_of_values']
-
-conv = msg['conv']
-pool_size = msg['pool_size']
-# conv = False
-print("infotopo: nb_of_values: ",nb_of_values)
-
 # 模型
-client_net,decoder_net = model_msg['client_net'],model_msg['decoder_net']
-server_net,unit_net = model_msg['server_net'], model_msg['unit_net']
-decoder_route = model_msg['decoder_route']
-image_deprocess = model_msg['image_deprocess']
+client_net = msg['client_net']
+server_net,unit_net = msg['server_net'], msg['unit_net']
+image_deprocess = msg['image_deprocess']
 
 # 路径
-results_dir = model_msg['results_dir']
+results_dir = msg['results_dir']
 inverse_dir = results_dir + 'layer' + str(args['split_layer'])+'/'
-# data_type = 1 if args['dataset'] == 'CIFAR10' else 0
 split_layer = args['split_layer']
 
 print('results_dir:', results_dir)
-print('inverse_dir:', inverse_dir)
-print('decoder_route:', decoder_route)
 
 create_dir(inverse_dir)
 
@@ -110,7 +93,7 @@ unit_net = unit_net.to(args['device'])
 config['defense']["results_dir"] = results_dir
 # config["1"] = results_dir
 defense_scheduler = Scheduler(config)
-if config['defense']['method']=='cloak':
+if config['defense']['method']=='cloak': # 如果是cloak，则client_net为None
     client_net = None
     server_net = unit_net
 
@@ -125,11 +108,11 @@ else: # 如果没有client_net，则直接保存server_net
     new_weights_unit = server_net.state_dict()
 
 unit_net.load_state_dict(new_weights_unit)
-torch.save(unit_net.state_dict(), inverse_dir + 'unit_net_defensed.pth')
+torch.save(unit_net.state_dict(), inverse_dir + f'unit_net_defensed.pth')
 
 print("model saved in ",inverse_dir + 'unit_net_defensed.pth')
 
-# %%
+
 
 
 

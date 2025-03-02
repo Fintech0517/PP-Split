@@ -134,8 +134,3 @@ if os.path.exists(save_route):
     df.to_csv(save_route,index=False)
 else:
     pd.DataFrame(data=transpose, columns=[args['split_layer']]).to_csv(save_route,index=False)
-
-
-
-
-

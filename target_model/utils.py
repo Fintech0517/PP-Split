@@ -20,16 +20,17 @@ import torch.backends.cudnn as cudnn
 from torch.utils.data import Dataset, DataLoader
 from sklearn.metrics import roc_auc_score
 import tqdm
+import collections
 
 
 # unit_net, client_net
 def split_weights_client(weights,cweights,no_dense=False):
-    print('unit_net weights: ', weights.keys())
-    print('client_net cweights: ', cweights.keys())
-    print('len unit_net weights: ', len(weights.keys()))
-    print('len client_net cweights: ', len(cweights.keys()))
+    # print('unit_net weights: ', weights.keys())
+    # print('client_net cweights: ', cweights.keys())
+    # print('len unit_net weights: ', len(weights.keys()))
+    # print('len client_net cweights: ', len(cweights.keys()))
     for key in cweights:
-        print(key)
+        # print(key)
         if no_dense and 'dense' in key:
             continue
         else:
@@ -37,10 +38,10 @@ def split_weights_client(weights,cweights,no_dense=False):
     return cweights
 
 def split_weights_server(weights,cweights,sweights):
-    print('unit_net weights: ', weights.keys())
-    print('server_net cweights: ', sweights.keys())
-    print('len unit_net weights: ', len(weights.keys()))
-    print('len server_net cweights: ', len(sweights.keys()))
+    # print('unit_net weights: ', weights.keys())
+    # print('server_net cweights: ', sweights.keys())
+    # print('len unit_net weights: ', len(weights.keys()))
+    # print('len server_net cweights: ', len(sweights.keys()))
     ckeys = list(cweights)
     skeys = list(sweights)
     keys = list(weights)

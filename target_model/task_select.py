@@ -51,12 +51,11 @@ def get_infotopo_para(args):
     if dataset=='CIFAR10':
         nb_of_values=36 # nb_of_values-1=bins?
         # conv = True
-        conv = False
+        conv = True
         pool_size = 4
     elif dataset=='CIFAR100': # 和cifar10一样的
         nb_of_values=36 # nb_of_values-1=bins?
         conv = True
-        # conv = False
         pool_size = 4
     elif dataset=='credit':
         pass
@@ -215,190 +214,105 @@ def get_decoder(args): # 获取DRA中的decoder模型
     device=args['device']
     results_dir=args['result_dir']
     ep = args['ep']
-    test_num = args['test_num']
 
     decoder_route = None
     decoder_net = None
 
+    # test_num = args['test_num']
+    test_num = 'InverseModelAttack'
+    # test_num = 'Gaussian-0.1-50'
+
     # results_dir
-    results_dir  = f"../../results/inverse-model-results-20240414/{model}_{dataset}/{test_num}/"
+    results_dir  = f"/home/dengruijun/data/FinTech/PP-Split/results/inverse-model-results-20240414/{model}_{dataset}/{test_num}/"
     if ep == -1: # 默认的default 20ep
         pass
     elif ep == -2: # defense
-        results_dir  = f"../../results/inverse-model-results-20240414/{model}_{dataset}/{test_num}/shredder/"
-        results_dir  = f"../../results/inverse-model-results-20240414/{model}_{dataset}/{test_num}/nopeek/"
+        results_dir  = f"/home/dengruijun/data/FinTech/PP-Split/results/inverse-model-results-20240414/{model}_{dataset}/{test_num}/shredder/"
+        results_dir  = f"/home/dengruijun/data/FinTech/PP-Split/results/inverse-model-results-20240414/{model}_{dataset}/{test_num}/nopeek/"
     else: # ep>=0
-        results_dir  = f"../../results/inverse-model-results-20240414/{model}_{dataset}/{test_num}/{model}_{ep}ep/"
+        results_dir  = f"/home/dengruijun/data/FinTech/PP-Split/results/inverse-model-results-20240414/{model}_{dataset}/{test_num}/{model}_{ep}ep/"
 
     decoder_route = results_dir + f"/Decoder-layer{split_layer}.pth"
 
     if dataset == 'CIFAR10':
         if model == 'VGG5':
             # decoder net
-            decoder_route = f"/home/dengruijun/data/FinTech/PP-Split/results/inverse-model-results-20240414/VGG5/2/Decoder-layer{split_layer}.pth"
+            # decoder_route = f"/home/dengruijun/data/FinTech/PP-Split/results/inverse-model-results-20240414/VGG5/2/Decoder-layer{split_layer}.pth"
             decoder_net = VGG5Decoder(split_layer=split_layer)
 
-            if os.path.isfile(decoder_route): # 如果已经训练好了
-                print("=> loading decoder model '{}'".format(decoder_route))
-                decoder_net.load_state_dict(torch.load(decoder_route))
-                
-            else: # 如果没有,加载一个
-                print("train decoder model...")
-
         elif model == 'VGG9':
-            
+            # '../../results/inverse-model-results-20240414/VGG5_CIFAR10/InverseModelAttack//Decoder-layer2.pth
+            # /home/dengruijun/data/FinTech/PP-Split/results/inverse-model-results-20240414/VGG5_CIFAR10/InverseModelAttack/Decoder-layer2.pth
             # decoder net
+            decoder_net = VGG5Decoder(split_layer=split_layer,network='VGG9')
             
-            if os.path.isfile(decoder_route): # 如果已经训练好了
-                print("=> loading decoder model '{}'".format(decoder_route))
-                decoder_net = torch.load(decoder_route)
-            else: # 如果没有,加载一个
-                print("train decoder model...")
-                decoder_net = VGG5Decoder(split_layer=split_layer,network='VGG9')
-
         elif model == 'ResNet18':
             
             # decoder net
-            
-            if os.path.isfile(decoder_route): # 如果已经训练好了
-                print("=> loading decoder model '{}'".format(decoder_route))
-                decoder_net = torch.load(decoder_route)
-            else: # 如果没有,加载一个
-                print("train decoder model...")
-                decoder_net = InversionNet(split_layer=split_layer)
+            decoder_net = InversionNet(split_layer=split_layer)
+
         elif model == 'ResNet34':
-            
-            # decoder net
-            if os.path.isfile(decoder_route): # 如果已经训练好了
-                print("=> loading decoder model '{}'".format(decoder_route))
-                decoder_net = torch.load(decoder_route)
-            else: # 如果没有,加载一个
-                print("train decoder model...")
-                decoder_net = InversionNet(split_layer=7) # 手动设定，之后要改的 7 for split point  =10
-            # decoder_net = None
+            decoder_net = InversionNet(split_layer=7) # 手动设定，之后要改的 7 for split point  =10
         
         else:
             raise ValueError('get decoder error')
 
     elif dataset == 'CIFAR100':
         if model =='ResNet18':
-            
-            # decoder net  # 先用cifar10的吧，但估计是错的。
-            if os.path.isfile(decoder_route): # 如果已经训练好了
-                print("=> loading decoder model '{}'".format(decoder_route))
-                decoder_net = torch.load(decoder_route)
-            else: # 如果没有,加载一个
-                print("train decoder model...")
-                decoder_net = InversionNet(split_layer=split_layer)
+            decoder_net = InversionNet(split_layer=split_layer)
+
 
         elif model == 'ResNet34':
+            decoder_net = InversionNet(split_layer=split_layer)
             
-            # decoder net  # 先用cifar10的吧，但估计是错的。
-            if os.path.isfile(decoder_route): # 如果已经训练好了
-                print("=> loading decoder model '{}'".format(decoder_route))
-                decoder_net = torch.load(decoder_route)
-            else: # 如果没有,加载一个
-                print("train decoder model...")
-                decoder_net = InversionNet(split_layer=split_layer)
         elif model == 'ResNet50':
-            
-            # decoder net  # 先用cifar10的吧，但估计是错的。
-            if os.path.isfile(decoder_route): # 如果已经训练好了
-                print("=> loading decoder model '{}'".format(decoder_route))
-                decoder_net = torch.load(decoder_route)
-            else: # 如果没有,加载一个
-                print("train decoder model...")
-                decoder_net = InversionNet(split_layer=split_layer)  
+            decoder_net = InversionNet(split_layer=split_layer)  
+
         elif model == 'ViTb_16':
-            
-            # decoder net
-            if os.path.isfile(decoder_route): # 如果已经训练好了
-                print("=> loading decoder model '{}'".format(decoder_route))
-                decoder_net = torch.load(decoder_route)
-            else: # 如果没有,加载一个
-                print("train decoder model...")
-                decoder_net = None # TODO:
+            decoder_net = None
         else:
             raise ValueError('get decoder error')
         
     elif dataset == 'MNIST':
         if model == 'VGG5':
             
-            # decoder net
-            if os.path.isfile(decoder_route): # 如果已经训练好了
-                print("=> loading decoder model '{}'".format(decoder_route))
-                decoder_net = torch.load(decoder_route)
-            else: # 如果没有,加载一个
-                print("train decoder model...")
-                decoder_net = VGG5Decoder(split_layer=split_layer,network='VGG5_MNIST')
-                # print("decoder_net:",decoder_net)
+            decoder_net = VGG5Decoder(split_layer=split_layer,network='VGG5_MNIST')
+
         elif model == 'VGG9':
-            
-            # decoder net
-            if os.path.isfile(decoder_route): # 如果已经训练好了
-                print("=> loading decoder model '{}'".format(decoder_route))
-                decoder_net = torch.load(decoder_route)
-            else: # 如果没有,加载一个
-                print("train decoder model...")
-                decoder_net = VGG5Decoder(split_layer=split_layer,network='VGG9_MNIST')
+            decoder_net = VGG5Decoder(split_layer=split_layer,network='VGG9_MNIST')
         else:
             raise ValueError('get decoder error')
         
     elif dataset == 'ImageNet1k':
         if model == 'ViTb_16':
-            
-            # decoder net
-            if os.path.isfile(decoder_route): # 如果已经训练好了
-                print("=> loading decoder model '{}'".format(decoder_route))
-                decoder_net = torch.load(decoder_route)
-            else: # 如果没有,加载一个
-                print("train decoder model...")
-                decoder_net = None # TODO:
+            decoder_net = None
 
     elif dataset == 'credit':
-        
-        # decoder net
-        if os.path.isfile(decoder_route): # 如果已经训练好了
-            print("=> loading decoder model '{}'".format(decoder_route))
-            decoder_net = torch.load(decoder_route)
-        else: # 如果没有,加载一个
-            print("train decoder model...")
-            decoder_net = CreditNetDecoder1(split_layer=split_layer)
+        decoder_net = CreditNetDecoder1(split_layer=split_layer)
 
     elif dataset == 'bank':
-        
-
-        # decoder net
-        if os.path.isfile(decoder_route): # 如果已经训练好了
-            print("=> loading decoder model '{}'".format(decoder_route))
-            decoder_net = torch.load(decoder_route)
-        else: # 如果没有,加载一个
-            print("train decoder model...")
-            decoder_net = BankNetDecoder1(split_layer=split_layer)
+        decoder_net = BankNetDecoder1(split_layer=split_layer)
 
     elif dataset == 'purchase':
-        decoder_route = results_dir + f"Decoder-layer{split_layer}.pth"
-        # decoder net
-        if os.path.isfile(decoder_route): # 如果已经训练好了
-            print("=> loading decoder model '{}'".format(decoder_route))
-            decoder_net = torch.load(decoder_route)
-        else: # 如果没有,加载一个
-            print("train decoder model...")
-            decoder_net = PurchaseDecoder1(split_layer=split_layer)
+        decoder_net = PurchaseDecoder1(split_layer=split_layer)
             
     elif dataset == 'Iris':
-        decoder_route = results_dir+f"/Decoder-layer{split_layer}.pth"
-        # decoder net
-        if os.path.isfile(decoder_route): # 如果已经训练好了
-            print("=> loading decoder model '{}'".format(decoder_route))
-            decoder_net = torch.load(decoder_route)
-        else: # 如果没有,加载一个
-            print("train decoder model...")
-            decoder_net = IrisNetDecoder(layer=split_layer)
+        decoder_net = IrisNetDecoder(layer=split_layer)
 
     else:
         raise ValueError('get decoder error')
 
+    # 加载模型参数
+    if os.path.isfile(decoder_route): # 如果已经训练好了
+        print("=> loading decoder model '{}'".format(decoder_route))
+        decoder_net = torch.load(decoder_route)
+        # decoder_net.load_state_dict(torch.load(decoder_route))
+        
+    else: # 如果没有,加载一个
+        print("No trained decoder")
+    
+    # 确定模型在哪个设备上
+    # decoder_net.to(device)
 
     # 返回值
     msg={}
@@ -409,7 +323,7 @@ def get_decoder(args): # 获取DRA中的decoder模型
     print("decoder_route: ", decoder_route)
 
     # 重新保存一下decoder:
-    torch.save(decoder_net.state_dict(),decoder_route)
+    # torch.save(decoder_net.state_dict(),decoder_route)
     return msg
 
 def get_models(args):
@@ -426,17 +340,19 @@ def get_models(args):
     no_dense = args['no_dense'] # 默认为False
     ep = args['ep']
 
+    # results_dir
+    results_dir  = f"/home/dengruijun/data/FinTech/PP-Split/results/{result_ws}/{model}_{dataset}/{test_num}/"
+    if ep == -1: # 默认的default 20ep
+        pass
+    elif ep == -2: # defense
+        results_dir  = f"/home/dengruijun/data/FinTech/PP-Split/results/{result_ws}/{model}_{dataset}/{test_num}/shredder/"
+        results_dir  = f"/home/dengruijun/data/FinTech/PP-Split/results/{result_ws}/{model}_{dataset}/{test_num}/nopeek/"
+    else: # ep>=0
+        results_dir  = f"/home/dengruijun/data/FinTech/PP-Split/results/{result_ws}/{model}_{dataset}/{test_num}/{model}_{ep}ep/"
+
+
     # 加载模型和数据集，并从unit模型中切割出client_model
     if dataset=='CIFAR10':
-        results_dir  = f"../../results/{result_ws}/{model}_{dataset}/{test_num}/"
-        if ep == -1: # 默认的default 20ep
-            pass
-        elif ep == -2: # defense
-            results_dir  = f"../../results/{result_ws}/{model}_{dataset}/{test_num}/shredder/"
-            results_dir  = f"../../results/{result_ws}/{model}_{dataset}/{test_num}/nopeek/"
-        else: # ep>=0
-            results_dir  = f"../../results/{result_ws}/{model}_{dataset}/{test_num}/{model}_{ep}ep/"
-
         if model == 'VGG5':
             # 超参数
             # split_layer_list = list(range(len(model_cfg['VGG5'])))
@@ -509,8 +425,6 @@ def get_models(args):
             server_net.load_state_dict(pweights)
             print('server_net: ', server_net)
 
-
-           
         elif model == 'ResNet18':
             split_layer_list=[2,3,5,7,9,11]
 
@@ -758,8 +672,6 @@ def get_models(args):
             if split_layer < 13:
                 pweights = split_weights_client(pweights, client_net.state_dict())
             client_net.load_state_dict(pweights)
-
-
 
     elif dataset=='credit':
         # 超参数
