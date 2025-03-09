@@ -112,6 +112,7 @@ class FMInfoMetric():
 
             # 计算jacobian
             J = F.jacobian(model, input_i)
+            # print('jacobian done!')
             # J = J.reshape(J.shape[0],outputs.numel(),inputs.numel()) # (batch, out_size, in_size)
             J = J.reshape(output_size, input_size) # (batch, out_size, in_size)
             # print(f"J2.shape: {J.shape}, J2.prod: {torch.prod(torch.tensor(list(J.shape)))}")
@@ -119,17 +120,16 @@ class FMInfoMetric():
             JtJ = torch.matmul(J.t(), J)
             I = 1.0/(sigmas)*JtJ
 
-            # I = JtJ
-            # print("I: ", I)
+            # 下面才开始进行这个diag计算，减少内存消耗
             # diagonal fisher information matrix (approximation)
             I_diagonal = torch.diagonal(I,dim1=0,dim2=1) # vector
             # print("I_diagonal: ",I_diagonal.shape)
 
-            I_diag = torch.diag_embed(I_diagonal) # matrix
+            # I_diag = torch.diag_embed(I_diagonal) # matrix
             # print('drj trace: ',torch.trace(I_diag))
             
             # batch的平均
-            I_diagonal_batch_avg += I_diagonal / (batch_size)
+            # I_diagonal_batch_avg += I_diagonal / (batch_size)
 
             # # 储存I
             # I_np = I.cpu().detach().numpy()
@@ -140,13 +140,16 @@ class FMInfoMetric():
             # w = torch.det(I)
             # print('det I: ', I.det().log())
             
-            try:
-                s,f2 = torch.slogdet(I) # 直接用torch计算
-                if s <= 0:
-                    raise RuntimeError("sign <=0 ")
-                print('f2: ', f2)
-            except RuntimeError as e:
-                print("logdet计算报错")
+            # 直接用logdet计算
+            # try:
+            #     s,f2 = torch.slogdet(I) # 直接用torch计算
+            #     if s <= 0:
+            #         raise RuntimeError("sign <=0 ")
+            #     print('f2: ', f2)
+            # except RuntimeError as e:
+            #     print("logdet计算报错")
+
+
             # f2_1 = torch.logdet(I_diag) # 和后面的是一样的
             f2_2 = torch.sum(torch.log(I_diagonal+1e-10)) # /I_diagonal.numel() # diagonal后计算
 
@@ -159,7 +162,7 @@ class FMInfoMetric():
             # print('f2_1: ', f2_1)
             print('f2_2: ', f2_2)
 
-        f2_2_avg_inner = torch.sum(torch.log(I_diagonal_batch_avg+1e-10)) # 用平均后的diagonal 计算
+        # f2_2_avg_inner = torch.sum(torch.log(I_diagonal_batch_avg+1e-10)) # 用平均后的diagonal 计算
 
         print('f2_avg_outer: ',f2_avg_outer)
         print('f2_2_avg_outer: ',f2_2_avg_outer)

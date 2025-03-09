@@ -10,7 +10,7 @@ import os
 from ppsplit.defense.noise import Noise
 
 # 模型、数据集获取
-from target_model.task_select import get_dataloader_and_model, get_dataloader,get_models
+from target_model.task_select import get_dataloader_and_model, get_dataloader,get_models,get_decoder
 
 
 
@@ -26,7 +26,7 @@ parser.add_argument('--test_bs', type=int, default=1, help='test_bs')
 parser.add_argument('--train_bs', type=int, default=32, help='train_bs')
 parser.add_argument('--noise_scale', type=float, default=0, help='noise_scale')
 parser.add_argument('--split_layer', type=int, default=2, help='split_layer')
-parser.add_argument('--test_num', type=str, default='InverseModelAttack-defense0.1', help='test_num')
+parser.add_argument('--test_num', type=str, default='InverseModelAttack', help='test_num')
 parser.add_argument('--no_dense', action='store_true', help='no_dense')
 parser.add_argument('--ep', type=int, help='epochs', default=-1)
 
@@ -64,18 +64,21 @@ print(args)
 # 获取模型和数据集
 # msg = get_dataloader_and_model(**args)
 
+data_msg = get_dataloader(args)
 model_msg = get_models(args)
+decoder_msg = get_decoder(args)
+msg = {**model_msg,**data_msg,**decoder_msg}
+
 
 # one_data_loader,trainloader,testloader = model_msg['one_data_loader'],model_msg['trainloader'], model_msg['testloader']
-client_net,decoder_net = model_msg['client_net'], model_msg['decoder_net']
-decoder_route = model_msg['decoder_route']
-image_deprocess = model_msg['image_deprocess']
+client_net,decoder_net = msg['client_net'], msg['decoder_net']
+decoder_route = msg['decoder_route']
+image_deprocess = msg['image_deprocess']
 
 
-results_dir = model_msg['results_dir']
+results_dir = msg['results_dir']
 inverse_dir = results_dir + 'layer'+str(args['split_layer'])+'/'
 
-data_msg = get_dataloader(args)
 data_type = data_msg['data_type']
 # data_type = 1 if args['dataset'] in ['CIFAR10','MNIST'] else 0
 

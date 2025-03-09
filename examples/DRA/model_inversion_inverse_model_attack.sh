@@ -92,17 +92,17 @@ nohup python -u model_inversion_inverse_model_attack.py --device cuda:0 --datase
 # nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --dataset CIFAR10 --model VGG5 --split_layer 2  --noise_scale 0.7 --test_num Gaussian-0.7 > ../../results/inverse-model-results-20240414/VGG5/Gaussian-0.2/pool4-layer2-gpu-0.7.log 2>&1 &
 # nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --dataset CIFAR10 --model VGG5 --split_layer 2  --noise_scale 0.8 --test_num Gaussian-0.8 > ../../results/inverse-model-results-20240414/VGG5/Gaussian-0.2/pool4-layer2-gpu-0.8.log 2>&1 &
 # nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --dataset CIFAR10 --model VGG5 --split_layer 2  --noise_scale 0.9 --test_num Gaussian-0.9 > ../../results/inverse-model-results-20240414/VGG5/Gaussian-0.2/pool4-layer2-gpu-0.9.log 2>&1 &
-nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --dataset CIFAR10 --model VGG5 --split_layer 2  --noise_scale 1 --test_num Gaussian-1 > ../../results/inverse-model-results-20240414/VGG5/Gaussian-0.2/pool4-layer2-gpu-1.log 2>&1 &
-nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --dataset CIFAR10 --model VGG5 --split_layer 2  --noise_scale 5 --test_num Gaussian-5 > ../../results/inverse-model-results-20240414/VGG5/Gaussian-0.2/pool4-layer2-gpu-5.log 2>&1 &
-nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --dataset CIFAR10 --model VGG5 --split_layer 2  --noise_scale 10 --test_num Gaussian-10 > ../../results/inverse-model-results-20240414/VGG5/Gaussian-0.2/pool4-layer2-gpu-10.log 2>&1 &
-nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --dataset CIFAR10 --model VGG5 --split_layer 2  --noise_scale 15 --test_num Gaussian-15 > ../../results/inverse-model-results-20240414/VGG5/Gaussian-0.2/pool4-layer2-gpu-15.log 2>&1 &
-nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --dataset CIFAR10 --model VGG5 --split_layer 2  --noise_scale 20 --test_num Gaussian-20 > ../../results/inverse-model-results-20240414/VGG5/Gaussian-0.2/pool4-layer2-gpu-20.log 2>&1 &
-nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --dataset CIFAR10 --model VGG5 --split_layer 2  --noise_scale 25 --test_num Gaussian-25 > ../../results/inverse-model-results-20240414/VGG5/Gaussian-0.2/pool4-layer2-gpu-25.log 2>&1 &
-nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --dataset CIFAR10 --model VGG5 --split_layer 2  --noise_scale 30 --test_num Gaussian-30 > ../../results/inverse-model-results-20240414/VGG5/Gaussian-0.2/pool4-layer2-gpu-30.log 2>&1 &
-nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --dataset CIFAR10 --model VGG5 --split_layer 2  --noise_scale 35 --test_num Gaussian-35 > ../../results/inverse-model-results-20240414/VGG5/Gaussian-0.2/pool4-layer2-gpu-35.log 2>&1 &
-nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --dataset CIFAR10 --model VGG5 --split_layer 2  --noise_scale 40 --test_num Gaussian-40 > ../../results/inverse-model-results-20240414/VGG5/Gaussian-0.2/pool4-layer2-gpu-40.log 2>&1 &
-nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --dataset CIFAR10 --model VGG5 --split_layer 2  --noise_scale 45 --test_num Gaussian-45 > ../../results/inverse-model-results-20240414/VGG5/Gaussian-0.2/pool4-layer2-gpu-45.log 2>&1 &
-nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --dataset CIFAR10 --model VGG5 --split_layer 2  --noise_scale 50 --test_num Gaussian-50 > ../../results/inverse-model-results-20240414/VGG5/Gaussian-0.2/pool4-layer2-gpu-50.log 2>&1 &
+# nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --dataset CIFAR10 --model VGG5 --split_layer 2  --noise_scale 1 --test_num Gaussian-1 > ../../results/inverse-model-results-20240414/VGG5/Gaussian-0.2/pool4-layer2-gpu-1.log 2>&1 &
+# nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --dataset CIFAR10 --model VGG5 --split_layer 2  --noise_scale 5 --test_num Gaussian-5 > ../../results/inverse-model-results-20240414/VGG5/Gaussian-0.2/pool4-layer2-gpu-5.log 2>&1 &
+# nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --dataset CIFAR10 --model VGG5 --split_layer 2  --noise_scale 10 --test_num Gaussian-10 > ../../results/inverse-model-results-20240414/VGG5/Gaussian-0.2/pool4-layer2-gpu-10.log 2>&1 &
+# nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --dataset CIFAR10 --model VGG5 --split_layer 2  --noise_scale 15 --test_num Gaussian-15 > ../../results/inverse-model-results-20240414/VGG5/Gaussian-0.2/pool4-layer2-gpu-15.log 2>&1 &
+# nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --dataset CIFAR10 --model VGG5 --split_layer 2  --noise_scale 20 --test_num Gaussian-20 > ../../results/inverse-model-results-20240414/VGG5/Gaussian-0.2/pool4-layer2-gpu-20.log 2>&1 &
+# nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --dataset CIFAR10 --model VGG5 --split_layer 2  --noise_scale 25 --test_num Gaussian-25 > ../../results/inverse-model-results-20240414/VGG5/Gaussian-0.2/pool4-layer2-gpu-25.log 2>&1 &
+# nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --dataset CIFAR10 --model VGG5 --split_layer 2  --noise_scale 30 --test_num Gaussian-30 > ../../results/inverse-model-results-20240414/VGG5/Gaussian-0.2/pool4-layer2-gpu-30.log 2>&1 &
+# nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --dataset CIFAR10 --model VGG5 --split_layer 2  --noise_scale 35 --test_num Gaussian-35 > ../../results/inverse-model-results-20240414/VGG5/Gaussian-0.2/pool4-layer2-gpu-35.log 2>&1 &
+# nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --dataset CIFAR10 --model VGG5 --split_layer 2  --noise_scale 40 --test_num Gaussian-40 > ../../results/inverse-model-results-20240414/VGG5/Gaussian-0.2/pool4-layer2-gpu-40.log 2>&1 &
+# nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --dataset CIFAR10 --model VGG5 --split_layer 2  --noise_scale 45 --test_num Gaussian-45 > ../../results/inverse-model-results-20240414/VGG5/Gaussian-0.2/pool4-layer2-gpu-45.log 2>&1 &
+# nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --dataset CIFAR10 --model VGG5 --split_layer 2  --noise_scale 50 --test_num Gaussian-50 > ../../results/inverse-model-results-20240414/VGG5/Gaussian-0.2/pool4-layer2-gpu-50.log 2>&1 &
 
 # Purchase100
 # nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --dataset purchase --split_layer 0  > ../../results/inverse-model-results-20240414/Purchase/InverseModelAttack-defense0.1/pool4-layer0-gpu.log 2>&1 &
@@ -111,9 +111,18 @@ nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --datase
 # nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --dataset purchase --split_layer 5  > ../../results/inverse-model-results-20240414/Purchase/InverseModelAttack-defense0.1/pool4-layer5-gpu.log 2>&1 &
 # nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --dataset purchase --split_layer 7  > ../../results/inverse-model-results-20240414/Purchase/InverseModelAttack-defense0.1/pool4-layer7-gpu.log 2>&1 &
 # nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --dataset purchase --split_layer 8  > ../../results/inverse-model-results-20240414/Purchase/InverseModelAttack-defense0.1/pool4-layer8-gpu.log 2>&1 &
-[6] 3512303
-[7] 3512304
-[8] 3512305
-[9] 3512306
-[10] 3512307
-[11] 3513285
+
+
+
+# Credit
+# nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --dataset credit --model credit --split_layer 0  > ../../results/inverse-model-results-20240414/credit_credit/InverseModelAttack/layer0-gpu.log 2>&1 &
+# nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --dataset credit --model credit --split_layer 1  > ../../results/inverse-model-results-20240414/credit_credit/InverseModelAttack/layer1-gpu.log 2>&1 &
+# nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --dataset credit --model credit --split_layer 2  > ../../results/inverse-model-results-20240414/credit_credit/InverseModelAttack/layer2-gpu.log 2>&1 &
+# nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --dataset credit --model credit --split_layer 3  > ../../results/inverse-model-results-20240414/credit_credit/InverseModelAttack/layer3-gpu.log 2>&1 &
+# nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --dataset credit --model credit --split_layer 4  > ../../results/inverse-model-results-20240414/credit_credit/InverseModelAttack/layer4-gpu.log 2>&1 &
+# nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --dataset credit --model credit --split_layer 5  > ../../results/inverse-model-results-20240414/credit_credit/InverseModelAttack/layer5-gpu.log 2>&1 &
+# nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --dataset credit --model credit --split_layer 6  > ../../results/inverse-model-results-20240414/credit_credit/InverseModelAttack/layer6-gpu.log 2>&1 &
+# nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --dataset credit --model credit --split_layer 7  > ../../results/inverse-model-results-20240414/credit_credit/InverseModelAttack/layer7-gpu.log 2>&1 &
+# nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --dataset credit --model credit --split_layer 8  > ../../results/inverse-model-results-20240414/credit_credit/InverseModelAttack/layer8-gpu.log 2>&1 &
+# nohup python -u model_inversion_inverse_model_attack.py --device cuda:1 --dataset credit --model credit --split_layer 9  > ../../results/inverse-model-results-20240414/credit_credit/InverseModelAttack/layer9-gpu.log 2>&1 &
+

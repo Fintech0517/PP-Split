@@ -187,6 +187,7 @@ class VisionTransformer(nn.Module):
         norm_layer: Callable[..., torch.nn.Module] = partial(nn.LayerNorm, eps=1e-6),
         conv_stem_configs: Optional[List[ConvStemConfig]] = None,
         split_layer=None, # 模型拆分 [0,,,num_layers]
+        location='Client',
         **kwargs,
     ):
         super().__init__()
@@ -204,8 +205,10 @@ class VisionTransformer(nn.Module):
         self.norm_layer = norm_layer
         self.split_layer = split_layer if (split_layer is not None and split_layer <= num_layers) else num_layers+1
         self.num_layers = num_layers
+        self.location = location
+
         # 第一层，conv投影
-        if conv_stem_configs is not None:
+        if conv_stem_configs is not None and self.location!='Server': # server没有第一层
             # As per https://arxiv.org/abs/2106.14881
             seq_proj = nn.Sequential()
             prev_channels = 3
@@ -317,9 +320,10 @@ class VisionTransformer(nn.Module):
     def forward(self, x: torch.Tensor):
         # Reshape and permute the input tensor
         # conv_proj
-        x = self._process_input(x)
+        if self.location!='Server':
+            x = self._process_input(x)
         
-        if self.split_layer > 0:
+        if self.split_layer > 0: 
             # encoder
             n = x.shape[0]
 
@@ -329,7 +333,7 @@ class VisionTransformer(nn.Module):
 
             x = self.encoder(x)
 
-        if self.split_layer > self.num_layers:
+        if self.split_layer > self.num_layers: # 12是encoder的最后一层
             # heads 
             # Classifier "token" as used by standard language architectures
             x = x[:, 0]
@@ -355,7 +359,8 @@ def _vision_transformer(
     #     _ovewrite_named_param(kwargs, "image_size", weights.meta["min_size"][0])
     # image_size = kwargs.pop("image_size", 224) # imagenet的size
     image_size = kwargs.pop("image_size", 32) # imagenet的size
-    # image_size = kwargs.pop("image_size", 8) # imagenet的size
+    # image_size = kwargs.pop("image_size", 32) # CIFAR10的size
+    # image_size = kwargs.pop("image_size", 8) # avgpool=4 CIFAR10的size
 
     model = VisionTransformer(
         image_size=image_size,

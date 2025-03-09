@@ -22,8 +22,8 @@ from .data_preprocessing.preprocess_cifar100 import get_cifar100_normalize
 from .data_preprocessing.preprocess_ImageNet1k import get_ImageNet1k_valLoader
 from .data_preprocessing.dataset import get_one_data
 
-import sys
 
+import sys
 class Remapper:
     def __init__(self):
         self.old = 'target_model.models.VGG'
@@ -71,10 +71,11 @@ def get_infotopo_para(args):
         nb_of_values = 2
         conv = True
         pool_size = 2
-    elif dataset=='ImageNet1k': # TODO: the smae to MNIST now
+    elif dataset=='ImageNet1k':
         nb_of_values = 2
         conv = True
-        pool_size = 2
+        # pool_size = 4 # 56*56
+        pool_size = 7 # 32*32
     else:
         raise ValueError('dataset error')
     
@@ -100,6 +101,7 @@ def get_dataloader(args):
     model = args['model']
     image_deprocess = None
     
+    data_interval = None
 
     # 加载模型和数据集，并从unit模型中切割出client_model
     if dataset=='CIFAR10':
@@ -656,7 +658,6 @@ def get_models(args):
             client_net.load_state_dict(pweights)
 
 
-
     elif dataset=='ImageNet1k':
         if model == 'ViTb_16':
             # 超参数
@@ -666,12 +667,24 @@ def get_models(args):
             # pretrained model ViT_B_16_Weights.IMAGENET1K_V1
             unit_net_route = f'/home/dengruijun/data/project/data/torch_models/hub/checkpoints/vit_b_16-c867db91-drj.pth' # VGG5-BN+Tanh # 存储的是模型参数，不包括模型结构
 
+            # unit_net
+            unit_net = ViTb_16(split_layer=split_layer)
+
             # 切割成client model
             client_net = ViTb_16(split_layer=split_layer)
-            pweights = torch.load(unit_net_route)
-            if split_layer < 13:
-                pweights = split_weights_client(pweights, client_net.state_dict())
-            client_net.load_state_dict(pweights)
+            
+            # unit_weights = torch.load(unit_net_route)
+            # if split_layer < 13:
+            #     pweights = split_weights_client(unit_weights, client_net.state_dict())
+            # client_net.load_state_dict(pweights)
+            print('client_net: ', client_net)
+
+            # 切割成server model
+            # server_net = ViTb_16(split_layer=split_layer)
+            # pweights = split_weights_server(unit_weights,client_net.state_dict(),server_net.state_dict())
+            # server_net.load_state_dict(pweights)
+            # print('server_net: ', server_net)
+            server_net=None
 
     elif dataset=='credit':
         # 超参数
@@ -690,8 +703,6 @@ def get_models(args):
         if split_layer < len(credit_cfg):
             pweights = split_weights_client(pweights,client_net.state_dict())
         client_net.load_state_dict(pweights)
-
-
 
     elif dataset=='bank':
         # 超参数

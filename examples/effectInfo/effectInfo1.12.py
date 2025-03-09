@@ -33,11 +33,11 @@ from ppsplit.utils import create_dir
 # nohup python -u effectInfo1.8.py > ../../results/20240702-effectiveInfo/VGG5/effectiveInfo1.8/effectInfo1.8-pool4-layer6-gpu.log 2>&1 &
 
 parser = argparse.ArgumentParser(description='PP-Split')
-parser.add_argument('--device', type=str, default="cuda:0", help='device')
-parser.add_argument('--dataset', type=str, default="CIFAR10", help='dataset') # 'bank', 'credit', 'purchase', 'Iris',
-parser.add_argument('--model', type=str, default="ResNet18", help='model')  # 'ResNet18'
+parser.add_argument('--device', type=str, default="cuda:1", help='device')
+parser.add_argument('--dataset', type=str, default="ImageNet1k", help='dataset') # 'bank', 'credit', 'purchase', 'Iris',
+parser.add_argument('--model', type=str, default="ViTb_16", help='model')  # 'ResNet18'
 parser.add_argument('--result_dir', type=str, default="20240702-effectiveInfo/", help='result_dir')
-parser.add_argument('--oneData_bs', type=int, default=5, help='oneData_bs')
+parser.add_argument('--oneData_bs', type=int, default=1, help='oneData_bs')
 parser.add_argument('--test_bs', type=int, default=500, help='test_bs')
 parser.add_argument('--train_bs', type=int, default=1, help='train_bs')
 parser.add_argument('--noise_scale', type=float, default=0, help='noise_scale')
@@ -51,7 +51,6 @@ args_python = parser.parse_args()
 args = vars(args_python)
 
 print(args)
-
 
 
 # %%
@@ -105,8 +104,8 @@ FMInfo_diff_layer_list = []
 FMInfo_same_layer_list = []
 FMInfo_same_avg_d_layer_list = []
 
-# for j, data in enumerate(tqdm.tqdm(testloader)): # 对testloader遍历
-for j, data in enumerate(tqdm.tqdm(one_data_loader)): # 测试第一个testloader
+for j, data in enumerate(tqdm.tqdm(testloader)): # 对testloader遍历
+# for j, data in enumerate(tqdm.tqdm(one_data_loader)): # 测试第一个testloader
     inputs, labels = data
     inputs, labels = inputs.to(args['device']), labels.to(args['device'])
     with torch.no_grad():
@@ -140,4 +139,8 @@ if os.path.exists(save_route):
     df.to_csv(save_route,index=False)
 else:
     pd.DataFrame(data=transpose, columns=[args['split_layer']]).to_csv(save_route,index=False)
+
+
+
+
 

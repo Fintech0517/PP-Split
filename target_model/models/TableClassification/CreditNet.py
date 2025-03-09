@@ -150,12 +150,12 @@ class CreditNetDecoder(nn.Module):  # cifar10 relu22 decoder网络 （目前结�
 
 
 class CreditNetDecoder1(nn.Module):
-    def __init__(self,layer):
-        credit_inv_cfg = credit_cfg[:layer+1][::-1]
+    def __init__(self,split_layer):
+        credit_inv_cfg = credit_cfg[:split_layer+1][::-1]
         print(credit_inv_cfg)
         super().__init__()
         linear_idx = 1
-        assert layer < len(credit_cfg)
+        assert split_layer < len(credit_cfg)
         for i, component in enumerate(credit_inv_cfg):
             if component[0]=='D':
                 if i==len(credit_inv_cfg)-1:

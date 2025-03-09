@@ -16,10 +16,10 @@ from .aioi import AIOI
 from .complex_nn import ComplexNN
 
 # 攻击算法
-from .supervised_decoder import SupervisedDecoder
-from .input_optimization import InputOptimization
-from .input_model_optimization import InputModelOptimization
-from .discriminator_attacker import DiscriminatorAttack
+# from .supervised_decoder import SupervisedDecoder
+# from .input_optimization import InputOptimization
+# from .input_model_optimization import InputModelOptimization
+# from .discriminator_attacker import DiscriminatorAttack
 
 
 # 其他
@@ -78,27 +78,27 @@ def load_algo(config, client_model=None, dataloader=None, run=None):
     elif method == "disco":
         algo = Disco(config, client_model=client_model, run=run)
     
-    # Attacks
-    elif method == "supervised_decoder":
-        item = next(iter(dataloader))
-        z = item["z"]
-        config["adversary"]["channels"] = z.shape[1]
-        config["adversary"]["patch_size"] = z.shape[2]
-        algo = SupervisedDecoder(config["adversary"])
-    elif method == "discriminator":
-        item = next(iter(dataloader))
-        z = item["z"]
-        config["adversary"]["channels"] = z.shape[1]
-        config["adversary"]["patch_size"] = z.shape[2]
-        algo = DiscriminatorAttack(config["adversary"])
-    elif method == "input_optimization":
-        config["adversary"]["target_model_path"] = path.join(config["experiments_folder"], config["challenge_experiment"], "saved_models", "client_model.pt")
-        config["adversary"]["target_model_config"] = path.join(config["experiments_folder"], config["challenge_experiment"], "configs", f"{config['adversary']['target_model']}.json")
-        algo = InputOptimization(config["adversary"])
-    elif method == "input_model_optimization":
-        config["adversary"]["target_model_path"] = path.join(config["experiments_folder"], config["challenge_experiment"], "saved_models", "client_model.pt")
-        config["adversary"]["target_model_config"] = path.join(config["experiments_folder"], config["challenge_experiment"], "configs", f"{config['adversary']['target_model']}.json")
-        algo = InputModelOptimization(config["adversary"])
+    # # Attacks
+    # elif method == "supervised_decoder":
+    #     item = next(iter(dataloader))
+    #     z = item["z"]
+    #     config["adversary"]["channels"] = z.shape[1]
+    #     config["adversary"]["patch_size"] = z.shape[2]
+    #     algo = SupervisedDecoder(config["adversary"])
+    # elif method == "discriminator":
+    #     item = next(iter(dataloader))
+    #     z = item["z"]
+    #     config["adversary"]["channels"] = z.shape[1]
+    #     config["adversary"]["patch_size"] = z.shape[2]
+    #     algo = DiscriminatorAttack(config["adversary"])
+    # elif method == "input_optimization":
+    #     config["adversary"]["target_model_path"] = path.join(config["experiments_folder"], config["challenge_experiment"], "saved_models", "client_model.pt")
+    #     config["adversary"]["target_model_config"] = path.join(config["experiments_folder"], config["challenge_experiment"], "configs", f"{config['adversary']['target_model']}.json")
+    #     algo = InputOptimization(config["adversary"])
+    # elif method == "input_model_optimization":
+    #     config["adversary"]["target_model_path"] = path.join(config["experiments_folder"], config["challenge_experiment"], "saved_models", "client_model.pt")
+    #     config["adversary"]["target_model_config"] = path.join(config["experiments_folder"], config["challenge_experiment"], "configs", f"{config['adversary']['target_model']}.json")
+    #     algo = InputModelOptimization(config["adversary"])
     else:
         raise NotImplementedError("Unknown algorithm {}".format(config["method"]))
         # exit()
@@ -123,7 +123,9 @@ class Scheduler():
         self.config["logits"] = config.get("logits") or "softmax"
         self.config["optimizer"] = config.get("optimizer") or "adam"
         self.config["loss"] = config.get("loss") or "cross_entropy"
-        self.device = torch.device(config["device"])
+
+
+        self.device = torch.device(self.config["device"])
 
         # self.wandb = wandb.init(mode="disabled")
         # wandb.define_metric("batch_step")
@@ -199,9 +201,9 @@ class Scheduler():
     def run_defense_job(self): #防御
         for epoch in range(self.config["total_epochs"]):
             print("Epoch: ",epoch)
-            self.defense_train(epoch) # 设计学好防御后的模型
-            self.defense_test(epoch) # 测试防御后的模型
-            self.epoch_summary(epoch) # 返回client和server的模型
+            train_msg = self.defense_train(epoch) # 设计学好防御后的模型
+            test_msg = self.defense_test(epoch) # 测试防御后的模型
+            self.epoch_summary(epoch,train_msg,test_msg) # 返回client和server的模型
         # self.generate_challenge()
         return self.client_model,self.server_model
 
@@ -245,7 +247,7 @@ class Scheduler():
             self.optimizer.zero_grad()
 
             # client model推理
-            z = self.algo.forward(features) 
+            z, msg = self.algo.forward(features) 
 
             # server 前向推理和反向传播
             z.clone().detach().requires_grad_(True)
@@ -262,11 +264,12 @@ class Scheduler():
             self.algo.backward(back_grads)
 
             epoch_loss = epoch_loss + loss.item() / NBatch
-            self.wandb.log({"train_loss_batch":loss.item()})
+            # self.wandb.log({"train_loss_batch":loss.item()})
 
         print("tran loss:",epoch_loss)
-
-        self.wandb.log({"train_loss_epoch":epoch_loss})
+        msg["train_loss_epoch"] = epoch_loss
+        return msg
+        # self.wandb.log({"train_loss_epoch":epoch_loss})
 
     def defense_test(self,epoch) -> None:
         self.algo.eval()
@@ -280,12 +283,12 @@ class Scheduler():
         for i, (features, labels) in enumerate(tqdm.tqdm(self.testloader)):
             features, labels = features.to(self.device), labels.to(self.device)
             
-            z = self.algo.forward(features) 
+            z,_ = self.algo.forward(features) 
             y = self.server_model.forward(z)
             loss = self.loss(y, labels)
 
             epoch_loss = epoch_loss + loss.item()/NBatch
-            self.wandb.log({"val_loss_batch":loss.item()})
+            # self.wandb.log({"val_loss_batch":loss.item()})
 
             # accuracy
             prob = self.prob_fun(y)
@@ -301,7 +304,9 @@ class Scheduler():
 
         print("val loss:",epoch_loss)
         print("val acc:",epoch_acc)
-        self.wandb.log({"val_loss_epoch":epoch_loss, "val_acc_epoch":epoch_acc})
+
+        return {"val_loss_epoch":epoch_loss, "val_acc_epoch":epoch_acc}
+        # self.wandb.log({"val_loss_epoch":epoch_loss, "val_acc_epoch":epoch_acc})
 
     def attack_train(self) -> None:
         if self.config.get("no_train"):
@@ -319,12 +324,18 @@ class Scheduler():
             z = self.algo.forward(items)
             self.utils.save_images(z,items["filename"])
 
-    def epoch_summary(self,epoch): # TODO:
+    def epoch_summary(self,epoch,train_msg,test_msg):
         # self.utils.logger.flush_epoch()
         # self.utils.save_models()
         # 打印log
+        print(f"Epoch {epoch} summary:")
+        print("Train:",train_msg)
+        print("Test:",test_msg)
 
-        pass
+        # 上传 wandb
+        train_msg.update(test_msg)
+        self.wandb.log(train_msg)
+
 
     def generate_challenge(self) -> None:
         challenge_dir = self.utils.make_challenge_dir(self.config["results_path"])

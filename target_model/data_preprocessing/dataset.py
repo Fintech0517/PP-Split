@@ -126,7 +126,7 @@ def get_one_data(dataloader,batch_size = 1): # 得到一个dataloader中第一�
     # inverse_data_list = [(first[0],first[1])]
     inverse_data_list = []
     
-    for i in range(batch_size):
+    for i in range(batch_size): # 对每个one data bs
         first = next(testIter)
         inverse_data_list.append((first[0],first[1]))
 

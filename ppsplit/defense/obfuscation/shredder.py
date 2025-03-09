@@ -46,7 +46,7 @@ class Shredder(SimbaDefence):
         activation_size = self.activation_shape(self.client_model, img_size)
         self.shredder_noise = NoisyActivation(activation_size)
     
-#         self.client_model = nn.Sequential(*nn.ModuleList(list(self.client_model.children())[:config["split_layer"]]), self.shredder_noise)
+#       self.client_model = nn.Sequential(*nn.ModuleList(list(self.client_model.children())[:config["split_layer"]]), self.shredder_noise)
 
         # self.put_on_gpus() # 传给你之前已经放在gpu上了
 
@@ -68,7 +68,7 @@ class Shredder(SimbaDefence):
         z = self.z.detach()
         z.requires_grad = True
         
-        return z 
+        return z ,{}
 
 
     def backward(self, grads):

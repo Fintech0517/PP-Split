@@ -28,10 +28,6 @@ from ppsplit.defense.obfuscation.scheduler import Scheduler
 
 
 # %%
-config = load_json('./config/nopeek.json')
-# config = load_json('./config/shredder.json')
-# config = load_json('./config/cloak.json')
-# config = load_json('./config/uniform_noise.json')
 
 # 加入脚本
 import argparse
@@ -52,6 +48,16 @@ parser.add_argument('--noise_scale', type=float, default=0, help='noise_scale')
 
 args = parser.parse_args()
 args = vars(args)
+
+if args['test_num'] == 'nopeek':
+    config = load_json('./config/nopeek.json')
+elif args['test_num'] == 'shredder':
+    config = load_json('./config/shredder.json')
+elif args['test_num'] == 'cloak':
+    config = load_json('./config/cloak.json')
+elif args['test_num'] == 'uniform_noise':
+    config = load_json('./config/uniform_noise.json')
+
 
 # 更新config中的general
 config['general'] = args 

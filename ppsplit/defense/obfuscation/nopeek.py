@@ -46,7 +46,7 @@ class NoPeek(SimbaDefence):
 
     def initialize(self, config): # 初始化的时候，是把这个 client模型，放到防御方法里面来了。
         clip_value = 1.0
-        
+
         # self.client_model = self.init_client_model(config)
         clip_grad_norm_(self.client_model.parameters(), clip_value)
 
@@ -62,8 +62,6 @@ class NoPeek(SimbaDefence):
 
         self.alpha = config["alpha"]
         self.dcor_tag = "dcor"
-        
-
 
 
     def forward(self, x):
@@ -81,8 +79,8 @@ class NoPeek(SimbaDefence):
         self.dcor_loss = self.loss(self.x, self.z) # 计算dcor loss
 
         # print("dcor_loss: ", self.dcor_loss.item())
-        self.wandb.log({"dcor_loss": self.dcor_loss.item()})
-        return z
+        # self.wandb.log({"dcor_loss": self.dcor_loss.item()})
+        return z,{self.dcor_tag: self.dcor_loss}
 
     def backward(self, grads): 
         server_grads = grads

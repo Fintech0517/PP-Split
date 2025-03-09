@@ -31,8 +31,9 @@ def get_ImageNet1k_valLoader(batch_size = 1, test_bs = None):
     dataloader = DataLoader(
         dataset,
         batch_size=test_bs,
-        num_workers=8,
+        num_workers=8, # 设置为8表示使用8个进程同时加载数据
         drop_last=True,
-        pin_memory=True,
+        # pin_memory=True, # 是否将加载的数据放在固定(锁页)内存中，当使用GPU时，设为True可以加速CPU到GPU的数据传输，因为固定内存的数据传输到GPU更快
+        pin_memory=False, # 是否将加载的数据放在固定(锁页)内存中，当使用GPU时，设为True可以加速CPU到GPU的数据传输，因为固定内存的数据传输到GPU更快
     )
     return dataloader,dataloader
